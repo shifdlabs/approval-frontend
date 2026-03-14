@@ -1,4 +1,5 @@
 import { onMounted, ref } from 'vue';
+import { uploadS3File, deleteS3File, S3BucketUrl } from '@/utils/s3';
 
 export function letterHeadController() {
     interface ApiItem {
@@ -42,6 +43,7 @@ export function letterHeadController() {
         phoneNumber: ''
       })
       const isSuccessSnackbarVisible = ref(false)
+      const isSaving = ref(false)
       
       const keyMapping: Record<string, keyof LetterHead> = {
         company_logo_url:        'companyLogoUrl',
@@ -53,8 +55,9 @@ export function letterHeadController() {
         company_city:            'city',
       };
 
-      function extractFilename(url: string): string {
+      function extractFilename(url: string | undefined | null): string {
         // Returns the substring after the last '/'
+        if (!url) return '';
         return url.split('/').pop() || '';
       }
       
@@ -81,17 +84,19 @@ export function letterHeadController() {
       
       const updateLetterhead = async () => {
         try {
+          isSaving.value = true
+          
           // Upload file if provided
           if (companyLogoFile.value != null) {
-            if (initialFormData.value?.companyLogoUrl != '') {
-              await deleteFile(`app-assets/${extractFilename(initialFormData.value.companyLogoUrl)}`)
+            if (initialFormData.value?.companyLogoUrl && initialFormData.value.companyLogoUrl !== '') {
+              await deleteS3File(`app-assets/${extractFilename(initialFormData.value.companyLogoUrl)}`)
             }
 
             const extension = companyLogoFile.value?.file.name.split('.').pop()
             const uniqueName = `${Date.now()}-${crypto.randomUUID()}.${extension}`
             const fileName = `app-assets/${uniqueName}`
 
-            await uploadFile(companyLogoFile.value?.file, fileName)
+            await uploadS3File(companyLogoFile.value?.file, fileName)
             initialFormData.value.companyLogoUrl = `${S3BucketUrl}${fileName}`
           }
 
@@ -137,6 +142,7 @@ export function letterHeadController() {
 
           if (error.value) {
             console.error(error.value)
+            isSaving.value = false
             return
           }
 
@@ -144,6 +150,23 @@ export function letterHeadController() {
 
         } catch (e) {
           console.error(e)
+        } finally {
+          isSaving.value = false
+        }
+      }
+
+      const previewLetterhead = () => {
+        // Open company logo in new tab if available
+        if (initialFormData.value.companyLogoUrl) {
+          window.open(initialFormData.value.companyLogoUrl, '_blank')
+        } else if (companyLogoFile.value?.file) {
+          // If new file selected but not saved yet, create temporary URL
+          const tempUrl = URL.createObjectURL(companyLogoFile.value.file)
+          const newWindow = window.open(tempUrl, '_blank')
+          // Clean up the temporary URL after window opens
+          setTimeout(() => URL.revokeObjectURL(tempUrl), 1000)
+        } else {
+          alert('No letterhead logo available to preview. Please upload a company logo first.')
         }
       }
 
@@ -165,8 +188,10 @@ export function letterHeadController() {
         imageUrl,
         initialFormData,
         isSuccessSnackbarVisible,
+        isSaving,
         fetchValue,
         updateLetterhead,
+        previewLetterhead,
         handleFileSelected,
       }
 }

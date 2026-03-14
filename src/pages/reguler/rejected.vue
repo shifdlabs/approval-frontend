@@ -8,12 +8,54 @@ const documents = ref<Document[]>([])
 const searchQuery = ref('');
 const isFilterSectionVisible = ref(false);
 const isLoading = ref(false);
-const filterPriority = ref<string | null>(null); // Define filterPriority
-const filterType = ref<string | null>(null); // Define filterType
+const filterPriority = ref<string | null>(null);
+const filterType = ref<string | null>(null);
+
+// Function to strip HTML tags and decode entities
+const stripHtml = (html: string): string => {
+  if (!html) return ''
+  
+  let text = html
+  
+  // Decode numeric entities (e.g., &#39; &#x27;)
+  text = text.replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec))
+  text = text.replace(/&#x([0-9A-Fa-f]+);/g, (match, hex) => String.fromCharCode(parseInt(hex, 16)))
+  
+  // Manual entity replacement multiple times for nested encoding
+  for (let iteration = 0; iteration < 5; iteration++) {
+    let hasChanged = false
+    
+    const entityReplacements: Array<[RegExp, string]> = [
+      [/&amp;/gi, '&'],
+      [/&lt;/gi, '<'],
+      [/&gt;/gi, '>'],
+      [/&quot;/gi, '"'],
+      [/&#0*39;/gi, "'"],
+      [/&apos;/gi, "'"],
+      [/&#x0*27;/gi, "'"],
+      [/&nbsp;/gi, ' '],
+    ]
+    
+    for (const [pattern, replacement] of entityReplacements) {
+      const before = text
+      text = text.replace(pattern, replacement as string)
+      if (text !== before) hasChanged = true
+    }
+    
+    if (!hasChanged) break
+  }
+  
+  // Remove HTML tags
+  const tmp = document.createElement('div')
+  tmp.innerHTML = text
+  return tmp.textContent || tmp.innerText || ''
+}
 
 const headers = [
   { title: 'SUBJECT', key: 'subject' },
   { title: 'BODY', key: 'body' },
+  { title: 'TYPE', key: 'type' },
+  { title: 'PRIORITY', key: 'priority' },
   { title: 'REJECTED BY', key: 'lastRejector' },
   { title: 'REASON', key: 'reason' },
 ];
@@ -71,20 +113,44 @@ onMounted(() => {
   fetchRejectedHistories();
 });
 
-const filteredDocument = computed(() => {
-        return documents.value.filter(document => {
-          const subject = document.subject.toLowerCase()
-          const nameMatch =
-            !searchQuery.value ||
-            subject.includes(searchQuery.value.toLowerCase())
-
-          return nameMatch
-        })
-      })
-
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, ''); // remove all HTML tags
+const documentType = (value: string) => {
+  if (value === '1')
+    return "External"
+  else 
+    return "Internal"
 }
+
+const priorityCard = (value: number | null) => {
+  if (value === 1)
+    return { color: 'error', text: 'High' }
+  else if (value === 2)
+    return { color: 'warning', text: 'Medium' }
+  else if (value === 3)
+    return { color: 'info', text: 'Low' }
+  else
+    return { color: 'primary', text: 'Low' }
+}
+
+const filteredDocument = computed(() => {
+  return documents.value.filter(document => {
+    const subject = document.subject.toLowerCase()
+    const subjectMatch =
+      !searchQuery.value ||
+      subject.includes(searchQuery.value.toLowerCase())
+
+    // Use documentType function for consistent type matching
+    const typeMatch = !filterType.value || documentType(document.type) === filterType.value
+    
+    // Priority filter
+    let priorityMatch = true;
+    if (filterPriority.value) {
+      const priorityValue = filterPriority.value === 'High' ? 1 : filterPriority.value === 'Medium' ? 2 : 3;
+      priorityMatch = document.priority === priorityValue;
+    }
+
+    return subjectMatch && typeMatch && priorityMatch
+  })
+})
 </script>
 
 <template>
@@ -102,7 +168,7 @@ function stripHtml(html: string): string {
               clearable
             />
             <VBtn
-              color="#E0E0E0"
+             
               density="comfortable"
               icon=""
               class="rounded"
@@ -147,12 +213,29 @@ function stripHtml(html: string): string {
         >
           <template #item.subject="{ item }">
             <VLabel>
-              {{ item.subject }}
+              {{ stripHtml(item.subject) }}
             </VLabel>
           </template>
 
           <template #item.body="{ item }">
-            <VLabel class="body-cell" v-html="stripHtml(item.body)"/>
+            <VLabel style="max-width: 300px;">
+              {{ stripHtml(item.body) }}
+            </VLabel>
+          </template>
+
+          <template #item.type="{ item }">
+            <VLabel>
+              {{ documentType(item.type) }}
+            </VLabel>
+          </template>
+
+          <template #item.priority="{ item }">
+            <VChip
+              :color="priorityCard(item.priority).color"
+              size="small"
+            >
+              {{ priorityCard(item.priority).text }}
+            </VChip>
           </template>
 
           <template #item.lastRejector="{ item }">

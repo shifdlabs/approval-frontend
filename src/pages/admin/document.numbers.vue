@@ -102,6 +102,7 @@ const submitNewGroupForm = async () => {
           isSuccessCreateGroupFormat.value = false
           isCreateGroupFormatDialogVisible.value = false
           fetchNumberingFormats()
+          fetchNumberingGroups()
         }, 1000)
       }
     } catch (e) {

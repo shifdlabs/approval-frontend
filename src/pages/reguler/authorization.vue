@@ -16,6 +16,8 @@ const {
   documentType,
   priorityCard,
   statusCard,
+  stripHtml,
+  decodeHtml,
   onTapFilter,
   onTapRow
 } = authorizationController()
@@ -35,7 +37,7 @@ const {
               clearable
             />
             <VBtn
-              color="#E0E0E0"
+             
               density="comfortable"
               icon=""
               class="rounded"
@@ -103,13 +105,14 @@ const {
             :to="{ name: 'preview-id', params: { id: '1212' } }"
             class="font-weight-medium text-link">
             <VLabel>
-                {{ item.subject  }}
+                {{ stripHtml(item.subject) }}
             </VLabel>
             </RouterLink>
           </template>
 
           <template #item.body="{ item }">
-            <VLabel style="max-width: 300px;" v-html="item.body">
+            <VLabel style="max-width: 300px;">
+              {{ stripHtml(item.body) }}
             </VLabel>
           </template>
 

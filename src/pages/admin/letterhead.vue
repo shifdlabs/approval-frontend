@@ -6,7 +6,9 @@ const {
   imageUrl,
   initialFormData,
   isSuccessSnackbarVisible,
+  isSaving,
   updateLetterhead,
+  previewLetterhead,
   handleFileSelected
 } = letterHeadController();
 </script>
@@ -117,6 +119,8 @@ const {
               <VBtn
                 color="primary"
                 variant="tonal"
+                @click="previewLetterhead"
+                :disabled="isSaving"
               >
                 Preview as Letterhead
               </VBtn>
@@ -124,6 +128,8 @@ const {
               <VBtn 
               type="submit"
               @click="updateLetterhead"
+              :loading="isSaving"
+              :disabled="isSaving"
               >
                 Save Changes
               </VBtn>
@@ -131,6 +137,21 @@ const {
       </VRow>
     </VCardText>
   </VCard>
+
+  <!-- Loading Overlay -->
+  <VOverlay
+    v-model="isSaving"
+    contained
+    persistent
+    class="align-center justify-center"
+  >
+    <VProgressCircular
+      indeterminate
+      size="64"
+      color="primary"
+    />
+    <div class="text-h6 mt-4">Saving...</div>
+  </VOverlay>
 
   <VSnackbar
     v-model="isSuccessSnackbarVisible"

@@ -13,7 +13,7 @@
               clearable
             />
             <VBtn
-              color="#E0E0E0"
+             
               density="comfortable"
               icon=""
               class="rounded"
@@ -58,12 +58,14 @@
         >
           <template #item.subject="{ item }">
             <VLabel>
-              {{ item.subject }}
+              {{ stripHtml(item.subject) }}
             </VLabel>
           </template>
 
           <template #item.body="{ item }">
-            <VLabel style="max-width: 300px;" v-html="item.body"/>
+            <VLabel style="max-width: 300px;">
+              {{ stripHtml(item.body) }}
+            </VLabel>
           </template>
 
           <template #item.type="{ item }">
@@ -112,10 +114,6 @@ const headers = [
 
 const documents = ref<Document[]>([])
 
-const filteredType = ref(null)
-const filteredPriority = ref(null)
-const filteredStatus = ref(null)
-
 const fetchDocuments = async () => {
         try {
           const res = await useApi('/document/inprogress', {
@@ -136,16 +134,91 @@ const fetchDocuments = async () => {
           const nameMatch =
             !searchQuery.value ||
             subject.includes(searchQuery.value.toLowerCase())
-          const priorityMatch =
-            !filteredPriority.value ||
-            document.priority == filteredPriority.value
           
-          const typeMatch = !filteredType.value || document.type == filteredType.value
-          const statusMatch = !filteredStatus.value || document.status == filteredStatus.value
+          // Convert filter values to match document values
+          let priorityValue = null
+          if (filterPriority.value === 'High') priorityValue = 1
+          else if (filterPriority.value === 'Medium') priorityValue = 2
+          else if (filterPriority.value === 'Low') priorityValue = 3
+          
+          const priorityMatch =
+            !filterPriority.value ||
+            document.priority == priorityValue
+          
+          // Use documentType function for consistent type matching
+          const typeMatch = !filterType.value || documentType(document.type) === filterType.value
+          
           // Both conditions must be true:
-          return nameMatch && priorityMatch && typeMatch && statusMatch
+          return nameMatch && priorityMatch && typeMatch
         })
       })
+
+// Helper function to strip HTML tags and decode entities
+const stripHtml = (html: string): string => {
+  if (!html) return ''
+  
+  let text = html
+  
+  // Decode all possible HTML entities multiple times
+  for (let iteration = 0; iteration < 5; iteration++) {
+    let hasChanged = false
+    
+    // Manual entity replacement (case insensitive)
+    const entityReplacements: Array<[RegExp, string]> = [
+      [/&amp;/gi, '&'],
+      [/&lt;/gi, '<'],
+      [/&gt;/gi, '>'],
+      [/&quot;/gi, '"'],
+      [/&#0*34;/gi, '"'],
+      [/&#x0*22;/gi, '"'],
+      [/&#0*39;/gi, "'"],
+      [/&apos;/gi, "'"],
+      [/&#x0*27;/gi, "'"],
+      [/&#0*47;/gi, '/'],
+      [/&#x0*2F;/gi, '/'],
+      [/&sol;/gi, '/'],
+      [/&#0*92;/gi, '\\'],
+      [/&#x0*5C;/gi, '\\'],
+      [/&#0*124;/gi, '|'],
+      [/&#x0*7C;/gi, '|'],
+      [/&verbar;/gi, '|'],
+      [/&#0*37;/gi, '%'],
+      [/&#x0*25;/gi, '%'],
+      [/&percnt;/gi, '%'],
+      [/&nbsp;/gi, ' '],
+    ]
+    
+    for (const [pattern, replacement] of entityReplacements) {
+      const before = text
+      text = text.replace(pattern, replacement as string)
+      if (text !== before) hasChanged = true
+    }
+    
+    // Generic numeric entities
+    const beforeNumeric = text
+    text = text.replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(parseInt(dec)))
+    text = text.replace(/&#x([0-9A-Fa-f]+);/gi, (match, hex) => String.fromCharCode(parseInt(hex, 16)))
+    if (text !== beforeNumeric) hasChanged = true
+    
+    // DOM-based decoding
+    const tmp = document.createElement('DIV')
+    tmp.innerHTML = text
+    const decoded = tmp.textContent || tmp.innerText || ''
+    if (decoded !== text) hasChanged = true
+    text = decoded
+    
+    // If nothing changed, we're done
+    if (!hasChanged) break
+  }
+  
+  // Remove any remaining < > brackets (for safety)
+  text = text.replace(/[<>]/g, '')
+  
+  // Clean up whitespace
+  text = text.replace(/\s+/g, ' ').trim()
+  
+  return text
+}
 
 const onTapFilter = () => {
   filterType.value = null;

@@ -7,6 +7,10 @@ const isBookingDocumentNumberDialogVisible = ref(false)
 const isRefetchList = ref(false)
 const bookedNumbers = ref<BookedDocumentNumber[]>([])
 const groupedWithFormat = ref<GroupWithFormats[]>([])
+const isFilterSectionVisible = ref(false)
+const filteredGroup = ref<string | null>(null)
+const filteredFormat = ref<string | null>(null)
+
 const headers = [
     { title: 'DOCUMENT NUMBER', key: 'DocumentNumber' },
     { title: 'FORMAT NAME', key: 'FormatName' },
@@ -15,7 +19,20 @@ const headers = [
 ]
 
 const onTapFilter = () => {
+  filteredGroup.value = null
+  filteredFormat.value = null
+  isFilterSectionVisible.value = !isFilterSectionVisible.value
 }
+
+const uniqueGroups = computed(() => {
+  const groups = bookedNumbers.value.map(item => item.GroupName)
+  return [...new Set(groups)].map(group => ({ value: group, title: group }))
+})
+
+const uniqueFormats = computed(() => {
+  const formats = bookedNumbers.value.map(item => item.FormatName)
+  return [...new Set(formats)].map(format => ({ value: format, title: format }))
+})
 
       const fetchBookedNumbers = async () => {
         try {
@@ -23,7 +40,6 @@ const onTapFilter = () => {
             method: 'GET'
           })
       
-          console.log(res.data.value)
           const value = res.data.value as { data: any };
           bookedNumbers.value = value.data.map((bookingNumbers: any) => mapBookingNumber(bookingNumbers));
         } catch (e) {
@@ -37,12 +53,7 @@ const onTapFilter = () => {
             method: 'GET'
           });
 
-          console.log(res.data.value);
-
-          // Properly type the response
           const value = res.data.value as { data: any[] };
-
-          // Map the raw data into your GroupWithFormats[]
           groupedWithFormat.value = value.data.map(mapGroupedWithFormat);
         } catch (e) {
           console.log(e);
@@ -85,14 +96,21 @@ const mapBookingNumber = (rawBookingNumber: any): BookedDocumentNumber => {
 
     const filteredBookingNumber = computed(() => {
         return bookedNumbers.value.filter(number => {
-          const subject = number.DocumentNumber.toLowerCase()
+          const documentNumber = number.DocumentNumber.toLowerCase()
 
-          const nameMatch =
+          const searchMatch =
             !searchQuery.value ||
-            subject.includes(searchQuery.value.toLowerCase())
+            documentNumber.includes(searchQuery.value.toLowerCase())
 
-          // Both conditions must be true:
-          return nameMatch
+          const groupMatch = 
+            !filteredGroup.value || 
+            number.GroupName === filteredGroup.value
+
+          const formatMatch = 
+            !filteredFormat.value || 
+            number.FormatName === filteredFormat.value
+
+          return searchMatch && groupMatch && formatMatch
         })
       })
 
@@ -134,6 +152,15 @@ const mapBookingNumber = (rawBookingNumber: any): BookedDocumentNumber => {
               style="inline-size: 200px; width: 500px;"
               class="me-3"
             />
+            <VBtn
+              density="comfortable"
+              icon=""
+              class="rounded"
+              @click="onTapFilter"
+            >
+              <VIcon :icon="isFilterSectionVisible ? 'tabler-filter-x' : 'tabler-filter-plus'">
+              </VIcon>
+            </VBtn>
           </div>
  
           <VSpacer />
@@ -145,10 +172,40 @@ const mapBookingNumber = (rawBookingNumber: any): BookedDocumentNumber => {
         </div>
       </VCardText>
 
+      <VDivider />
+
+      <div v-if="isFilterSectionVisible">
+        <VCardText>
+          <div class="d-flex justify-end flex-wrap gap-y-4 gap-x-6">
+            <AppSelect
+              v-model="filteredGroup"
+              label="Group"
+              placeholder="Select Group"
+              :items="uniqueGroups"
+              item-title="title"
+              item-value="value"
+              clearable
+            />
+
+            <AppSelect
+              v-model="filteredFormat"
+              label="Format Name"
+              placeholder="Select Format"
+              :items="uniqueFormats"
+              item-title="title"
+              item-value="value"
+              clearable
+            />
+          </div>
+        </VCardText>
+
+        <VDivider />
+      </div>
+
       <div>
         <VDataTable
           :headers="headers"
-          :items="bookedNumbers"
+          :items="filteredBookingNumber"
           :items-per-page="10"
           @click:row="onTapRow"
         >
