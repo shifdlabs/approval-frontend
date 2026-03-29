@@ -17,6 +17,46 @@ interface Props {
 
 const props = defineProps<Props>();
 
+// Function to strip HTML tags and decode entities
+const stripHtml = (html: string): string => {
+  if (!html) return ''
+  
+  let text = html
+  
+  // Decode numeric entities (e.g., &#39; &#x27;)
+  text = text.replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec))
+  text = text.replace(/&#x([0-9A-Fa-f]+);/g, (match, hex) => String.fromCharCode(parseInt(hex, 16)))
+  
+  // Manual entity replacement multiple times for nested encoding
+  for (let iteration = 0; iteration < 5; iteration++) {
+    let hasChanged = false
+    
+    const entityReplacements: Array<[RegExp, string]> = [
+      [/&amp;/gi, '&'],
+      [/&lt;/gi, '<'],
+      [/&gt;/gi, '>'],
+      [/&quot;/gi, '"'],
+      [/&#0*39;/gi, "'"],
+      [/&apos;/gi, "'"],
+      [/&#x0*27;/gi, "'"],
+      [/&nbsp;/gi, ' '],
+    ]
+    
+    for (const [pattern, replacement] of entityReplacements) {
+      const before = text
+      text = text.replace(pattern, replacement as string)
+      if (text !== before) hasChanged = true
+    }
+    
+    if (!hasChanged) break
+  }
+  
+  // Remove HTML tags
+  const tmp = document.createElement('div')
+  tmp.innerHTML = text
+  return tmp.textContent || tmp.innerText || ''
+}
+
 const currentDate = computed(() => {
   const now = new Date()
   return now.toLocaleDateString('en-GB', {
@@ -145,12 +185,12 @@ const generateDocumentHTMLTemplate = async () => {
         <!-- Subject Section -->
         ${props.document.subject && props.document.subject !== '' ? `
         <div class="subject">
-          <span class="title">Subject: </span>${props.document.subject}
+          <span class="title">Subject: </span>${stripHtml(props.document.subject)}
         </div>` : ''}
 
         <!-- Body Content -->
         <div class="${bodyClass}">
-          ${props.document.body || ''}
+          ${stripHtml(props.document.body || '')}
         </div>
 
         <!-- Closing -->
@@ -369,7 +409,7 @@ const generateDocumentPDF = async () => {
     
     if (images.length > 0) {
       const imageLoadPromises = Array.from(images).map((img) => {
-        return new Promise((resolve) => {
+        return new Promise<void>((resolve) => {
           if (img.complete) {
             resolve()
           } else {

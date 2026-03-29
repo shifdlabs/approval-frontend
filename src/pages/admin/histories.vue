@@ -3,6 +3,9 @@ import { historiesController } from '@/controllers/admin/histories-controller';
 const {
   filteredHistories,
   searchQuery,
+  filterType,
+  filterPriority,
+  filterStatus,
   isFilterSectionVisible,
   headers,
   onTapFilter,
@@ -23,7 +26,7 @@ const {
               clearable
             />
             <VBtn
-              color="#E0E0E0"
+             
               density="comfortable"
               icon=""
               class="rounded"
@@ -36,13 +39,13 @@ const {
         </div>
       </VCardText>
       <VDivider />
-<!-- 
+
       <div v-if="isFilterSectionVisible">
         <VCardText>
-          <div class="d-flex justify-end flex-wrap gap-y-4 gap-x-6">
+          <div class="d-flex justify-start flex-wrap gap-y-4 gap-x-6">
             <VSelect
               v-model="filterType"
-              :items="['Type 1', 'Type 2', 'Type 3']"
+              :items="['Internal', 'External']"
               label="Select Type"
               clearable
             />
@@ -54,14 +57,14 @@ const {
             />
             <VSelect
               v-model="filterStatus"
-              :items="['Approved', 'Rejected', 'Pending']"
+              :items="['Approved', 'Rejected']"
               label="Select Status"
               clearable
             />
           </div>
         </VCardText>
         <VDivider />
-      </div> -->
+      </div>
 
       <div>
         <VDataTable
@@ -85,6 +88,21 @@ const {
             <VLabel>
               {{ item.user }}
             </VLabel>
+          </template>
+
+          <template #item.type="{ item }">
+            <VLabel>
+              {{ item.type }}
+            </VLabel>
+          </template>
+
+          <template #item.priority="{ item }">
+            <VChip
+              :color="item.priority === 'High' ? 'error' : item.priority === 'Medium' ? 'warning' : 'info'"
+              size="small"
+            >
+              {{ item.priority }}
+            </VChip>
           </template>
 
           <template #item.action="{ item }">

@@ -6,6 +6,74 @@ const { bookmarkList, isLoading, fetchBookmarks } = useBookmarkController()
 
 const searchValue = ref('')
 
+// Function to strip HTML tags and decode entities
+const stripHtml = (html: string): string => {
+  if (!html) return ''
+  
+  // Decode common HTML entities multiple times to handle nested encoding
+  let text = html
+  const entities: { [key: string]: string } = {
+    '&lt;': '<',
+    '&gt;': '>',
+    '&amp;': '&',
+    '&quot;': '"',
+    '&#39;': "'",
+    '&#x27;': "'",
+    '&apos;': "'",
+    '&nbsp;': ' ',
+    '&mdash;': '—',
+    '&ndash;': '–',
+    '&hellip;': '…',
+    '&ldquo;': '"',
+    '&rdquo;': '"',
+    '&lsquo;': '"',
+    '&rsquo;': '"',
+    '&copy;': '©',
+    '&reg;': '®',
+    '&trade;': '™',
+    '&times;': '×',
+    '&divide;': '÷',
+    '&plusmn;': '±',
+    '&deg;': '°',
+    '&micro;': 'µ',
+    '&para;': '¶',
+    '&sect;': '§',
+    '&bull;': '•',
+    '&middot;': '·',
+    '&dagger;': '†',
+    '&Dagger;': '‡',
+    '&permil;': '‰',
+    '&lsaquo;': '‹',
+    '&rsaquo;': '›',
+    '&euro;': '€',
+    '&cent;': '¢',
+    '&pound;': '£',
+    '&yen;': '¥',
+    '&curren;': '¤'
+  }
+  
+  // Decode numeric entities (e.g., &#39; &#x27;)
+  text = text.replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec))
+  text = text.replace(/&#x([0-9A-Fa-f]+);/g, (match, hex) => String.fromCharCode(parseInt(hex, 16)))
+  
+  // Decode named entities multiple times for nested encoding
+  for (let i = 0; i < 5; i++) {
+    let changed = false
+    for (const [entity, char] of Object.entries(entities)) {
+      if (text.includes(entity)) {
+        text = text.split(entity).join(char)
+        changed = true
+      }
+    }
+    if (!changed) break
+  }
+  
+  // Remove HTML tags
+  const tmp = document.createElement('div')
+  tmp.innerHTML = text
+  return tmp.textContent || tmp.innerText || ''
+}
+
 const isFilterSectionVisible = ref(false)
 const startDate = ref<string | null>(null)
 const endDate = ref<string | null>(null)
@@ -55,18 +123,32 @@ const filteredBookmarks = computed(() => {
       (item.body || '').toLowerCase().includes(searchValue.value.toLowerCase())
     )
   }
-  // Filter by start date (receivedAt >= startDate)
-  if (appliedStartDate.value) {
+  // Filter by start date and end date using Date objects
+  if (appliedStartDate.value || appliedEndDate.value) {
     result = result.filter(item => {
       if (!item.receiveAt) return false
-      return appliedStartDate.value && item.receiveAt.slice(0, 10) >= appliedStartDate.value
-    })
-  }
-  // Filter by end date (receivedAt <= endDate)
-  if (appliedEndDate.value) {
-    result = result.filter(item => {
-      if (!item.receiveAt) return false
-      return appliedEndDate.value && item.receiveAt.slice(0, 10) <= appliedEndDate.value
+      
+      const itemDate = new Date(item.receiveAt)
+      itemDate.setHours(0, 0, 0, 0) // Normalize to midnight
+      
+      if (appliedStartDate.value && appliedEndDate.value) {
+        const startDateObj = new Date(appliedStartDate.value!)
+        startDateObj.setHours(0, 0, 0, 0)
+        const endDateObj = new Date(appliedEndDate.value!)
+        endDateObj.setHours(0, 0, 0, 0)
+        
+        return itemDate >= startDateObj && itemDate <= endDateObj
+      } else if (appliedStartDate.value) {
+        const startDateObj = new Date(appliedStartDate.value!)
+        startDateObj.setHours(0, 0, 0, 0)
+        return itemDate >= startDateObj
+      } else if (appliedEndDate.value) {
+        const endDateObj = new Date(appliedEndDate.value!)
+        endDateObj.setHours(0, 0, 0, 0)
+        return itemDate <= endDateObj
+      }
+      
+      return true
     })
   }
   return result
@@ -96,7 +178,7 @@ onMounted(async () => {
               clearable
             />
             <VBtn
-              color="#E0E0E0"
+             
               density="comfortable"
               icon=""
               class="rounded"
@@ -153,6 +235,18 @@ onMounted(async () => {
             :items="filteredBookmarks"
             :items-per-page="10"
           >
+            <template #item.subject="{ item }">
+              <VLabel>
+                {{ stripHtml(item.subject) }}
+              </VLabel>
+            </template>
+
+            <template #item.body="{ item }">
+              <VLabel style="max-width: 300px;">
+                {{ stripHtml(item.body) }}
+              </VLabel>
+            </template>
+
             <template #item.receiveAt="{ item }">
               {{ new Date(item.receiveAt).toLocaleString() }}
             </template>

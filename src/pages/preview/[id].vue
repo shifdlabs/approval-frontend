@@ -99,6 +99,55 @@ function openDocumentReference(id: string) {
   window.open(`${window.location.origin}/preview/${id}`)
 }
 
+// Helper function to strip HTML tags and decode entities
+const stripHtml = (html: string): string => {
+  if (!html) return ''
+  
+  let text = html
+  
+  // Decode numeric entities (e.g., &#39; &#x27;)
+  text = text.replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec))
+  text = text.replace(/&#x([0-9A-Fa-f]+);/g, (match, hex) => String.fromCharCode(parseInt(hex, 16)))
+  
+  // Manual entity replacement multiple times for nested encoding
+  for (let iteration = 0; iteration < 5; iteration++) {
+    let hasChanged = false
+    
+    const entityReplacements: Array<[RegExp, string]> = [
+      [/&amp;/gi, '&'],
+      [/&lt;/gi, '<'],
+      [/&gt;/gi, '>'],
+      [/&quot;/gi, '"'],
+      [/&#0*39;/gi, "'"],
+      [/&apos;/gi, "'"],
+      [/&#x0*27;/gi, "'"],
+      [/&nbsp;/gi, ' '],
+    ]
+    
+    for (const [pattern, replacement] of entityReplacements) {
+      const before = text
+      text = text.replace(pattern, replacement as string)
+      if (text !== before) hasChanged = true
+    }
+    
+    if (!hasChanged) break
+  }
+  
+  // Remove HTML tags
+  const tmp = window.document.createElement('div')
+  tmp.innerHTML = text
+  return tmp.textContent || tmp.innerText || ''
+}
+
+// Helper function to decode HTML entities for proper rendering
+const decodeHtml = (html: string): string => {
+  if (!html) return ''
+  
+  const txt = window.document.createElement('textarea')
+  txt.innerHTML = html
+  return txt.value
+}
+
 const authorization = async (isApproved: boolean) => {
   try {
     const documentId = document.value?.id
@@ -419,7 +468,7 @@ onMounted(() => {
           class="card-title"
           style="font-size: 20px; font-weight: 600; padding-bottom: 30px;"
         >
-          {{ document?.subject }}
+          {{ stripHtml(document?.subject || '') }}
         </VLabel>
       </VRow>
 
@@ -432,7 +481,7 @@ onMounted(() => {
         </VLabel>
 
         <VDivider style="margin-bottom: 13px;"/>
-        <div class="auto-text" v-html="document?.body"/>
+        <div class="auto-text">{{ stripHtml(document?.body || '') }}</div>
       </VRow>
     </VCard>
 
@@ -622,12 +671,12 @@ onMounted(() => {
 
   <!-- Hidden PDF View Component -->
   <PdfView 
-    v-if="approvers.length > 0"
+    v-if="approvers.length > 0 && document"
     :key="`pdf-${approvers.length}-${approvers[0]?.signatureUrl || 'none'}`"
     ref="pdfViewComponent"
     :document="document"
     :booking-number="document?.publicationValue"
-    :internal-recipients="internalRecipient"
+    :internal-recipients="internalRecipient as any"
     :external-recipients="document?.externalRecipient || ''"
     :signers="[]"
     :signers-with-signature="approvers"

@@ -10,6 +10,46 @@ const filterType = ref<string | null>(null);
 const filterStatus = ref<string | null>(null);
 const isFilterSectionVisible = ref(false);
 
+// Function to strip HTML tags and decode entities
+const stripHtml = (html: string): string => {
+  if (!html) return ''
+  
+  let text = html
+  
+  // Decode numeric entities (e.g., &#39; &#x27;)
+  text = text.replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec))
+  text = text.replace(/&#x([0-9A-Fa-f]+);/g, (match, hex) => String.fromCharCode(parseInt(hex, 16)))
+  
+  // Manual entity replacement multiple times for nested encoding
+  for (let iteration = 0; iteration < 5; iteration++) {
+    let hasChanged = false
+    
+    const entityReplacements: Array<[RegExp, string]> = [
+      [/&amp;/gi, '&'],
+      [/&lt;/gi, '<'],
+      [/&gt;/gi, '>'],
+      [/&quot;/gi, '"'],
+      [/&#0*39;/gi, "'"],
+      [/&apos;/gi, "'"],
+      [/&#x0*27;/gi, "'"],
+      [/&nbsp;/gi, ' '],
+    ]
+    
+    for (const [pattern, replacement] of entityReplacements) {
+      const before = text
+      text = text.replace(pattern, replacement as string)
+      if (text !== before) hasChanged = true
+    }
+    
+    if (!hasChanged) break
+  }
+  
+  // Remove HTML tags
+  const tmp = document.createElement('div')
+  tmp.innerHTML = text
+  return tmp.textContent || tmp.innerText || ''
+}
+
 const headers = [
   { title: 'SUBJECT', key: 'subject' },
   { title: 'BODY', key: 'body' },
@@ -33,20 +73,32 @@ const headers = [
         }
       }
 
+const documentType = (value: string) => {
+  if (value === '1')
+    return "External"
+  else 
+    return "Internal"
+}
+
 const filteredCompleteList = computed(() => {
   return documents.value.filter((item) => {
     const subjectMatch =
       !searchQuery.value ||
       item.subject.toLowerCase().includes(searchQuery.value.toLowerCase());
-    const typeMatch = !filterType.value || item.type === filterType.value;
-    const statusMatch = !filterStatus.value || `${item.status}` === filterStatus.value;
+    
+    // Use documentType function for consistent type matching
+    const typeMatch = !filterType.value || documentType(item.type) === filterType.value
+    
+    // Convert filter status to match document status values
+    let statusMatch = true;
+    if (filterStatus.value) {
+      const statusValue = filterStatus.value === 'Finish' ? 2 : 3;
+      statusMatch = item.status === statusValue;
+    }
+    
     return subjectMatch && typeMatch && statusMatch;
   });
 });
-
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, ''); // remove all HTML tags
-}
 
 const onTapFilter = () => {
   filterType.value = null;
@@ -110,7 +162,7 @@ onMounted(() => {
               clearable
             />
             <VBtn
-              color="#E0E0E0"
+             
               density="comfortable"
               icon=""
               class="rounded"
@@ -152,16 +204,17 @@ onMounted(() => {
           @click:row="onTapRow"
         >
           <template #item.subject="{ item }">
-            <VLabel>{{ item.subject }}</VLabel>
+            <VLabel>{{ stripHtml(item.subject) }}</VLabel>
           </template>
 
           <template #item.body="{ item }">
-            <VLabel style="max-width: 300px;" v-html="stripHtml(item.body)">
+            <VLabel style="max-width: 300px;">
+              {{ stripHtml(item.body) }}
             </VLabel>
           </template>
 
           <template #item.type="{ item }">
-            <VLabel>{{ item.type == '1' ? 'Internal' : 'External' }}</VLabel>
+            <VLabel>{{ documentType(item.type) }}</VLabel>
           </template>
 
           <template #item.priority="{ item }">

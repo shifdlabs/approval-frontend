@@ -17,6 +17,7 @@ const {
   priorityCard,
   statusCard,
   formatDate,
+  stripHtml,
   onTapFilter,
   onTapRow
 } = approvalsController()
@@ -35,7 +36,7 @@ const {
               class="me-3"
             />
             <VBtn
-              color="#E0E0E0"
+             
               density="comfortable"
               icon=""
               class="rounded"
@@ -101,13 +102,13 @@ const {
         
         <template #item.subject="{ item }">
           <VLabel>
-              {{ item.subject  }}
+              {{ stripHtml(item.subject) }}
           </VLabel>
         </template>
 
         <template #item.body="{ item }">
           <VLabel style="max-width: 300px;">
-              {{ item.body }}
+              {{ stripHtml(item.body) }}
           </VLabel>
         </template>
 

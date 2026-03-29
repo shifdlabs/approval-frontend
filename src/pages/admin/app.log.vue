@@ -26,7 +26,7 @@ const {
               class="me-3"
             />
             <VBtn
-              color="#E0E0E0"
+             
               density="comfortable"
               icon=""
               class="rounded"

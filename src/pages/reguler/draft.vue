@@ -3,6 +3,46 @@ import { computed, onMounted, ref } from 'vue';
 
 const router = useRouter()
 
+// Function to strip HTML tags and decode entities
+const stripHtml = (html: string): string => {
+  if (!html) return ''
+  
+  let text = html
+  
+  // Decode numeric entities (e.g., &#39; &#x27;)
+  text = text.replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec))
+  text = text.replace(/&#x([0-9A-Fa-f]+);/g, (match, hex) => String.fromCharCode(parseInt(hex, 16)))
+  
+  // Manual entity replacement multiple times for nested encoding
+  for (let iteration = 0; iteration < 5; iteration++) {
+    let hasChanged = false
+    
+    const entityReplacements: Array<[RegExp, string]> = [
+      [/&amp;/gi, '&'],
+      [/&lt;/gi, '<'],
+      [/&gt;/gi, '>'],
+      [/&quot;/gi, '"'],
+      [/&#0*39;/gi, "'"],
+      [/&apos;/gi, "'"],
+      [/&#x0*27;/gi, "'"],
+      [/&nbsp;/gi, ' '],
+    ]
+    
+    for (const [pattern, replacement] of entityReplacements) {
+      const before = text
+      text = text.replace(pattern, replacement as string)
+      if (text !== before) hasChanged = true
+    }
+    
+    if (!hasChanged) break
+  }
+  
+  // Remove HTML tags
+  const tmp = document.createElement('div')
+  tmp.innerHTML = text
+  return tmp.textContent || tmp.innerText || ''
+}
+
 // Definisikan tipe data untuk response API
 interface Author {
   FirstName: string;
@@ -123,7 +163,7 @@ function onTapRow(
               clearable
             />
             <VBtn
-              color="#E0E0E0"
+             
               density="comfortable"
               icon=""
               class="rounded"
@@ -168,12 +208,14 @@ function onTapRow(
         >
           <template #item.subject="{ item }">
             <VLabel>
-              {{ item.subject }}
+              {{ stripHtml(item.subject) }}
             </VLabel>
           </template>
 
           <template #item.body="{ item }">
-            <VLabel style="max-width: 350px;" v-html="item.body"/>
+            <VLabel style="max-width: 350px;">
+              {{ stripHtml(item.body) }}
+            </VLabel>
           </template>
 
           <template #item.type="{ item }">

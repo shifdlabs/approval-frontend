@@ -46,39 +46,56 @@ const mapUser = (rawUser: any): User => {
 
 const updatePassword = async () => {
   try {
-  const {
-    execute,
-    error,
-    isFetching,
-    data,
-    onFetchError,
-  } = useApi('/user/password',
-    {
-      method: 'PUT',
-      body: JSON.stringify({
-        id: user.value?.id,
-        currentPassword: formData.value.currentPassword,
-        newPassword: formData.value.newPassword,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
+    const {
+      execute,
+      error,
+      data,
+      onFetchError,
+    } = useApi('/user/password',
+      {
+        method: 'PUT',
+        body: JSON.stringify({
+          id: user.value?.id,
+          currentPassword: formData.value.currentPassword,
+          newPassword: formData.value.newPassword,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       },
-    },
-    {
-      immediate: false,
+      {
+        immediate: false,
+      }
+    )
+
+    // Optional: hook into error
+    onFetchError((fetchError) => {
+      console.error('Fetch error:', fetchError)
+      alert('Failed to update password. Please check your current password and try again.')
+    })
+
+    // IMPORTANT: Execute the API call
+    await execute()
+
+    // Check if there was an error
+    if (error.value) {
+      console.error('Error updating password:', error.value)
+      alert('Failed to update password. Please check your current password.')
+      return
     }
-  )
 
-  // Optional: hook into error
-  onFetchError((fetchError) => {
-    console.log('Fetch error:', fetchError)
-  })
-
-    isChangePasswordDialogVisible.value = false
-    isSuccessDialogVisible.value = true
-    refVForm.value?.reset()
+    // Check if update was successful
+    const response = data.value as any
+    if (response && response.success) {
+      isChangePasswordDialogVisible.value = false
+      isSuccessDialogVisible.value = true
+      refVForm.value?.reset()
+    } else {
+      alert('Failed to update password. Please try again.')
+    }
   } catch (e) {
-    console.log(e)
+    console.error('Exception updating password:', e)
+    alert('An error occurred while updating password.')
   }
 }
 

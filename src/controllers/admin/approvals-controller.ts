@@ -2,6 +2,62 @@ import { Document } from '@/models/document/document'
 import { computed, ref } from 'vue'
 
 export function approvalsController() {
+    const stripHtml = (html: string): string => {
+      if (!html) return ''
+      
+      let text = html
+      
+      // Decode HTML entities multiple times to handle nested encoding
+      for (let i = 0; i < 5; i++) {
+        const entities: { [key: string]: string } = {
+          '&nbsp;': ' ',
+          '&amp;': '&',
+          '&lt;': '<',
+          '&gt;': '>',
+          '&quot;': '"',
+          '&#39;': "'",
+          '&#x27;': "'",
+          '&apos;': "'",
+          '&cent;': '¢',
+          '&pound;': '£',
+          '&yen;': '¥',
+          '&euro;': '€',
+          '&copy;': '©',
+          '&reg;': '®',
+          '&trade;': '™',
+          '&times;': '×',
+          '&divide;': '÷',
+          '&laquo;': '«',
+          '&raquo;': '»',
+          '&ndash;': '–',
+          '&mdash;': '—',
+          '&hellip;': '…',
+          '&permil;': '‰',
+          '&bull;': '•',
+          '&deg;': '°',
+          '&para;': '¶',
+          '&sect;': '§',
+          '&ldquo;': '"',
+          '&rdquo;': '"',
+          '&lsquo;': "'",
+          '&rsquo;': "'"
+        }
+        
+        Object.keys(entities).forEach(entity => {
+          const regex = new RegExp(entity, 'g')
+          text = text.replace(regex, entities[entity])
+        })
+      }
+      
+      // Remove HTML tags using DOM
+      const doc = new DOMParser().parseFromString(text, 'text/html')
+      text = doc.body.textContent || ''
+      
+      // Clean up extra whitespace
+      text = text.replace(/\s+/g, ' ').trim()
+      
+      return text
+    }
     const documents = ref<Document[]>([])
     const selected = ref<Document[]>([])
     const searchQuery = ref('')
@@ -159,6 +215,7 @@ export function approvalsController() {
         documentType,
         statusCard,
         formatDate,
+        stripHtml,
         onTapFilter,
         fetchDocuments,
         onTapRow
