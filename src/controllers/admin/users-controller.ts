@@ -282,6 +282,41 @@ export function usersController() {
           console.error(e)
         }
       }
+
+      const showUnlockUserDialog = (item: User) => {
+        confirmationDialogData.value = Object.assign(confirmationDialogData.value, {
+          type: 5,
+          title: 'Unlock User Account',
+          message: `Are you sure you want to unlock account for ${item.firstName} ${item.lastName}? This will reset failed login attempts and allow them to login again.`,
+          buttonTitle: 'Unlock Account',
+        })
+ 
+        selectedUser.value = item
+        isConfirmationDialogVisible.value = true
+      }
+
+      const unlockUser = async () => {
+        try {
+          const { data, error } = await useApi(`/user/unlock/${selectedUser.value?.id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+          })
+
+          if (error.value) {
+            console.error(error.value)
+            return
+          }
+
+          // Refresh user list after unlock
+          await refetchList()
+          isConfirmationDialogVisible.value = false
+        } catch (e) {
+          console.error(e)
+        }
+      }
  
       // ==========> Initialize Index Data
  
@@ -373,5 +408,7 @@ export function usersController() {
         changeRole,
         showChangeAcceessDialog,
         changeAccess,
+        showUnlockUserDialog,
+        unlockUser,
       }
 }
