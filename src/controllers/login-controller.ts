@@ -24,7 +24,7 @@ export function loginController() {
       //   remember: false
       // })
       const credentials = ref({
-        email: 'user2@approval.com',
+        email: 'admin@approval.com',
         password: 'Test1234!',
         remember: false
       })
