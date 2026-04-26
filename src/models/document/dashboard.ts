@@ -1,36 +1,53 @@
-export interface InProgressOverview {
+export interface NeedApprovalCard {
+  total: number
+  urgent: number
+  normal: number
+  oldest_pending_days: number
+  alert_type: 'warning' | 'success'
+  alert_label: string
+}
+
+export interface InProgressCard {
+  total: number
+  longest_processing_days: number
+  alert_type: 'warning' | 'success'
+  alert_label: string
+}
+
+export interface RejectedCard {
+  total: number
+  mine_needs_revision: number
+  alert_type: 'warning' | 'success'
+  alert_label: string
+}
+
+export interface CompletedCard {
+  total: number
+  total_year: number
+  alert_type: 'warning' | 'success'
+  alert_label: string
+}
+
+export interface DashboardSummaryResponse {
+  period: string
+  need_approval: NeedApprovalCard
+  in_progress: InProgressCard
+  rejected: RejectedCard
+  completed: CompletedCard
+}
+
+export interface DeadlineItemResponse {
+    id: string
     subject: string
-    approvers: ApproverState[]
+    days_remaining: number
 }
 
-export interface ApproverState {
-    name: string
-    title: string
-    approved: boolean | null
-    date: string | null
-    signature: boolean
-    signatureUrl: string | null
-}
-
-export interface RejectedOverview {
-    name: string
-    title: string
-    date: string
-    subject: string
-    reason: string
-}
-
-export interface CompletedOverview {
-    isFinished: boolean
-    name: string
-    title: string
-    date: string
-    subject: string
-    internalApprover: ApproverState[] | null
-    externalApprover: string | null
-}
-
-export interface InternalRecipient {
-    name: string
-    title: string
+export interface RecentDocumentResponse {
+	id: string
+	number: string
+	subject: string
+	from_to: string
+	status: string
+	type: number
+	updated_at: string
 }
