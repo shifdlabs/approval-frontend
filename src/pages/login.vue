@@ -38,7 +38,7 @@ const {
 
         <VCardText class="text-center">
           <h4 class="text-h4 mb-1">
-            Welcome to <span class="text-capitalize">Alpha {{ themeConfig.app.title }}</span>
+            Welcome to <span class="text-capitalize">Shifd {{ themeConfig.app.title }}</span>
           </h4>
           <p class="mb-0">
             Please sign-in to your account
