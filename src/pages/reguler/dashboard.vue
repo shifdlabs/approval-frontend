@@ -88,12 +88,21 @@
               <span>{{ card.badge }}</span>
             </div>
           </div>
-          <div class="card-number" :style="{ color: card.numberColor }">{{ card.count }}</div>
+          <div class="card-number" :style="{ color: card.numberColor }">
+            <span v-if="isLoading" class="shimmer"></span>
+            <span v-else :class="{ 'fade-in': !isLoading }">{{ card.count }}</span>
+          </div>
           <div class="card-label">{{ card.label }}</div>
           <div class="card-divider"></div>
           <div class="card-footer">
             <span class="card-note">{{ card.note }}</span>
-            <button class="card-action" :style="{ color: card.actionColor }">{{ card.action }} →</button>
+            <button
+              class="card-action"
+              :style="{ color: card.actionColor }"
+              @click="cardActions[card.id - 1]()"
+            >
+              {{ card.action }} →
+            </button>
           </div>
         </div>
       </div>
@@ -145,13 +154,13 @@
                   class="table-row"
                   :style="{ animationDelay: i * 0.04 + 's' }"
                 >
-                  <td class="cell-nomor">{{ s.nomor }}</td>
+                  <td class="cell-nomor">{{ s.number }}</td>
                   <td class="cell-perihal">
-                    <span class="perihal-text">{{ s.perihal }}</span>
-                    <span class="perihal-sub">{{ s.dari }}</span>
+                    <span class="perihal-text">{{ s.subject }}</span>
+                    <span class="perihal-sub">{{ s.from_to }}</span>
                   </td>
-                  <td class="cell-dari">{{ s.dari }}</td>
-                  <td class="cell-tanggal">{{ s.tanggal }}</td>
+                  <td class="cell-dari">{{ s.from_to }}</td>
+                  <td class="cell-tanggal">{{ new Date(s.updated_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) }}</td>
                   <td>
                     <span class="status-badge" :class="statusClass(s.status)">
                       <span class="status-dot"></span>{{ s.status }}
@@ -160,10 +169,10 @@
                   <td>
                     <div class="action-group">
                       <!-- Conditional action buttons based on status -->
-                      <button v-if="s.status === 'Perlu Diperiksa'" class="btn-action primary">Periksa</button>
-                      <button v-if="s.status === 'Ditolak'"         class="btn-action warning">Revisi</button>
+                      <button v-if="s.status === 'Perlu Diperiksa'" class="btn-action primary" @click="lihatDocument(s.id)">Periksa</button>
+                      <button v-if="s.status === 'Ditolak'"         class="btn-action warning" @click="lihatDocument(s.id)">Revisi</button>
                       <button v-if="s.status === 'Perlu Diperiksa' || s.status === 'Ditolak'" class="btn-action ghost">Detail</button>
-                      <button v-if="s.status === 'In Progress' || s.status === 'Selesai'"     class="btn-action ghost">Lihat</button>
+                      <button v-if="s.status === 'In Progress' || s.status === 'Selesai'"     class="btn-action ghost" @click="lihatDocument(s.id)">Lihat</button>
                     </div>
                   </td>
                 </tr>
@@ -194,9 +203,17 @@
                 <button v-if="s.status === 'Perlu Diperiksa'" class="btn-action primary">Periksa</button>
                 <button v-if="s.status === 'Ditolak'"         class="btn-action warning">Revisi</button>
                 <button v-if="s.status === 'Perlu Diperiksa' || s.status === 'Ditolak'" class="btn-action ghost">Detail</button>
-                <button v-if="s.status === 'In Progress' || s.status === 'Selesai'"     class="btn-action ghost">Lihat</button>
+                <button v-if="s.status === 'In Progress' || s.status === 'Selesai'" @click="lihatDocument(s.id)" class="btn-action ghost">Lihat</button>
               </div>
             </div>
+          </div>
+
+          <div class="empty-state">
+            <svg v-if="filteredSurat.length === 0" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:#d1d5db">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            <p v-if="filteredSurat.length === 0">Belum ada surat</p>
           </div>
 
         </div>
@@ -208,7 +225,7 @@
         <!-- Widget 1: Donut Chart — Distribusi Status -->
         <div class="widget-card">
           <h3 class="widget-title">Distribusi Status</h3>
-          <p class="widget-sub">Total {{ totalSurat }} surat bulan ini</p>
+          <p class="widget-sub">Total {{ totalSurat }} surat {{ activeStatTab === 'semua' ? 'keseluruhan' : activeStatTab === 'hari' ? 'hari ini' : activeStatTab === 'minggu' ? 'minggu ini' : 'bulan ini' }}</p>
           <div class="donut-section">
             <div class="donut-wrap">
               <svg viewBox="0 0 120 120" class="donut-svg">
@@ -248,7 +265,7 @@
           <h3 class="widget-title">Mendekati Batas Waktu</h3>
           <p class="widget-sub">Surat yang perlu segera ditindak</p>
           <div class="deadline-list">
-            <div v-for="dl in deadlines" :key="dl.id" class="deadline-item">
+            <div v-for="dl in mappedDeadlines" :key="dl.id" class="deadline-item">
               <div class="deadline-top">
                 <span class="deadline-name">{{ dl.name }}</span>
                 <!-- Bar width = urgency progress, color = urgency level -->
@@ -266,7 +283,7 @@
           <h3 class="widget-title">Aktivitas Terkini</h3>
           <p class="widget-sub">Current Time Log</p>
           <div class="activity-list">
-            <div v-for="act in activities" :key="act.id" class="activity-item">
+            <div v-for="act in mappedActivities" :key="act.id" class="activity-item">
               <div class="activity-icon" :style="{ background: act.iconBg, color: act.iconColor }">
                 <span v-html="act.icon"></span>
               </div>
@@ -285,17 +302,29 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { useDashboardController } from '@/controllers/reguler/document-dashboard-controller'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 // ════════════════════════════════════════
 // SECTION 1 & 2 — Header & Alert
 // ════════════════════════════════════════
 
-const userName          = ref('Budi')
+const userName = useCookie('name')
 const notifCount        = ref(3)
 const showNotifications = ref(false)
-const showAlert         = ref(true)
-const alertCount        = ref(3)
+const showAlert         = ref(false)
+const alertCount        = ref(0)
+const activeSuratTab = ref('Semua')
+const suratTabs = ['Semua', 'Internal', 'External']
+const tabTypeMap = { 'Semua': 0, 'Internal': 1, 'External': 2 }
+const lihatDocument = (id) => {
+  console.log('fungsi dipanggil, id:', id)
+  console.log('router:', router)
+  router.push(`/preview/${id}`)
+}
 
 const now = new Date()
 
@@ -311,12 +340,25 @@ const greeting = computed(() => {
   return 'Selamat Malam'
 })
 
-const buatSuratBaru = () => alert('Buat Surat Baru diklik!')
+const buatSuratBaru = () => router.push('/document/create')
 const lihatSemua    = () => alert('Navigasi ke daftar surat belum diperiksa')
 
+// Mapping action per card
+const cardActions = {
+  0: () => router.push('/reguler/authorization'), // Periksa
+  1: () => router.push('/reguler/progress'),      // Lihat (In Progress)
+  2: () => router.push('/reguler/rejected'),      // Tinjau
+  3: () => router.push('/reguler/complete'),      // Lihat (Selesai)
+}
+
 // ════════════════════════════════════════
-// SECTION 3 — Stat Cards
+// SECTION 3 — Stat Cards + API
 // ════════════════════════════════════════
+
+const {
+	summary, deadlines, activities, recentDocuments,
+	isLoading, fetchSummary, fetchDeadlines, fetchActivities, fetchRecentDocuments
+} = useDashboardController()
 
 const activeStatTab = ref('semua')
 const searchQuery   = ref('')
@@ -328,7 +370,6 @@ const statTabs = [
   { label: 'Bulan Ini',  value: 'bulan'  },
 ]
 
-// Reusable badge icons
 const warnIcon = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
 const okIcon   = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
 
@@ -336,63 +377,135 @@ const statCards = ref([
   {
     id: 1, topColor: '#f59e0b', iconBg: '#fef3c7', iconColor: '#d97706',
     icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`,
-    badgeType: 'badge-warn', badgeIcon: warnIcon, badge: 'Terlama: 5 hari belum diproses',
-    count: '12', numberColor: '#d97706', label: 'Perlu Diperiksa',
-    note: '3 mendesak · 9 normal', action: 'Periksa', actionColor: '#d97706',
+    badgeType: 'badge-warn', badgeIcon: warnIcon, badge: '-',
+    count: '-', numberColor: '#d97706', label: 'Perlu Diperiksa',
+    note: '-', action: 'Periksa', actionColor: '#d97706',
   },
   {
     id: 2, topColor: '#2563eb', iconBg: '#dbeafe', iconColor: '#2563eb',
     icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/><line x1="12" y1="13" x2="12" y2="21"/></svg>`,
-    badgeType: 'badge-ok', badgeIcon: okIcon, badge: 'Semua berjalan tepat waktu',
-    count: '8', numberColor: '#2563eb', label: 'Sedang Diproses',
-    note: 'Paling lama: 11 hari belum selesai', action: 'Lihat', actionColor: '#2563eb',
+    badgeType: 'badge-ok', badgeIcon: okIcon, badge: '-',
+    count: '-', numberColor: '#2563eb', label: 'Sedang Diproses',
+    note: '-', action: 'Lihat', actionColor: '#2563eb',
   },
   {
     id: 3, topColor: '#ef4444', iconBg: '#fee2e2', iconColor: '#dc2626',
     icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>`,
-    badgeType: 'badge-warn', badgeIcon: warnIcon, badge: '2 surat perlu revisi segera',
-    count: '5', numberColor: '#dc2626', label: 'Ditolak',
-    note: '2 surat milikmu perlu direvisi', action: 'Tinjau', actionColor: '#dc2626',
+    badgeType: 'badge-warn', badgeIcon: warnIcon, badge: '-',
+    count: '-', numberColor: '#dc2626', label: 'Ditolak',
+    note: '-', action: 'Tinjau', actionColor: '#dc2626',
   },
   {
     id: 4, topColor: '#10b981', iconBg: '#d1fae5', iconColor: '#059669',
     icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="9 11 12 14 22 4"/></svg>`,
-    badgeType: 'badge-ok', badgeIcon: okIcon, badge: 'Semua berjalan tepat waktu',
-    count: '20', numberColor: '#059669', label: 'Selesai Bulan Ini',
-    note: 'Total 312 sepanjang tahun', action: 'Lihat', actionColor: '#059669',
+    badgeType: 'badge-ok', badgeIcon: okIcon, badge: '-',
+    count: '-', numberColor: '#059669', label: 'Selesai Bulan Ini',
+    note: '-', action: 'Lihat', actionColor: '#059669',
   },
 ])
+
+// Mapping response API → statCards
+const animateCount = (index, targetValue) => {
+  const delay    = 1000 // shimmer terlihat selama 1 detik
+  const duration = 1500
+  const steps    = 60
+  const stepTime = duration / steps
+  const target   = parseInt(targetValue) || 0
+  let current    = 0
+
+  setTimeout(() => {
+    // Matikan shimmer tepat saat angka mulai counting
+    if (index === 0) isLoading.value = false
+
+    const timer = setInterval(() => {
+      current += Math.ceil(target / steps)
+      if (current >= target) {
+        current = target
+        clearInterval(timer)
+      }
+      statCards.value[index].count = String(current)
+    }, stepTime)
+  }, delay)
+}
+
+const updateCardsFromSummary = () => {
+  if (!summary.value) return
+
+  const s = summary.value
+
+  // Animate counts
+  animateCount(0, s.need_approval.total)
+  animateCount(1, s.in_progress.total)
+  animateCount(2, s.rejected.total)
+  animateCount(3, s.completed.total)
+
+  // Card 1 — Perlu Diperiksa
+  statCards.value[0].badge     = s.need_approval.alert_label
+  statCards.value[0].badgeType = s.need_approval.alert_type === 'warning' ? 'badge-warn' : 'badge-ok'
+  statCards.value[0].badgeIcon = s.need_approval.alert_type === 'warning' ? warnIcon : okIcon
+  statCards.value[0].note      = `${s.need_approval.urgent} mendesak · ${s.need_approval.normal} normal`
+
+  // Card 2 — Sedang Diproses
+  statCards.value[1].badge     = s.in_progress.alert_label
+  statCards.value[1].badgeType = s.in_progress.alert_type === 'warning' ? 'badge-warn' : 'badge-ok'
+  statCards.value[1].badgeIcon = s.in_progress.alert_type === 'warning' ? warnIcon : okIcon
+  statCards.value[1].note      = `Paling lama: ${s.in_progress.longest_processing_days} hari belum selesai`
+
+  // Card 3 — Ditolak
+  statCards.value[2].badge     = s.rejected.alert_label
+  statCards.value[2].badgeType = s.rejected.alert_type === 'warning' ? 'badge-warn' : 'badge-ok'
+  statCards.value[2].badgeIcon = s.rejected.alert_type === 'warning' ? warnIcon : okIcon
+  statCards.value[2].note      = `${s.rejected.mine_needs_revision} surat milikmu perlu direvisi`
+
+  // Card 4 — Selesai
+  statCards.value[3].badge     = s.completed.alert_label
+  statCards.value[3].badgeType = s.completed.alert_type === 'warning' ? 'badge-warn' : 'badge-ok'
+  statCards.value[3].badgeIcon = s.completed.alert_type === 'warning' ? warnIcon : okIcon
+  statCards.value[3].note      = `Total ${s.completed.total_year} sepanjang tahun`
+
+  showAlert.value  = s.need_approval.oldest_pending_days > 1
+  alertCount.value = s.need_approval.total
+
+  // update donut chart dari data API
+  statusDistribution.value = [
+    { label: 'Selesai',         count: s.completed.total,    color: '#10b981' },
+    { label: 'Perlu Diperiksa', count: s.need_approval.total, color: '#f59e0b' },
+    { label: 'In Progress',     count: s.in_progress.total,  color: '#3b82f6' },
+    { label: 'Ditolak',         count: s.rejected.total,     color: '#ef4444' },
+  ]
+}
+
+// Fetch ulang setiap kali tab filter berubah
+watch(activeStatTab, async (newTab) => {
+  await fetchSummary(newTab)
+  updateCardsFromSummary()
+})
+
+// Fetch ulang saat tab berubah
+watch(activeSuratTab, (newTab) => {
+	fetchRecentDocuments(tabTypeMap[newTab])
+})
+
+// Fetch pertama kali saat halaman dibuka
+onMounted(async () => {
+  await fetchSummary(activeStatTab.value)
+  updateCardsFromSummary()
+  fetchDeadlines()
+  fetchActivities()
+  fetchRecentDocuments(0)
+})
 
 // ════════════════════════════════════════
 // SECTION 4A — Surat Table
 // ════════════════════════════════════════
 
-const activeSuratTab = ref('Semua')
-const suratTabs      = ['Semua', 'Masuk', 'Keluar']
+const filteredSurat = computed(() => recentDocuments.value ?? [])
 
-const suratList = ref([
-  { id:1, nomor:'001/KM/III/2026', perihal:'Permohonan Izin Kegiatan Ola..', dari:'Ramirez Gustavo', tanggal:'11 Mar 2026', status:'Perlu Diperiksa', jenis:'Masuk'  },
-  { id:2, nomor:'002/KM/III/2026', perihal:'Upacara Digital Melalui Zoom..', dari:'Ramirez Gustavo', tanggal:'10 Mar 2026', status:'In Progress',     jenis:'Masuk'  },
-  { id:3, nomor:'003/KM/III/2026', perihal:'Weekly Meeting 2026 Landscape..', dari:'Ramirez Gustavo', tanggal:'06 Mar 2026', status:'Selesai',        jenis:'Keluar' },
-  { id:4, nomor:'004/KM/III/2026', perihal:'Request CSR Budget For 2026..', dari:'Ramirez Gustavo', tanggal:'04 Mar 2026', status:'Ditolak',           jenis:'Masuk'  },
-  { id:5, nomor:'005/KM/III/2026', perihal:'Izin Pengawasan Ketat Level Max..', dari:'Ramirez Gustavo', tanggal:'03 Mar 2026', status:'Perlu Diperiksa', jenis:'Masuk' },
-  { id:6, nomor:'006/KM/III/2026', perihal:'Meeting Koordinasi With Alien..', dari:'Ramirez Gustavo', tanggal:'02 Mar 2026', status:'In Progress',    jenis:'Keluar' },
-  { id:7, nomor:'007/KM/III/2026', perihal:'Ekspolari Mars Melalui Pluto..', dari:'Ramirez Gustavo', tanggal:'04 Mar 2026', status:'Ditolak',          jenis:'Masuk'  },
-])
-
-// Filter rows by Masuk / Keluar tab; "Semua" shows all
-const filteredSurat = computed(() =>
-  activeSuratTab.value === 'Semua'
-    ? suratList.value
-    : suratList.value.filter(s => s.jenis === activeSuratTab.value)
-)
-
-// Returns CSS modifier class for a given status string
 const statusClass = (status) => ({
-  'Perlu Diperiksa': 'status-periksa',
-  'In Progress':     'status-progress',
-  'Selesai':         'status-selesai',
-  'Ditolak':         'status-ditolak',
+	'In Progress': 'status-progress',
+	'Selesai':     'status-selesai',
+	'Ditolak':     'status-ditolak',
+	'Cancelled':   'status-ditolak',
 }[status] || '')
 
 // ════════════════════════════════════════
@@ -407,9 +520,8 @@ const statusDistribution = ref([
 ])
 
 const totalSurat    = computed(() => statusDistribution.value.reduce((a, b) => a + b.count, 0))
-const circumference = 2 * Math.PI * 45 // r=45 → C ≈ 282.74
+const circumference = 2 * Math.PI * 45
 
-// Each segment: dash = proportional arc length, offset = rotation from 12 o'clock
 const donutSegments = computed(() => {
   let offset = circumference * 0.25
   return statusDistribution.value.map(item => {
@@ -424,26 +536,78 @@ const donutSegments = computed(() => {
 // SECTION 4C — Deadline Tracker
 // ════════════════════════════════════════
 
-const deadlines = ref([
-  { id:1, name:'Izin Kegiatan Olahraga',         urgency:'+3 hari lewat', urgencyClass:'urgency-overdue', progress:100, barColor:'#ef4444' },
-  { id:2, name:'Upacara Digital Melalui Zoom..', urgency:'Hari ini',      urgencyClass:'urgency-today',   progress:85,  barColor:'#f59e0b' },
-  { id:3, name:'Surat Tugas Perjalanan Dinas',   urgency:'2 hari lagi',   urgencyClass:'urgency-soon',    progress:55,  barColor:'#f59e0b' },
-  { id:4, name:'Laporan Evaluasi Triwulan',       urgency:'5 hari lagi',  urgencyClass:'urgency-ok',      progress:30,  barColor:'#10b981' },
-])
+const mappedDeadlines = computed(() =>
+    deadlines.value.map(d => {
+        const days = d.days_remaining
+
+        let urgency, urgencyClass, barColor, progress
+
+        if (days < 0) {
+            urgency      = `+${Math.abs(days)} hari lewat`
+            urgencyClass = 'urgency-overdue'
+            barColor     = '#ef4444'
+            progress     = 100
+        } else if (days === 0) {
+            urgency      = 'Hari ini'
+            urgencyClass = 'urgency-today'
+            barColor     = '#f59e0b'
+            progress     = 90
+        } else if (days <= 14) {
+            urgency      = `${days} hari lagi`
+            urgencyClass = 'urgency-soon'
+            barColor     = '#f59e0b'
+            progress     = Math.max(20, 100 - (days / 14 * 100))
+        } else {
+            urgency      = `${days} hari lagi`
+            urgencyClass = 'urgency-ok'
+            barColor     = '#10b981'
+            progress     = Math.max(10, 100 - (days / 60 * 100))
+        }
+
+        return {
+            id:           d.id,
+            name:         d.subject,
+            urgency,
+            urgencyClass,
+            progress,
+            barColor,
+        }
+    })
+)
+
 
 // ════════════════════════════════════════
 // SECTION 4D — Activity Feed
 // ════════════════════════════════════════
 
+const mappedActivities = computed(() => {
+	if (!activities.value) return []
+
+	return activities.value.map(act => ({
+		id:      act.id,
+		icon:    act.is_approved ? iconCheck : iconX,
+		iconBg:  act.is_approved ? '#d1fae5' : '#fee2e2',
+		iconColor: act.is_approved ? '#059669' : '#dc2626',
+		text:    act.is_approved
+			? `<strong>${act.subject}</strong> disetujui oleh <strong>${act.approver_name}</strong>`
+			: `<strong>${act.subject}</strong> ditolak, diminta revisi`,
+		time: formatRelativeTime(act.updated_at),
+	}))
+})
+
 const iconCheck = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="9 11 12 14 22 4"/></svg>`
 const iconMail  = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`
 const iconX     = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>`
 
-const activities = ref([
-  { id:1, icon: iconCheck, iconBg:'#d1fae5', iconColor:'#059669', text:'<strong>Laporan Januari</strong> disetujui oleh <strong>Jhon Doe</strong>', time:'5 menit lalu'  },
-  { id:2, icon: iconMail,  iconBg:'#fef3c7', iconColor:'#d97706', text:'Surat baru masuk dari <strong>Ramirez Duterte</strong>',                    time:'23 menit lalu' },
-  { id:3, icon: iconX,     iconBg:'#fee2e2', iconColor:'#dc2626', text:'<strong>Pengajuan Data 2026</strong> ditolak, diminta revisi',               time:'1 jam lalu'    },
-])
+const formatRelativeTime = (isoString) => {
+  const diff = Math.floor((Date.now() - new Date(isoString).getTime()) / 1000)
+
+  if (diff <= 0)    return 'Baru saja'
+  if (diff < 60)    return `${diff} detik lalu`
+  if (diff < 3600)  return `${Math.floor(diff / 60)} menit lalu`
+  if (diff < 86400) return `${Math.floor(diff / 3600)} jam lalu`
+  return                   `${Math.floor(diff / 86400)} hari lalu`
+}
 </script>
 
 <style scoped>
@@ -797,5 +961,48 @@ const activities = ref([
 @media (max-width: 380px) {
   .cards-grid { grid-template-columns: 1fr; }
   .card-badge { display: none; }
+}
+
+/* Shimmer */
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.shimmer {
+  display: inline-block;
+  width: 60px;
+  height: 48px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite; /* ← naikkan dari 1.2s ke 1.5s */
+}
+
+.card-number {
+  transition: opacity 0.4s ease;
+}
+
+.card-number.fade-in {
+  animation: fadeInNum 0.5s ease both;
+}
+
+@keyframes fadeInNum {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 20px;
+  background: #fff;
+  color: #9ca3af;
+  font-size: .875rem;
+  min-height: 300px;
+  border-radius: 0 0 16px 16px;
 }
 </style>
