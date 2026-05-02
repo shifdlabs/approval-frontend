@@ -9,6 +9,7 @@ const {
   isPasswordVisible,
   refVForm,
   isLoginError,
+  loginErrorMessage,
   isAccountInactive,
   isInProgress,
   credentials,
@@ -45,11 +46,11 @@ const {
           </p>
 
           <VAlert v-if="isLoginError" color="error" class="mt-4">
-            The email or password you entered is incorrect.
+            {{ loginErrorMessage || 'The email or password you entered is incorrect.' }}
           </VAlert>
 
           <VAlert v-if="isAccountInactive" color="error" class="mt-4">
-            The account has deleted, contact to your admin.
+            {{ loginErrorMessage || 'The account has been disabled, contact your administrator.' }}
           </VAlert>
         </VCardText>
 

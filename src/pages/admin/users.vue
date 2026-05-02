@@ -38,6 +38,8 @@ const {
   changeRole,
   showChangeAcceessDialog,
   changeAccess,
+  showUnlockUserDialog,
+  unlockUser,
 } = usersController();
 </script>
 
@@ -223,6 +225,14 @@ const {
                         Enabled Access
                       </div>
                     </VListItem>
+
+                    <VListItem
+                      value="unlockUser"
+                      @click="showUnlockUserDialog(item)"
+                    >
+                      <VIcon start icon="tabler-lock-open" size="20" />
+                      Unlock Account
+                    </VListItem>
                   </VList>
                 </VMenu>
               </IconBtn>
@@ -300,6 +310,12 @@ const {
         <VBtn 
         color="error"
         v-if="confirmationDialogData.type == 4" @click="deleteMultipleUsers">
+          {{ confirmationDialogData.buttonTitle }}
+        </VBtn>
+
+        <VBtn 
+        color="success"
+        v-if="confirmationDialogData.type == 5" @click="unlockUser">
           {{ confirmationDialogData.buttonTitle }}
         </VBtn>
       </VCardText>

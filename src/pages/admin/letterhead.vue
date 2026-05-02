@@ -9,7 +9,8 @@ const {
   isSaving,
   updateLetterhead,
   previewLetterhead,
-  handleFileSelected
+  handleFileSelected,
+  removeImage
 } = letterHeadController();
 </script>
 
@@ -29,21 +30,33 @@ const {
     <VCardText>
       <VRow>
         <VCol cols="12">
-          <div class="d-flex align-center flex-wrap">
-            <div v-if="imageUrl != ''">
-              <img :src="imageUrl" alt="Example Image" style="max-width: 100px; max-height: 100px;"/>
+          <div class="d-flex align-center flex-wrap gap-4">
+            <!-- Image Preview -->
+            <div v-if="imageUrl != ''" class="d-flex flex-column align-center">
+              <img :src="imageUrl" alt="Letterhead Preview" style="max-width: 150px; max-height: 150px; border: 2px solid #e0e0e0; border-radius: 8px; padding: 4px;"/>
+              <div class="d-flex gap-2 mt-2">
+                <VBtn
+                  size="small"
+                  color="error"
+                  variant="tonal"
+                  @click="removeImage"
+                >
+                  Remove
+                </VBtn>
+              </div>
             </div>
 
-            <div v-else>
+            <!-- File Upload Component -->
+            <div>
               <FileUploadIcon :initialUrl="initialFormData.companyLogoUrl" @file-selected="handleFileSelected"/>
             </div>
 
-            <VRow style="flex-direction: column;" class="ml-4">
-              <!-- <VBtn color="primary" style="max-width: 198px;" class="mb-2">
-              Upload Company Logo
-              </VBtn> -->
+            <VRow style="flex-direction: column;" class="ml-2">
               <VLabel>
-                Allowed Only for PNG. Max size of 1Mb
+                Allowed formats: PNG, JPG, JPEG. Max size of 1Mb
+              </VLabel>
+              <VLabel v-if="imageUrl != ''" class="text-success">
+                ✓ Letterhead uploaded
               </VLabel>
             </VRow>
           </div>
@@ -55,7 +68,6 @@ const {
             v-model="initialFormData.companyName"
             label="Company Name"
             placeholder="Enter your company name"
-            :rules="[requiredValidator]"
           />
         </VCol>
 
@@ -64,7 +76,6 @@ const {
             v-model="initialFormData.description"
             label="Description"
             placeholder="Enter your company description"
-            :rules="[requiredValidator]"
           />
         </VCol>
 
@@ -75,7 +86,6 @@ const {
             v-model="initialFormData.email"
             label="Email"
             placeholder="Enter your company email"
-            :rules="[requiredValidator]"
           />
         </VCol>
 
@@ -86,7 +96,6 @@ const {
             v-model="initialFormData.phoneNumber"
             label="Phone Number"
             placeholder="Enter your company phone number"
-            :rules="[requiredValidator]"
           />
         </VCol>
 
@@ -97,7 +106,6 @@ const {
             v-model="initialFormData.address"
             label="Address"
             placeholder="Enter your company address"
-            :rules="[requiredValidator]"
           />
         </VCol>
 
@@ -108,7 +116,6 @@ const {
             v-model="initialFormData.city"
             label="City"
             placeholder="Enter your company city"
-            :rules="[requiredValidator]"
           />
         </VCol>
 

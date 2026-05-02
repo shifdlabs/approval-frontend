@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
 import { Document } from '@/models/document/document';
 import { User } from '@/models/users/users';
 import companyLogoDummy1 from '@images/custom/dummy-company-logo-1.png';
+import { useApi } from '@/composables/useApi';
 // @ts-ignore
 import html2pdf from 'html2pdf.js';
 
@@ -68,6 +70,53 @@ const currentDate = computed(() => {
 
 // PDF Generation states
 const isGeneratingPDF = ref(false)
+
+// Letterhead data from database
+const letterheadData = ref({
+  companyLogoUrl: '',
+  companyName: '',
+  description: '',
+  address: '',
+  city: '',
+  email: '',
+  phoneNumber: ''
+})
+
+// Fetch letterhead settings from database
+const fetchLetterheadSettings = async () => {
+  try {
+    const res = await useApi('/appsettings', { method: 'GET' });
+    const apiResponse = res.data.value as any;
+
+    const keyMapping: Record<string, string> = {
+      'company_logo_url': 'companyLogoUrl',
+      'company_name': 'companyName',
+      'company_description': 'description',
+      'company_address': 'address',
+      'company_city': 'city',
+      'company_email': 'email',
+      'company_phone_number': 'phoneNumber'
+    }
+
+    if (apiResponse?.data) {
+      const mappedData: any = {}
+      apiResponse.data.forEach((item: any) => {
+        const formKey = keyMapping[item.key]
+        if (formKey) {
+          mappedData[formKey] = item.value
+        }
+      })
+      letterheadData.value = { ...letterheadData.value, ...mappedData }
+    }
+  } catch (error) {
+    console.error('Error fetching letterhead settings:', error)
+  }
+}
+
+// Fetch letterhead on mount
+onMounted(() => {
+  fetchLetterheadSettings()
+})
 
 // Helper function to convert image URL to base64
 const imageUrlToBase64 = async (url: string): Promise<string> => {
@@ -151,18 +200,37 @@ const generateDocumentHTMLTemplate = async () => {
   // Only add page break class if content is VERY long
   const bodyClass = isVeryLongContent ? 'body very-long-content' : 'body'
 
+  // Get letterhead logo - use DB logo if available, otherwise fallback to dummy
+  let letterheadLogo = companyLogoDummy1
+  if (letterheadData.value.companyLogoUrl) {
+    try {
+      letterheadLogo = await imageUrlToBase64(letterheadData.value.companyLogoUrl)
+    } catch (error) {
+      console.warn('Failed to load letterhead logo, using default')
+    }
+  }
+
+  // Use DB letterhead data if available, otherwise use hardcoded defaults
+  const companyName = letterheadData.value.companyName || 'Pacific Innovations Corporation'
+  const companyAddress = letterheadData.value.address || '55 Montgomery Street, Suite 2100, Financial District, San Francisco, CA 94104'
+  const companyCity = letterheadData.value.city || 'United States of America'
+  const companyPhone = letterheadData.value.phoneNumber || '+1 (415) 555-7890'
+  const companyEmail = letterheadData.value.email || 'contact@pacificinnovations.com'
+  const companyDescription = letterheadData.value.description || ''
+
   return `
     <div class="pdf-document">
       <div class="letter">
-        <!-- Letterhead Section -->
+        <!-- Letterhead Section (Dynamic from Database) -->
         <div class="letterhead">
-          <img src="${companyLogoDummy1}" alt="Company Logo" class="logo" style="width: 80px; height: 80px; object-fit: contain;" />
-          <div class="info">
-            <h1 class="title">Pacific Innovations Corporation</h1>
-            <p class="subtitle">455 Montgomery Street, Suite 2100, Financial District, San Francisco, CA 94104<br>
-              United States of America
-            </p>
-            <p class="code">Phone: +1 (415) 555‑7890 | Website: pacificinnovations.com</p>
+          <div class="letterhead-logo">
+            <img src="${letterheadLogo}" alt="Company Logo" class="logo" />
+          </div>
+          <div class="letterhead-info">
+            <h1 class="company-name">${companyName}</h1>
+            <p class="company-details">${companyAddress}<br>${companyCity}</p>
+            <p class="company-contact">Phone: ${companyPhone} | Email: ${companyEmail}</p>
+            ${companyDescription ? `<p class="company-description">${companyDescription}</p>` : ''}
           </div>
         </div>
 
@@ -225,41 +293,62 @@ const generateDocumentHTMLTemplate = async () => {
         }
         
         .letterhead {
-          position: relative;
           display: flex;
-          justify-content: center;
           align-items: center;
-          padding: 1rem;
+          gap: 1rem;
+          padding: 1rem 1rem 0.75rem 1rem;
           border-bottom: 4px solid #000;
         }
         
+        .letterhead-logo {
+          flex-shrink: 0;
+          width: 140px;
+        }
+        
         .logo {
-          position: absolute;
-          left: 0;
-          width: 80px;
-          height: 80px;
+          width: 100%;
+          height: auto;
+          max-height: 140px;
+          object-fit: contain;
+          display: block;
         }
         
-        .info {
+        .letterhead-info {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 0.15rem;
           text-align: center;
-          margin-left: 50px;
         }
         
-        .info .title {
-          font-size: 2rem;
-          font-weight: 700;
-          margin: 0;
+        .company-name {
+          font-size: 1.75rem;
+          font-weight: bold;
+          color: #2c3e50;
+          margin: 0 0 0.4rem 0;
+          line-height: 1.2;
         }
         
-        .info .subtitle {
-          font-size: 1rem;
-          margin: 0.5rem 0;
-          line-height: 1.4;
+        .company-details {
+          font-size: 0.95rem;
+          color: #7f8c8d;
+          line-height: 1.6;
+          margin: 0 0 0.2rem 0;
         }
         
-        .info .code {
+        .company-contact {
           font-size: 0.9rem;
+          color: #7f8c8d;
+          line-height: 1.4;
           margin: 0;
+        }
+        
+        .company-description {
+          font-size: 0.9rem;
+          color: #95a5a6;
+          font-style: italic;
+          margin: 0;
+          line-height: 1.3;
         }
         
         .sub-title-right {
