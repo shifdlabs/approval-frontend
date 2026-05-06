@@ -56,7 +56,26 @@ export const useApi = createFetch({
       }
 
       return { data: parsedData, response }
-    }
+    },
+    onFetchError(ctx) {
+      // Parse error response body to extract custom error messages
+      const { data, response } = ctx
+      
+      let parsedError = null
+      try {
+        parsedError = destr(data)
+      } catch (error) {
+        console.error('Failed to parse error response:', error)
+      }
+
+      // If we successfully parsed the error response, attach it
+      if (parsedError) {
+        ctx.data = parsedError
+        ctx.error = parsedError
+      }
+
+      return ctx
+    },
   },
 })
 

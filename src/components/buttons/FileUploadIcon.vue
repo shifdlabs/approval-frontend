@@ -15,23 +15,19 @@
       type="file"
       @change="handleFileChange"
       style="display: none"
-      accept="image/png"
+      accept="image/png,image/jpeg,image/jpg"
     />
   </div>
 </template>
 
 <script setup>
 import { defineEmits, defineProps, ref } from 'vue';
-
-// Allow parent to configure the base directory for images
 const props = defineProps({
   initialUrl: { type: String, default: '' },
-  // e.g. '/images' for public folder or '/uploads' if served
   imageDir: {
     type: String,
     default: '/images'
   },
-  // Placeholder image filename in the imageDir
   placeholder: {
     type: String,
     default: 'placeholder.png'
@@ -69,9 +65,10 @@ const openFileDialog = () => {
 const handleFileChange = async (event) => {
   const file = event.target.files[0];
   if (!file) return;
-  // Only allow PNG files
-  if (file.type !== 'image/png') {
-    alert('Only PNG files are allowed.');
+  // Only allow PNG, JPG, JPEG files
+  const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+  if (!allowedTypes.includes(file.type)) {
+    alert('Only PNG, JPG, and JPEG files are allowed.');
     return;
   }
 
