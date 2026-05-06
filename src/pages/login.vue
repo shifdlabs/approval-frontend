@@ -81,44 +81,15 @@ const {
                   :rules="[requiredValidator]"
                 />
 
-                <!-- remember me checkbox -->
-                <div class="d-flex align-center justify-space-between flex-wrap my-6">
-                  <VCheckbox
-                    v-model="credentials.remember"
-                    label="Remember me"
-                  />
-
-                  <RouterLink
-                    class="text-primary" :to="{ }"
-                  >
-                    Forgot Password?
-                  </RouterLink>
-                </div>
-
                 <!-- login button -->
                 <VBtn
                   block
                   type="submit"
                   :disabled="isInProgress"
+                  class="mt-6"
                 >
                   Login
                 </VBtn>
-              </VCol>
-
-              <!-- create account -->
-              <VCol
-                cols="12"
-                class="text-body-1 text-center"
-              >
-                <span class="d-inline-block">
-                  Didn't have an account?
-                </span>
-                <!-- <RouterLink
-                  class="text-primary ms-1 d-inline-block text-body-1"
-                  :to="{ name:'register' }"
-                >
-                  Register
-                </RouterLink> -->
               </VCol>
 
             </VRow>

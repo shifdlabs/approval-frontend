@@ -5,7 +5,7 @@ export interface User {
     firstName: string
     lastName: string
     email: string
-    position: Position
+    position: Position | null
     phone: string
     role: number
     access: boolean

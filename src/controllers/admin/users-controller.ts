@@ -46,7 +46,7 @@ export function usersController() {
             fullName.includes(searchQuery.value.toLowerCase())
           const positionMatch =
             !filteredPosition.value ||
-            user.position.id == filteredPosition.value
+            (user.position && user.position.id == filteredPosition.value)
  
           const roleMatch = !filteredRole.value || user.role == filteredRole.value
           const accessMatch = !filteredAccess.value || user.access == filteredAccess.value
@@ -287,15 +287,17 @@ export function usersController() {
  
       const fetchUsers = async () => {
         try {
+          console.log('Fetching users from API...');
           const res = await useApi('/user', {
             method: 'GET'
           })
  
-          console.log(res.data.value)
+          console.log('API Response:', res.data.value)
           const value = res.data.value as { data: any };
           usersList.value = value.data.map((user: any) => mapUser(user));
+          console.log('Users list updated, total:', usersList.value.length);
         } catch (e) {
-          console.log(e)
+          console.error('Error fetching users:', e)
         }
       }
  
@@ -314,14 +316,18 @@ export function usersController() {
       }
  
       const refetchList = async () => {
-        if (isRefetchList) {
-          fetchUsers()
+        if (isRefetchList.value) {
+          await fetchUsers()
+          isRefetchList.value = false
         }
       }
  
       // ===> User Data Response Mapper
  
-      const mapPosition = (rawPosition: any): Position => {
+      const mapPosition = (rawPosition: any): Position | null => {
+        if (!rawPosition) {
+          return null;
+        }
         return {
           id: rawPosition.ID,     // mapping 'ID' from response to 'id'
           name: rawPosition.Name  // mapping 'Name' from response to 'name'
@@ -358,6 +364,7 @@ export function usersController() {
         isUpdateUserDialogVisible,
         isFilterSectionVisible,
         headers,
+        fetchUsers,
         refetchList,
         userRole,
         accessType,

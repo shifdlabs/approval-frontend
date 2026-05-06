@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { usersController } from '@/controllers/admin/users-controller';
+import { ref } from 'vue';
  
 const {
   usersList,
@@ -23,6 +24,7 @@ const {
   isUpdateUserDialogVisible,
   isFilterSectionVisible,
   headers,
+  fetchUsers,
   refetchList,
   userRole,
   accessType,
@@ -39,6 +41,14 @@ const {
   showChangeAcceessDialog,
   changeAccess,
 } = usersController();
+
+const isImportUsersDialogVisible = ref(false);
+
+const handleImportComplete = async () => {
+  console.log('Import completed, refreshing user list...');
+  await fetchUsers();
+  isRefetchList.value = false;
+};
 </script>
 
 <template>
@@ -69,6 +79,10 @@ const {
           <div class="d-flex align-center flex-wrap gap-4">
             <VBtn prepend-icon="tabler-plus" @click="isCreateUserDialogVisible = true">
               Add New User
+            </VBtn>
+
+            <VBtn prepend-icon="tabler-file-import" @click="isImportUsersDialogVisible = true">
+              Import Users
             </VBtn>
  
             <VBtn v-if="selected.length > 0" color="error" prepend-icon="tabler-trash" @click="showDeleteMultipleUserDialog">
@@ -147,7 +161,7 @@ const {
  
         <template #item.position="{ item }">
           <VLabel>
-              {{ item.position.name }}
+              {{ item.position?.name || '-' }}
           </VLabel>
         </template>
  
@@ -259,6 +273,13 @@ const {
   <DetailUserDialog
     v-model:user="selectedUser"
     v-model:is-dialog-visible="isDetailUserDialogVisible"
+  />
+
+  <ImportUsersDialog
+    v-model:is-dialog-visible="isImportUsersDialogVisible"
+    v-model:is-refetch-list="isRefetchList"
+    :positions="positions"
+    @update:is-refetch-list="handleImportComplete"
   />
  
   <VDialog
