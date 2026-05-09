@@ -60,6 +60,7 @@ declare module 'vue' {
     FileRowView: typeof import('./src/components/attachment/FileRowView.vue')['default']
     FileUploadIcon: typeof import('./src/components/buttons/FileUploadIcon.vue')['default']
     I18n: typeof import('./src/@core/components/I18n.vue')['default']
+    ImportUsersDialog: typeof import('./src/components/dialogs/ImportUsersDialog.vue')['default']
     MoreBtn: typeof import('./src/@core/components/MoreBtn.vue')['default']
     Notifications: typeof import('./src/@core/components/Notifications.vue')['default']
     PanelContactUs: typeof import('./src/components/PanelContactUs.vue')['default']

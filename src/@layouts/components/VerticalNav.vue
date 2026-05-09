@@ -97,10 +97,15 @@ watch(selectedItem, (newVal) => {
           // Properly type the response
           const value = res.data.value as { data: any[] };
 
-          // Map the raw data into your GroupWithFormats[]
-          groupedWithFormat.value = value.data.map(mapGroupedWithFormat);
+          // Map the raw data into your GroupWithFormats[] with null check
+          if (value && value.data && Array.isArray(value.data)) {
+            groupedWithFormat.value = value.data.map(mapGroupedWithFormat);
+          } else {
+            groupedWithFormat.value = [];
+          }
         } catch (e) {
           console.log(e);
+          groupedWithFormat.value = [];
         }
       };
 
