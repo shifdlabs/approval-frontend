@@ -261,7 +261,7 @@ const createDocument = async (isDraft: boolean) => {
   try {
     const authorId = useCookie('userId').value
     const publicationNumberType = publicationNumberTypeInput.value
-    const type = selectedType.value == '1' ? 1 : 2
+    const type = Number(document.value.type)
     const priority = document.value.priority
     const subject = document.value.subject
     const body = document.value.body
