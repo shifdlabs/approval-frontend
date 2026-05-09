@@ -10,17 +10,19 @@
         <p class="header-subtitle">
           <span>{{ formattedDate }}</span>
           <span class="sep">·</span>
+          <span class="live-clock">{{ currentTime }}</span>
+          <span class="sep">·</span>
           <span>{{ greeting }}, {{ userName }} 👋</span>
         </p>
       </div>
       <div class="header-right">
-        <button class="btn-icon" @click="showNotifications = !showNotifications" :class="{ active: showNotifications }" aria-label="Notifikasi">
+        <!-- <button class="btn-icon" @click="showNotifications = !showNotifications" :class="{ active: showNotifications }" aria-label="Notifikasi">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
           </svg>
           <span v-if="notifCount > 0" class="notif-badge">{{ notifCount }}</span>
-        </button>
+        </button> -->
         <button class="btn-primary" @click="buatSuratBaru">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -62,11 +64,41 @@
             @click="activeStatTab = tab.value"
           >{{ tab.label }}</button>
         </div>
-        <div class="search-box">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input v-model="searchQuery" type="text" placeholder="Cari nomor atau perihal..." class="search-input"/>
+        <div class="search-wrapper">
+          <div class="search-box">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input v-model="searchQuery" type="text" placeholder="Cari nomor atau perihal..." class="search-input"/>
+            <svg v-if="isSearching" class="search-spinner" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/>
+            </svg>
+          </div>
+
+          <!-- Dropdown hasil search -->
+          <div v-if="searchQuery.trim().length > 0" class="search-dropdown">
+            <div v-if="isSearching" class="search-state">
+              <div class="search-loading-spinner"></div>
+              <span>Sedang mencari...</span>
+            </div>
+            <template v-else>
+              <div v-if="searchResults.length === 0" class="search-state">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:#d1d5db">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <span>Data Tidak Ditemukan</span>
+              </div>
+              <div
+                v-for="item in searchResults"
+                :key="item.id"
+                class="search-item"
+                @click="lihatDocument(item.id)"
+              >
+                <span class="search-item-number">{{ item.document_number ?? '—' }}</span>
+                <span class="search-item-subject">{{ item.subject }}</span>
+              </div>
+            </template>
+          </div>
         </div>
       </div>
 
@@ -357,7 +389,8 @@ const cardActions = {
 
 const {
 	summary, deadlines, activities, recentDocuments,
-	isLoading, fetchSummary, fetchDeadlines, fetchActivities, fetchRecentDocuments
+	isLoading, fetchSummary, fetchDeadlines, fetchActivities, fetchRecentDocuments,
+  searchResults, isSearching, searchDocuments,
 } = useDashboardController()
 
 const activeStatTab = ref('semua')
@@ -608,6 +641,44 @@ const formatRelativeTime = (isoString) => {
   if (diff < 86400) return `${Math.floor(diff / 3600)} jam lalu`
   return                   `${Math.floor(diff / 86400)} hari lalu`
 }
+
+// ════════════════════════════════════════
+// SEARCH
+// ════════════════════════════════════════
+
+let searchTimer   = null
+
+watch(searchQuery, (val) => {
+  clearTimeout(searchTimer)
+
+  if (val.trim().length === 0) {
+    searchResults.value = []
+    isSearching.value = false
+    return
+  }
+
+  isSearching.value = true 
+
+  searchTimer = setTimeout(() => {
+    searchDocuments(val)
+  }, 1000)
+})
+
+// Live clock
+const currentTime = ref('')
+
+const updateTime = () => {
+  const now = new Date()
+  const hh  = String(now.getHours()).padStart(2, '0')
+  const mm  = String(now.getMinutes()).padStart(2, '0')
+  const ss  = String(now.getSeconds()).padStart(2, '0')
+  currentTime.value = `${hh}:${mm}:${ss}`
+}
+
+updateTime() // set langsung saat load
+onMounted(() => {
+  setInterval(updateTime, 1000)
+})
 </script>
 
 <style scoped>
@@ -713,11 +784,28 @@ const formatRelativeTime = (isoString) => {
 .tab:hover  { border-color: #93c5fd; color: #2563eb; background: #eff6ff; }
 .tab.active { background: #111827; border-color: #111827; color: #fff; }
 
+/* Ganti .search-box yang lama */
 .search-box {
   display: flex; align-items: center; gap: 8px;
   background: #fff; border: 1.5px solid #e5e7eb;
   border-radius: 10px; padding: 9px 16px; color: #9ca3af;
-  min-width: 260px; transition: border-color .15s;
+  width: 420px;        /* ← tetapkan width, bukan min-width */
+  transition: border-color .15s;
+}
+
+/* Dropdown ikut lebar wrapper, tidak perlu min-width lagi */
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;             /* ← left: 0 + right: 0 = sama persis dengan .search-wrapper */
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.10);
+  z-index: 100;
+  overflow: hidden;
+  animation: fadeUp .15s ease both;
 }
 .search-box:focus-within { border-color: #2563eb; color: #2563eb; }
 .search-input {
@@ -1004,5 +1092,100 @@ const formatRelativeTime = (isoString) => {
   font-size: .875rem;
   min-height: 300px;
   border-radius: 0 0 16px 16px;
+}
+
+/* Search wrapper & dropdown */
+.search-wrapper {
+  position: relative;
+}
+
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  min-width: 320px;
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.10);
+  z-index: 100;
+  overflow: hidden;
+  animation: fadeUp .15s ease both;
+}
+
+.search-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 16px;
+  font-size: .84rem;
+  color: #9ca3af;
+}
+
+.search-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 11px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background .1s;
+}
+.search-item:last-child  { border-bottom: none; }
+.search-item:hover       { background: #f8faff; }
+
+.search-item-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .75rem;
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.search-item-subject {
+  font-size: .85rem;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Spinner animation */
+.search-spinner {
+  animation: spin .8s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.search-loading-spinner {
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid #e5e7eb;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  flex-shrink: 0;
+}
+
+.search-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 16px;
+  font-size: .84rem;
+  color: #9ca3af;
+}
+
+.live-clock {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .82rem;
+  color: #374151;
+  letter-spacing: .5px;
 }
 </style>

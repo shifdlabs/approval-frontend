@@ -2,6 +2,11 @@ import { ActivityResponse } from '@/models/document/activity.response'
 import { DashboardSummaryResponse, DeadlineItemResponse, RecentDocumentResponse } from '@/models/document/dashboard'
 import { ref } from 'vue'
 
+interface SearchDocumentResult {
+  id: string
+  subject: string
+  document_number: string | null
+}
 
 export const useDashboardController = () => {
   const summary = ref<DashboardSummaryResponse | null>(null)
@@ -21,6 +26,7 @@ export const useDashboardController = () => {
     const fetchSummary = async (tabValue: string) => {
     isLoading.value = true
     const period = periodMap[tabValue] ?? 'all'
+
 
     const { execute, data, error } = useApi(
         `document/dashboard?period=${period}`,
@@ -90,14 +96,46 @@ export const useDashboardController = () => {
         if (error.value) return
 
         const res = data.value as any
-        if (res?.data) {
-            recentDocuments.value = res.data
+
+        recentDocuments.value = res?.data ?? []
+    }
+
+        // Search
+    const searchResults = ref<SearchDocumentResult[]>([])
+    const isSearching   = ref(false)
+
+    const searchDocuments = async (keyword: string) => {
+        if (keyword.trim().length === 0) {
+        searchResults.value = []
+        return
+        }
+
+        isSearching.value = true
+        try {
+        const { execute, data, error } = useApi(
+            `document/search?q=${encodeURIComponent(keyword.trim())}`,
+            { method: 'GET' },
+            { immediate: false }
+        )
+
+        await execute()
+
+        if (error.value) {
+            searchResults.value = []
+            return
+        }
+
+        const res = data.value as { data: SearchDocumentResult[] }
+        searchResults.value = res?.data ?? []
+        } finally {
+        isSearching.value = false
         }
     }
     
 
     return {
         summary, deadlines, activities, recentDocuments,
-        isLoading, fetchSummary, fetchDeadlines, fetchActivities, fetchRecentDocuments
+        isLoading, fetchSummary, fetchDeadlines, fetchActivities, fetchRecentDocuments,
+        searchResults, isSearching, searchDocuments,
     }
 }
