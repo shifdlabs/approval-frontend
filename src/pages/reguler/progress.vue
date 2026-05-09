@@ -254,14 +254,13 @@ onMounted(() => {
   fetchDocuments()
 });
 
-function onTapRow(
+
+      function onTapRow(
         e: MouseEvent,
         payload: { item: Document; index: number; event: MouseEvent }
-): void {
+      ): void {
         const { item, index } = payload
-        router.replace('/preview/' + item.id)
-        console.log('row clicked:', item.id, 'at index', index)
-        // …etc.
+        window.location.href = `/preview/${item.id}`
       }
 </script>
 

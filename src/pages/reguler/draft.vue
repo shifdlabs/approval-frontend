@@ -143,8 +143,9 @@ function onTapRow(
         e: MouseEvent,
         payload: { item: DraftDocument; index: number; event: MouseEvent }
 ): void {
-        const { item, index } = payload
-      router.push('/document/' + item.id)
+
+  const { item, index } = payload
+  window.location.href = `/preview/${item.id}`
 }
 </script>
 

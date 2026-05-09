@@ -1,16 +1,8 @@
 import { CustomInputContent } from "@/@core/types";
 
 export const documentType: CustomInputContent[] = [
-  {
-    title: 'Internal',
-    desc: 'A Document Created for Internal Purpose (Announcement, Permit, etc).',
-    value: '1',
-  },
-  {
-    title: 'External',
-    value: '2',
-    desc: 'A Document Created for External Purpose and It Will Send to Other Company',
-  },
+  { title: 'Internal', value: '1', desc: 'Surat untuk keperluan internal' },
+  { title: 'External', value: '2', desc: 'Surat untuk keperluan eksternal' },
 ]
 
 export const documentLetterHeadType: CustomInputContent[] = [
