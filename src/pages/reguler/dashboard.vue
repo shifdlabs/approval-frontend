@@ -1188,4 +1188,326 @@ onMounted(() => {
   color: #374151;
   letter-spacing: .5px;
 }
+
+/* ════════════════════════════════════════
+   DARK MODE — moved to unscoped block below
+════════════════════════════════════════ */
 </style>
+
+<!-- Separate unscoped block for dark-mode overrides.
+     Scoping via .v-theme--dark .app-wrapper avoids :global() issues. -->
+<style>
+/* ════════════════════════════════════════
+   DARK MODE
+   Vuetify applies .v-theme--dark on an ancestor.
+   We scope under .app-wrapper to avoid leaking.
+════════════════════════════════════════ */
+
+.v-theme--dark .app-wrapper {
+  background: #25293C;
+  color: #E1DEF5;
+}
+
+/* ── Header ── */
+.v-theme--dark .app-wrapper .dashboard-header {
+  background: #2F3349;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+}
+.v-theme--dark .app-wrapper .header-title {
+  color: #E1DEF5;
+}
+.v-theme--dark .app-wrapper .header-subtitle {
+  color: #a0aec0;
+}
+.v-theme--dark .app-wrapper .sep {
+  color: #4A5072;
+}
+.v-theme--dark .app-wrapper .live-clock {
+  color: #a0aec0;
+}
+.v-theme--dark .app-wrapper .btn-icon {
+  background: #2F3349;
+  border-color: #4A5072;
+  color: #a0aec0;
+}
+.v-theme--dark .app-wrapper .btn-icon:hover,
+.v-theme--dark .app-wrapper .btn-icon.active {
+  border-color: #7367F0;
+  color: #7367F0;
+  background: rgba(115,103,240,.12);
+}
+.v-theme--dark .app-wrapper .notif-badge {
+  border-color: #2F3349;
+}
+.v-theme--dark .app-wrapper .btn-primary {
+  background: #7367F0;
+}
+.v-theme--dark .app-wrapper .btn-primary:hover {
+  background: #675DD8;
+}
+
+/* ── Alert Banner ── */
+.v-theme--dark .app-wrapper .alert-banner {
+  background: rgba(245,158,11,.1);
+  border-color: rgba(245,158,11,.25);
+}
+.v-theme--dark .app-wrapper .alert-text {
+  color: #fbbf24;
+}
+.v-theme--dark .app-wrapper .alert-text strong {
+  color: #fcd34d;
+}
+.v-theme--dark .app-wrapper .alert-link {
+  color: #a78bfa;
+}
+
+/* ── Toolbar / Tabs ── */
+.v-theme--dark .app-wrapper .tab {
+  background: #2F3349;
+  border-color: #4A5072;
+  color: #a0aec0;
+}
+.v-theme--dark .app-wrapper .tab:hover {
+  border-color: #7367F0;
+  color: #a78bfa;
+  background: rgba(115,103,240,.08);
+}
+.v-theme--dark .app-wrapper .tab.active {
+  background: #E1DEF5;
+  border-color: #E1DEF5;
+  color: #25293C;
+}
+
+/* ── Search ── */
+.v-theme--dark .app-wrapper .search-box {
+  background: #2F3349;
+  border-color: #4A5072;
+  color: #5E6692;
+}
+.v-theme--dark .app-wrapper .search-box:focus-within {
+  border-color: #7367F0;
+  color: #7367F0;
+}
+.v-theme--dark .app-wrapper .search-input {
+  color: #E1DEF5;
+}
+.v-theme--dark .app-wrapper .search-input::placeholder {
+  color: #5E6692;
+}
+.v-theme--dark .app-wrapper .search-dropdown {
+  background: #2F3349;
+  border-color: #4A5072;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+}
+.v-theme--dark .app-wrapper .search-state {
+  color: #5E6692;
+}
+.v-theme--dark .app-wrapper .search-item {
+  border-bottom-color: #3A3F57;
+}
+.v-theme--dark .app-wrapper .search-item:hover {
+  background: rgba(115,103,240,.06);
+}
+.v-theme--dark .app-wrapper .search-item-number {
+  color: #a78bfa;
+}
+.v-theme--dark .app-wrapper .search-item-subject {
+  color: #E1DEF5;
+}
+.v-theme--dark .app-wrapper .search-loading-spinner {
+  border-color: #4A5072;
+  border-top-color: #7367F0;
+}
+
+/* ── Stat Cards ── */
+.v-theme--dark .app-wrapper .stat-card {
+  background: #2F3349;
+  box-shadow: 0 1px 6px rgba(0,0,0,.2);
+}
+.v-theme--dark .app-wrapper .stat-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+}
+.v-theme--dark .app-wrapper .badge-warn {
+  background: rgba(245,158,11,.15);
+  color: #fbbf24;
+}
+.v-theme--dark .app-wrapper .badge-ok {
+  background: rgba(16,185,129,.15);
+  color: #34d399;
+}
+.v-theme--dark .app-wrapper .card-label {
+  color: #E1DEF5;
+}
+.v-theme--dark .app-wrapper .card-divider {
+  background: #3A3F57;
+}
+.v-theme--dark .app-wrapper .card-note {
+  color: #7983BB;
+}
+
+/* ── Shimmer ── */
+.v-theme--dark .app-wrapper .shimmer {
+  background: linear-gradient(90deg, #3A3F57 25%, #4A5072 50%, #3A3F57 75%);
+  background-size: 200% 100%;
+}
+
+/* ── Table Card ── */
+.v-theme--dark .app-wrapper .table-card,
+.v-theme--dark .app-wrapper .widget-card {
+  background: #2F3349;
+  box-shadow: 0 1px 6px rgba(0,0,0,.2);
+}
+.v-theme--dark .app-wrapper .table-card-header {
+  border-bottom-color: #3A3F57;
+}
+.v-theme--dark .app-wrapper .section-title {
+  color: #E1DEF5;
+}
+.v-theme--dark .app-wrapper .section-sub {
+  color: #7983BB;
+}
+
+/* Tab group (Semua / Internal / External) */
+.v-theme--dark .app-wrapper .tab-group {
+  background: #25293C;
+}
+.v-theme--dark .app-wrapper .tab-btn {
+  color: #7983BB;
+}
+.v-theme--dark .app-wrapper .tab-btn.active {
+  background: #2F3349;
+  color: #E1DEF5;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+}
+
+/* ── Table rows ── */
+.v-theme--dark .app-wrapper .surat-table th {
+  color: #5E6692;
+  border-bottom-color: #3A3F57;
+}
+.v-theme--dark .app-wrapper .table-row {
+  border-bottom-color: #353A52;
+}
+.v-theme--dark .app-wrapper .table-row:hover {
+  background: rgba(115,103,240,.04);
+}
+.v-theme--dark .app-wrapper .cell-nomor {
+  color: #a78bfa;
+}
+.v-theme--dark .app-wrapper .perihal-text {
+  color: #E1DEF5;
+}
+.v-theme--dark .app-wrapper .perihal-sub {
+  color: #5E6692;
+}
+.v-theme--dark .app-wrapper .cell-dari {
+  color: #a0aec0;
+}
+.v-theme--dark .app-wrapper .cell-tanggal {
+  color: #7983BB;
+}
+
+/* Status badges — dark variants */
+.v-theme--dark .app-wrapper .status-periksa {
+  background: rgba(245,158,11,.12);
+  color: #fbbf24;
+}
+.v-theme--dark .app-wrapper .status-progress {
+  background: rgba(59,130,246,.12);
+  color: #60a5fa;
+}
+.v-theme--dark .app-wrapper .status-selesai {
+  background: rgba(16,185,129,.12);
+  color: #34d399;
+}
+.v-theme--dark .app-wrapper .status-ditolak {
+  background: rgba(239,68,68,.12);
+  color: #f87171;
+}
+
+/* Table action buttons */
+.v-theme--dark .app-wrapper .btn-action.primary {
+  background: #7367F0;
+  border-color: #7367F0;
+}
+.v-theme--dark .app-wrapper .btn-action.primary:hover {
+  background: #675DD8;
+}
+.v-theme--dark .app-wrapper .btn-action.warning {
+  background: rgba(245,158,11,.15);
+  color: #fbbf24;
+  border-color: rgba(245,158,11,.3);
+}
+.v-theme--dark .app-wrapper .btn-action.warning:hover {
+  background: rgba(245,158,11,.25);
+}
+.v-theme--dark .app-wrapper .btn-action.ghost {
+  background: #2F3349;
+  color: #a0aec0;
+  border-color: #4A5072;
+}
+.v-theme--dark .app-wrapper .btn-action.ghost:hover {
+  border-color: #7983BB;
+  color: #E1DEF5;
+}
+
+/* ── Mobile Surat Cards ── */
+.v-theme--dark .app-wrapper .surat-mobile-card {
+  border-color: #3A3F57;
+  background: #353A52;
+}
+.v-theme--dark .app-wrapper .smc-perihal {
+  color: #E1DEF5;
+}
+.v-theme--dark .app-wrapper .smc-meta {
+  color: #7983BB;
+}
+
+/* ── Empty State ── */
+.v-theme--dark .app-wrapper .empty-state {
+  background: #2F3349;
+  color: #5E6692;
+}
+
+/* ── Widget Card ── */
+.v-theme--dark .app-wrapper .widget-title {
+  color: #E1DEF5;
+}
+.v-theme--dark .app-wrapper .widget-sub {
+  color: #7983BB;
+}
+
+/* Donut chart */
+.v-theme--dark .app-wrapper .donut-center-num {
+  fill: #E1DEF5;
+}
+.v-theme--dark .app-wrapper .donut-center-label {
+  fill: #5E6692;
+}
+.v-theme--dark .app-wrapper .legend-label {
+  color: #a0aec0;
+}
+.v-theme--dark .app-wrapper .legend-count {
+  color: #E1DEF5;
+}
+
+/* Deadline tracker */
+.v-theme--dark .app-wrapper .deadline-name {
+  color: #E1DEF5;
+}
+.v-theme--dark .app-wrapper .urgency-ok {
+  color: #7983BB;
+}
+.v-theme--dark .app-wrapper .deadline-bar-track {
+  background: #3A3F57;
+}
+
+/* Activity feed */
+.v-theme--dark .app-wrapper .activity-text {
+  color: #a0aec0;
+}
+.v-theme--dark .app-wrapper .activity-time {
+  color: #5E6692;
+}
+</style>
+
