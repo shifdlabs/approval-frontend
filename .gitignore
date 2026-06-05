@@ -18,6 +18,12 @@ dist-ssr
 
 # 👉 Custom Git ignores
 
+# Claude Code & internal docs (local only)
+CLAUDE.md
+BACKEND_PROMPT.md
+HANDOFF_FE_BUGFIX.md
+*.xlsx
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -41,3 +47,5 @@ public/mockServiceWorker.js
 # Env files
 .env*
 !.env.example
+tests/e2e/.auth/
+.env.test
