@@ -49,3 +49,10 @@ public/mockServiceWorker.js
 !.env.example
 tests/e2e/.auth/
 .env.test
+
+# Playwright output
+playwright-report/
+test-results/
+
+# Vite temp files
+vite.config.ts.timestamp-*.mjs
