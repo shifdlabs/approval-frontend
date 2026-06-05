@@ -26,26 +26,21 @@ const initialFormData = {
   positionId: '',
 };
 
-const formData = ref({ ...initialFormData });
-const selectedPosition = ref<Position>()
+const formData = ref({ ...initialFormData })
 
 // Watch the specific prop isDialogVisible
 watch(
   () => props.isDialogVisible,
   (isVisible) => {
     if (isVisible) {
-      // Reset formData every time the dialog becomes visible
       formData.value = { ...initialFormData }
       isAllInputtedValid.value = true
-
-      const defaultPosition = props.position.find(pos => pos.id == props.user?.position.id);
-      selectedPosition.value = defaultPosition
 
       formData.value = {
         firstName: props.user?.firstName ?? "",
         lastName: props.user?.lastName ?? "",
         phone: props.user?.phone ?? "",
-        positionId: "",
+        positionId: props.user?.position?.id ?? "",
       }
     }
   }
@@ -77,12 +72,11 @@ const updateUser = async () => {
       emit('update:isRefetch', true)
       emit('update:isDialogVisible', false)
     } else {
-      console.warn('User update failed or no success flag in response.')
-      emit('update:isDialogVisible', false)
+      isAllInputtedValid.value = false
     }
   } catch (e) {
     console.log(e)
-    emit('update:isDialogVisible', false)
+    isAllInputtedValid.value = false
   }
 }
 
@@ -149,7 +143,7 @@ const dialogModelValueUpdate = (val: boolean) => {
                 v-model="formData.firstName"
                 label="First Name"
                 placeholder="Enter your first name"
-                :rules="[requiredValidator]"
+                :rules="[requiredValidator, maxLengthValidator(100)]"
               />
             </VCol>
 
@@ -159,7 +153,7 @@ const dialogModelValueUpdate = (val: boolean) => {
                 v-model="formData.lastName"
                 label="Last Name"
                 placeholder="Enter your last name"
-                :rules="[requiredValidator]"
+                :rules="[requiredValidator, maxLengthValidator(100)]"
               />
             </VCol>
 
@@ -168,9 +162,9 @@ const dialogModelValueUpdate = (val: boolean) => {
               <AppTextField
                 v-model="formData.phone"
                 label="Phone Number"
-                type="number"
+                type="tel"
                 placeholder="Enter your phone number"
-                :rules="[requiredValidator]"
+                :rules="[requiredValidator, phoneValidator]"
               />
             </VCol>
 
@@ -180,12 +174,13 @@ const dialogModelValueUpdate = (val: boolean) => {
               md="6"
             >
               <AppSelect
-                v-model="selectedPosition"
+                v-model="formData.positionId"
                 label="Job Position"
                 placeholder="Please enter a job position"
                 :items="props.position"
                 item-title="name"
                 item-value="id"
+                clearable
               />
             </VCol>
             

@@ -131,6 +131,7 @@ watch(
   }
 );
 
+const refMainForm = ref<VForm>();
 const refVForm = ref<VForm>();
 const isErrorUniqueEmail = ref(false);
 const isAllInputtedValid = ref(true);
@@ -144,18 +145,20 @@ const onInputFormatCellClicked = () => {
 }
 
 const onCellFormSubmitted = () => {
-  console.log('Cell Format Form Value:', cellFormatKey.value);
-  var type = cellTypes.value.find((item) => item.key === cellFormatKey.value);
-  console.log('Selected Type:', type);
-  cellFormats.value.push({
-    name: type?.name || '',
-    key: type?.key || '',
-    short: type?.short || '',
-    originalValue: type?.name == FormatCellType.Static.name ? cellFormatValue.value : type?.description || '',
-    description: type?.description || '',
-  })
+  refVForm.value?.validate().then(({ valid: isValid }) => {
+    if (!isValid) return
 
-  isInputFormatCellFormActive.value = false
+    const type = cellTypes.value.find((item) => item.key === cellFormatKey.value)
+    cellFormats.value.push({
+      name: type?.name || '',
+      key: type?.key || '',
+      short: type?.short || '',
+      originalValue: type?.name == FormatCellType.Static.name ? cellFormatValue.value : type?.description || '',
+      description: type?.description || '',
+    })
+
+    isInputFormatCellFormActive.value = false
+  })
 }
 
 const createNewPublicationFormat = async () => {
@@ -190,17 +193,16 @@ const createNewPublicationFormat = async () => {
       emit('update:isDialogVisible', false)
       emit('update:isRefetchList', true)
     } else {
-      console.warn('Failed to create publication format or success not returned.')
-      emit('update:isDialogVisible', false)
+      isAllInputtedValid.value = false
     }
   } catch (e) {
     console.log(e)
-    emit('update:isDialogVisible', false)
+    isAllInputtedValid.value = false
   }
 }
 
 const onFormSubmit = async () => {
-  refVForm.value?.validate().then(({ valid: isValid }) => {
+  refMainForm.value?.validate().then(({ valid: isValid }) => {
     if (isValid) {
       isErrorUniqueEmail.value = false;
       isAllInputtedValid.value = true;
@@ -246,8 +248,12 @@ function buildFormatPath(): string {
           Create Publication Format
         </h4>
 
-        <VRow>
-                <!-- 👉 First Name -->
+        <VForm ref="refMainForm">
+          <VAlert v-if="!isAllInputtedValid" color="error" class="mb-4">
+            Please fill in all required fields.
+          </VAlert>
+          <VRow>
+                <!-- 👉 Format Name -->
                 <VCol cols="12">
                   <AppTextField
                     v-model="formData.name"
@@ -265,6 +271,7 @@ function buildFormatPath(): string {
                         item-value="id"
                         item-title="name"
                         clearable
+                        :rules="[requiredValidator]"
                     >
                     <template #item="{ item, props }">
                         <v-list-item v-bind="props">
@@ -289,6 +296,7 @@ function buildFormatPath(): string {
                         item-title="name"
                         item-value="id"
                         clearable
+                        :rules="[requiredValidator]"
                     />
                 </VCol>
 
@@ -304,6 +312,7 @@ function buildFormatPath(): string {
                     />
                 </VCol>
             </VRow>
+          </VForm>
         </VCardText>
 
         <VCardText>
@@ -367,7 +376,7 @@ function buildFormatPath(): string {
         >
           Close
         </VBtn>
-        <VBtn color="primary" @click="createNewPublicationFormat">
+        <VBtn color="primary" @click="onFormSubmit">
           Create Format
         </VBtn>
       </VCardText>
@@ -401,8 +410,8 @@ function buildFormatPath(): string {
         v-model="cellFormatValue"
         label="Preference Value"
         placeholder="Input Your Preference Value"
-        :disabled="cellFormatKey != FormatCellType.Static.key"
-        :rules="[requiredValidator]"
+        :disabled="cellFormatKey !== FormatCellType.Static.key"
+        :rules="cellFormatKey === FormatCellType.Static.key ? [requiredValidator] : []"
       />
     </VCardText>
     </VForm>

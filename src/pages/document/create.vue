@@ -40,7 +40,7 @@ const usersList = ref<User[]>([])
 const references = ref<DocumentReference[]>([])
 
 const selectedType = ref('')
-const selectedLetterheadType = ref('')
+const selectedLetterheadType = ref('1')
 const isInternalRecipientsEnable = ref(false)
 const isExternalRecipientsEnable = ref(false)
 const isCarbonCopyEnable = ref(false)
@@ -383,7 +383,7 @@ const onFileRemoved = (index: number) => {
           <VRow>
           <VCol cols="12">
             <AppTextField
-              :rules="[requiredValidator]"
+              :rules="[requiredValidator, maxLengthValidator(200)]"
               v-model="document.subject"
               label="Subject *"
               placeholder="Example: Official Announcement"
@@ -393,7 +393,7 @@ const onFileRemoved = (index: number) => {
 
             <VCol
             cols="12">
-            <VLabel>Reference *</VLabel>
+            <VLabel>Reference</VLabel>
             <VAutocomplete
               v-model="selectedReferenceDocument"
               v-model:search="searchReferenceDocument"
@@ -406,7 +406,7 @@ const onFileRemoved = (index: number) => {
             />
           </VCol>
 
-          <VCol 
+          <VCol
             cols="12">
             <AppSelect
                 v-model="publicationNumberTypeInput"
@@ -416,6 +416,7 @@ const onFileRemoved = (index: number) => {
                 item-title="title"
                 item-value="value"
                 clearable
+                :rules="[requiredValidator]"
             />
           </VCol>
 
@@ -509,9 +510,10 @@ const onFileRemoved = (index: number) => {
             cols="12">
             <AppTextField
               label="External Recipients (Add a comma ',' if multiple items)"
-                :disabled="!isExternalRecipientsEnable"
+              :disabled="!isExternalRecipientsEnable"
               v-model="document.externalRecipient"
               placeholder="Input your external recipient name"
+              :rules="isExternalRecipientsEnable ? [requiredValidator, emailValidator, maxLengthValidator(500)] : []"
             />
           </VCol>
 
@@ -630,7 +632,7 @@ const onFileRemoved = (index: number) => {
 
               <VCol cols="auto" class="d-flex align-center">
                 <VCheckbox
-                    v-model="isInternalRecipientsEnable"
+                    v-model="approvers[0].signature"
                     label="Print Signature"
                     density="compact"
                     hide-details
@@ -658,6 +660,7 @@ const onFileRemoved = (index: number) => {
                       item-value="id"
                       clearable
                       style="width: 100%;"
+                      :rules="[requiredValidator]"
                     />
                   </VCol>
 

@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { Position } from '@/models/positions/position';
 import { User } from '@/models/users/users';
 import { ref, watch } from 'vue';
 import { VForm } from 'vuetify/components';
 
 interface Props {
   userList: User[];
+  position: Position[];
   isDialogVisible: boolean;
   isRefetchList: boolean;
 }
@@ -27,6 +29,7 @@ const initialFormData = {
   confirmPassword: '',
   role: 1,
   access: true,
+  positionId: '',
 };
 
 const formData = ref({ ...initialFormData });
@@ -59,6 +62,7 @@ const createNewUser = async () => {
     const password = formData.value.password
     const role = formData.value.role
     const access = formData.value.access
+    const positionID = formData.value.positionId
 
     const { data } = await useApi('/user', {
       method: 'POST',
@@ -71,6 +75,7 @@ const createNewUser = async () => {
         password,
         role,
         access,
+        positionID,
       }),
     }).json<{ success: boolean }>()
 
@@ -78,12 +83,11 @@ const createNewUser = async () => {
       emit('update:isDialogVisible', false)
       emit('update:isRefetchList', true)
     } else {
-      console.warn('User creation failed or no success flag in response.')
-      emit('update:isDialogVisible', false)
+      isAllInputtedValid.value = false
     }
   } catch (e) {
     console.log(e)
-    emit('update:isDialogVisible', false)
+    isAllInputtedValid.value = false
   }
 }
 
@@ -145,7 +149,7 @@ const dialogModelValueUpdate = (val: boolean) => {
                 v-model="formData.firstName"
                 label="First Name"
                 placeholder="Enter your first name"
-                :rules="[requiredValidator]"
+                :rules="[requiredValidator, maxLengthValidator(100)]"
               />
             </VCol>
 
@@ -155,7 +159,7 @@ const dialogModelValueUpdate = (val: boolean) => {
                 v-model="formData.lastName"
                 label="Last Name"
                 placeholder="Enter your last name"
-                :rules="[requiredValidator]"
+                :rules="[requiredValidator, maxLengthValidator(100)]"
               />
             </VCol>
 
@@ -175,8 +179,21 @@ const dialogModelValueUpdate = (val: boolean) => {
               <AppTextField
                 v-model="formData.phoneNumber"
                 label="Phone Number"
-                type="number"
+                type="tel"
                 placeholder="Enter your phone number"
+                :rules="[requiredValidator, phoneValidator]"
+              />
+            </VCol>
+
+            <!-- 👉 Position -->
+            <VCol cols="12">
+              <AppSelect
+                v-model="formData.positionId"
+                label="Job Position"
+                placeholder="Select a job position"
+                :items="props.position"
+                item-title="name"
+                item-value="id"
                 :rules="[requiredValidator]"
               />
             </VCol>

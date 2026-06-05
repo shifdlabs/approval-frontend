@@ -19,14 +19,9 @@ export function loginController() {
       const isAccountInactive = ref(false)
       const isInProgress = ref(false)
       
-      // const credentials = ref({
-      //   email: 'admin@approval.com',
-      //   password: 'Test1234!',
-      //   remember: false
-      // })
       const credentials = ref({
-        email: 'admin@approval.com',
-        password: 'Test1234!',
+        email: '',
+        password: '',
         remember: false
       })
       

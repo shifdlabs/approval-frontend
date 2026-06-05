@@ -50,14 +50,13 @@ const updateUser = async () => {
 
     if (data.value?.success) {
       emit('update:isRefetch', true)
+      emit('update:isDialogVisible', false)
     } else {
-      console.warn('Update failed or success field missing in response.')
+      isAllInputtedValid.value = false
     }
-
-    emit('update:isDialogVisible', false)
   } catch (e) {
     console.log(e)
-    emit('update:isDialogVisible', false)
+    isAllInputtedValid.value = false
   }
 }
 
@@ -119,6 +118,7 @@ const dialogModelValueUpdate = (val: boolean) => {
               <AppTextField
                 v-model="formData.email"
                 label="New Email"
+                type="email"
                 placeholder="Enter your new email"
                 :rules="[requiredValidator, emailValidator]"
               />

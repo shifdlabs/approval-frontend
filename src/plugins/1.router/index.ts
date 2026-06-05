@@ -38,7 +38,13 @@ const router = createRouter({
 
 
     routes = routes.map(route => {
-      if (route.path.startsWith('/admin') || route.path.startsWith('/reguler')) {
+      if (
+        route.path.startsWith('/admin') ||
+        route.path.startsWith('/reguler') ||
+        route.path.startsWith('/document') ||
+        route.path.startsWith('/profile') ||
+        route.path.startsWith('/preview')
+      ) {
         route.meta = { ...route.meta, requiresAuth: true };
       }
       return route;

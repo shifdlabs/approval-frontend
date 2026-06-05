@@ -1,0 +1,47 @@
+[
+  {
+    "id": "FE-PROF-01",
+    "component": "ProfilePage",
+    "url": "/profile",
+    "field": "Page",
+    "bugType": "Page Render",
+    "severity": "INFO",
+    "backendAlignmentIssue": "-",
+    "stepsToReproduce": "1. Login sebagai staff1\n2. Buka /profile",
+    "recommendation": "-",
+    "screenshotPath": "tests/screenshots/FE-PROF-01-profile-page.png",
+    "result": "PASS",
+    "actualBehavior": "URL: http://localhost:5173/profile",
+    "expectedBehavior": "Profile page tampil di /profile"
+  },
+  {
+    "id": "FE-PROF-02",
+    "component": "ProfilePage",
+    "url": "/profile",
+    "field": "Edit buttons",
+    "bugType": "UI Accessibility",
+    "severity": "INFO",
+    "backendAlignmentIssue": "-",
+    "stepsToReproduce": "1. Buka /profile\n2. Cari tombol edit/update",
+    "recommendation": "-",
+    "screenshotPath": "tests/screenshots/FE-PROF-02-edit-buttons.png",
+    "result": "PASS",
+    "actualBehavior": "Ditemukan 2 tombol edit",
+    "expectedBehavior": "Ada tombol edit biodata, email, dan password"
+  },
+  {
+    "id": "FE-PROF-03",
+    "component": "ChangeEmailDialog",
+    "url": "/profile",
+    "field": "email",
+    "bugType": "Required Validation",
+    "severity": "INFO",
+    "backendAlignmentIssue": "-",
+    "stepsToReproduce": "1. Buka Change Email\n2. Klik Change tanpa isi email",
+    "recommendation": "-",
+    "screenshotPath": "tests/screenshots/FE-PROF-03-change-email-empty.png",
+    "result": "PASS",
+    "actualBehavior": "Errors: [\"This field is required\",\" Please follow the rules of the input form. \"]",
+    "expectedBehavior": "Muncul error required"
+  }
+]

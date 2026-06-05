@@ -23,7 +23,7 @@ export const emailValidator = (value: unknown) => {
 
 // 👉 Password Validator
 export const passwordValidator = (password: string) => {
-  const regExp = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&*()]).{8,}/
+  const regExp = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]).{8,}/
 
   const validPassword = regExp.test(password)
 
@@ -86,12 +86,30 @@ export const urlValidator = (value: unknown) => {
   return re.test(String(value)) || 'URL is invalid'
 }
 
-// 👉 Length Validator
+// 👉 Length Validator (exact length)
 export const lengthValidator = (value: unknown, length: number) => {
   if (isEmpty(value))
     return true
 
   return String(value).length === length || `"The length of the Characters field must be ${length} characters."`
+}
+
+// 👉 Max Length Validator
+export const maxLengthValidator = (max: number) => (value: unknown) => {
+  if (isEmpty(value))
+    return true
+
+  return String(value).length <= max || `This field must not exceed ${max} characters`
+}
+
+// 👉 Phone Validator (5-20 chars)
+export const phoneValidator = (value: unknown) => {
+  if (isEmpty(value))
+    return true
+
+  const len = String(value).trim().length
+
+  return (len >= 5 && len <= 20) || 'Phone number must be between 5 and 20 characters'
 }
 
 // 👉 Alpha-dash Validator

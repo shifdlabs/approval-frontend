@@ -67,7 +67,7 @@ const updateUser = async () => {
     const role = formData.value.role;
     const access = formData.value.access;
 
-    const { data, error } = await useApi('/user', {
+    const { error } = await useApi('/user', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -82,14 +82,15 @@ const updateUser = async () => {
     }).json();
 
     if (error.value) {
-      console.log(error.value);
+      isAllInputtedValid.value = false;
+      return;
     }
 
     emit('update:isRefetchList', true);
     emit('update:isDialogVisible', false);
   } catch (e) {
     console.log(e);
-    emit('update:isDialogVisible', false);
+    isAllInputtedValid.value = false;
   }
 };
 
@@ -151,7 +152,7 @@ const dialogModelValueUpdate = (val: boolean) => {
                 v-model="formData.firstName"
                 label="First Name"
                 placeholder="Enter your first name"
-                :rules="[requiredValidator]"
+                :rules="[requiredValidator, maxLengthValidator(100)]"
               />
             </VCol>
 
@@ -161,7 +162,7 @@ const dialogModelValueUpdate = (val: boolean) => {
                 v-model="formData.lastName"
                 label="Last Name"
                 placeholder="Enter your last name"
-                :rules="[requiredValidator]"
+                :rules="[requiredValidator, maxLengthValidator(100)]"
               />
             </VCol>
 
@@ -181,9 +182,9 @@ const dialogModelValueUpdate = (val: boolean) => {
               <AppTextField
                 v-model="formData.phone"
                 label="Phone Number"
-                type="number"
+                type="tel"
                 placeholder="Enter your phone number"
-                :rules="[requiredValidator]"
+                :rules="[requiredValidator, phoneValidator]"
               />
             </VCol>
 
