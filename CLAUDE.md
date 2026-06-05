@@ -8,7 +8,7 @@
 - **HTTP**: `useApi` composable (wraps `ofetch`)
 - **Auth**: Cookie-based (`accessToken`), guard di `src/plugins/1.router/index.ts`
 - **State**: `ref` / `reactive` (Composition API)
-- **Testing**: Playwright (62 tests, semua PASS)
+- **Testing**: Playwright (62 tests, semua PASS — Admin: 21, Reguler: 26, Auth: 15)
 - **Auto-imports**: `unplugin-auto-import` — validator dan composable tersedia global tanpa import manual
 
 ---
@@ -125,6 +125,8 @@ Jika menambah halaman baru yang butuh auth, pastikan pathnya tercakup di guard.
 
 | ID | Komponen | Fix |
 |----|----------|-----|
+| FE-BUG-A | `CreatePublicationFormatDialog.vue` | `createNewPublicationFormat` else/catch diubah ke `isAllInputtedValid.value = false` |
+| FE-BUG-B | `CreatePublicationFormatDialog.vue` | `onCellFormSubmitted` validasi via `refVForm.value?.validate()` sebelum push |
 | FE-BUG-06 | `CreatePublicationFormatDialog.vue` | VForm sudah membungkus field utama, tombol terhubung ke `onFormSubmit`, semua field punya `:rules` |
 | FE-BUG-08 | `UpdateUserDialog.vue`, `CreateUserDialog.vue` | emit close hanya di blok success |
 | FE-BUG-09 | `ChangeEmailDialog.vue`, `UpdateBiodataDialog.vue` | emit close hanya di blok success |
@@ -136,6 +138,7 @@ Jika menambah halaman baru yang butuh auth, pastikan pathnya tercakup di guard.
 | FE-BUG-01 | `CreateUserDialog.vue`, `UpdateUserDialog.vue` | `maxLengthValidator(100)` ditambah pada firstName dan lastName |
 | FE-BUG-02 | `document/create.vue` | `maxLengthValidator(200)` pada Subject |
 | FE-BUG-03 | Dialog user | `type="number"` → `type="tel"` pada field phone |
+| FE-BUG-04 | `CreateUserDialog.vue` | `positionId` wajib diisi — tambah `:rules="[requiredValidator]"`, hapus `clearable` |
 | FE-BUG-05 | `document/create.vue` | `externalRecipient` pakai rules kondisional berdasarkan tipe dokumen |
 | FE-BUG-10 | `validators.ts` | `passwordValidator` regex diperluas ke semua special chars ASCII |
 
@@ -143,88 +146,8 @@ Jika menambah halaman baru yang butuh auth, pastikan pathnya tercakup di guard.
 
 | ID | Komponen | Fix |
 |----|----------|-----|
+| FE-BUG-C | `document/create.vue` — `externalRecipient` | `emailValidator` ditambah di rules (field single email) |
 | FE-BUG-12 | `document/create.vue` | Asterisk dihapus dari label "Reference" |
-
----
-
-## Bug Masih Terbuka
-
-| ID | Komponen | Keterangan | Severity |
-|----|----------|------------|----------|
-| FE-BUG-A | `CreatePublicationFormatDialog.vue` | `createNewPublicationFormat` masih menutup dialog di blok `else` dan `catch` — harus `isAllInputtedValid.value = false` | HIGH |
-| FE-BUG-B | `CreatePublicationFormatDialog.vue` | Tombol "Add" di Format Cell Builder tidak memanggil `refVForm.validate()` sebelum push | HIGH |
-| FE-BUG-C | `document/create.vue` — `externalRecipient` | Field email tapi tidak ada `emailValidator` di rules | MEDIUM |
-| FE-BUG-04 | `CreateUserDialog.vue` — `positionId` | Perlu konfirmasi product: apakah posisi wajib atau opsional? | MEDIUM |
-
-### Detail Fix FE-BUG-A
-
-File: `src/components/dialogs/CreatePublicationFormatDialog.vue`
-
-Cari fungsi `createNewPublicationFormat`, di bagian `else` dan `catch`:
-
-```ts
-// SEKARANG — SALAH
-} else {
-  emit('update:isDialogVisible', false)
-}
-} catch (e) {
-  emit('update:isDialogVisible', false)
-}
-
-// HARUS JADI
-} else {
-  isAllInputtedValid.value = false
-}
-} catch (e) {
-  isAllInputtedValid.value = false
-}
-```
-
-### Detail Fix FE-BUG-B
-
-File: `src/components/dialogs/CreatePublicationFormatDialog.vue`
-
-Fungsi `onCellFormSubmitted` harus validasi dulu:
-
-```ts
-const onCellFormSubmitted = () => {
-  refVForm.value?.validate().then(({ valid: isValid }) => {
-    if (!isValid) return
-    var type = cellTypes.value.find((item) => item.key === cellFormatKey.value)
-    cellFormats.value.push({
-      name: type?.name || '',
-      key: type?.key || '',
-      short: type?.short || '',
-      originalValue: type?.name == FormatCellType.Static.name ? cellFormatValue.value : type?.description || '',
-      description: type?.description || '',
-    })
-    isInputFormatCellFormActive.value = false
-  })
-}
-```
-
-Dan di template, `VForm` harus `@submit.prevent` + tombol "Add" pakai `type="submit"`:
-
-```vue
-<VForm ref="refVForm" v-model="isCellFromValid" @submit.prevent="onCellFormSubmitted">
-  ...
-  <VBtn color="primary" type="submit">Add</VBtn>
-</VForm>
-```
-
-### Detail Fix FE-BUG-C
-
-File: `src/pages/document/create.vue`
-
-Cari baris `externalRecipient` yang punya `:rules`, tambahkan `emailValidator`:
-
-```vue
-<!-- SEBELUM -->
-:rules="isExternalRecipientsEnable ? [requiredValidator, maxLengthValidator(500)] : []"
-
-<!-- SESUDAH -->
-:rules="isExternalRecipientsEnable ? [requiredValidator, emailValidator, maxLengthValidator(500)] : []"
-```
 
 ---
 
