@@ -64,6 +64,7 @@ const handleImportComplete = async () => {
               placeholder="Search Users"
               style="inline-size: 200px; width: 500px;"
               class="me-3"
+              :maxlength="100"
             />
             <VBtn
              

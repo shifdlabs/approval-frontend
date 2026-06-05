@@ -99,8 +99,13 @@ const resetDialog = () => {
 const onFileSelected = (event: Event) => {
   const input = event.target as HTMLInputElement;
   if (input.files && input.files.length > 0) {
-    selectedFile.value = input.files[0];
-    // Parse Excel headers
+    const file = input.files[0];
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size must not exceed 10MB. Please upload a smaller file.');
+      input.value = '';
+      return;
+    }
+    selectedFile.value = file;
     parseExcelHeaders();
   }
 };
@@ -199,14 +204,15 @@ const loadPreview = async () => {
       previewErrors.value = data.value.data.errors || [];
       previewWarnings.value = data.value.data.warnings || [];
       
-      // Validate email format
-      const invalidEmails = previewData.value.filter(user => 
-        user.email && !user.email.includes('@')
+      // Validate email format using proper regex
+      const emailRegex = /^(?:[^<>()[\]\\.,;:\s@"]+(?:\.[^<>()[\]\\.,;:\s@"]+)*|".+")@(?:\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\]|(?:[a-z\-\d]+\.)+[a-z]{2,})$/i;
+      const invalidEmails = previewData.value.filter(user =>
+        user.email && !emailRegex.test(String(user.email))
       );
-      
+
       if (invalidEmails.length > 0) {
-        alert(`Warning: ${invalidEmails.length} row(s) have invalid email format. Email should contain @ symbol.\n\nPlease check your column mapping in Step 2!`);
-        currentStep.value = 2; // Go back to mapping step
+        alert(`Warning: ${invalidEmails.length} row(s) have invalid email format.\n\nPlease check your column mapping in Step 2!`);
+        currentStep.value = 2;
         return;
       }
       
@@ -229,12 +235,17 @@ const loadPreview = async () => {
 const performBulkImport = async () => {
   if (previewData.value.length === 0) return;
 
+  if (customPassword.value) {
+    const pwRegex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&*()]).{8,}/;
+    if (!pwRegex.test(customPassword.value)) {
+      alert('Custom password must be at least 8 characters and contain uppercase, lowercase, a digit, and a special character (!@#$%&*()).');
+      return;
+    }
+  }
+
   isImporting.value = true;
 
   try {
-    const passwordToUse = customPassword.value || 'password123 (default)';
-    console.log(`Bulk import with password: ${customPassword.value ? 'Custom password set' : 'Using default password'}`);
-    console.log('Sending preview data:', previewData.value);
     
     const { data, error } = await useApi('/user/import/bulk', {
       method: 'POST',
@@ -489,8 +500,8 @@ const getPositionName = (positionID: string) => {
                     v-model="customPassword"
                     :type="showPassword ? 'text' : 'password'"
                     label="Custom Password for All Users (Optional)"
-                    placeholder="Leave empty for default: password123"
-                    hint="This password will override all passwords and be used for ALL imported users"
+                    placeholder="Leave empty to auto-generate a secure random password"
+                    hint="Must be 8+ chars with uppercase, lowercase, digit, and special character (!@#$%&*())"
                     persistent-hint
                     :append-inner-icon="showPassword ? 'tabler-eye-off' : 'tabler-eye'"
                     @click:append-inner="showPassword = !showPassword"
@@ -503,7 +514,7 @@ const getPositionName = (positionID: string) => {
                 <strong>Default Values:</strong> Fields not mapped will use defaults during import:
                 <ul class="mt-2">
                   <li>Role: Regular User (1)</li>
-                  <li>Password: {{ customPassword || 'password123' }}</li>
+                  <li>Password: {{ customPassword ? 'Custom password set' : 'Auto-generated (secure random)' }}</li>
                   <li>Access: Enabled</li>
                 </ul>
               </VAlert>

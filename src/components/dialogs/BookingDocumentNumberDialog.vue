@@ -27,28 +27,18 @@ const dialogModelValueUpdate = (val: boolean) => {
   emit('update:isDialogVisible', val);
 };
 
-const {
-  execute,
-  error,
-} = useApi('/document/number',
-  {
-    method: 'POST',
-    body: JSON.stringify({
-      numbering_format_id: selectedFormatId.value,
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  },
-  {
-    immediate: false,
-  }
-)
-
 const onFormSubmit = async () => {
   if (selectedGroupName.value && selectedFormatId.value) {
     try {
-      await execute()
+      const { data, error } = await useApi('/document/number', {
+        method: 'POST',
+        body: JSON.stringify({
+          numbering_format_id: selectedFormatId.value,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).json<{ success: boolean }>()
 
       if (!error.value) {
         emit('update:isRefetchList', true)
@@ -60,7 +50,6 @@ const onFormSubmit = async () => {
       console.error('Unexpected Exception:', err)
     }
   } else {
-    // Handle validation error
     console.error('Please select both group and format.')
   }
 }

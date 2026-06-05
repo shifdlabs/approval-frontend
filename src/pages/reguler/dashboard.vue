@@ -649,6 +649,11 @@ const formatRelativeTime = (isoString) => {
 let searchTimer   = null
 
 watch(searchQuery, (val) => {
+  if (val && val.length > 100) {
+    searchQuery.value = val.substring(0, 100)
+    return
+  }
+
   clearTimeout(searchTimer)
 
   if (val.trim().length === 0) {
@@ -657,7 +662,7 @@ watch(searchQuery, (val) => {
     return
   }
 
-  isSearching.value = true 
+  isSearching.value = true
 
   searchTimer = setTimeout(() => {
     searchDocuments(val)

@@ -69,11 +69,12 @@ export function authorizationController() {
     ])
 
     const filteredDocument = computed(() => {
+        const query = searchQuery.value.substring(0, 100)
         return documents.value.filter(document => {
           const subject = document.subject.toLowerCase()
           const nameMatch =
-            !searchQuery.value ||
-            subject.includes(searchQuery.value.toLowerCase())
+            !query ||
+            subject.includes(query.toLowerCase())
           const priorityMatch =
             !filteredPriority.value ||
             document.priority == filteredPriority.value

@@ -363,6 +363,10 @@ function removeApprover(index: number) {
 }
 
 function showSubmitDialog() {
+  if (!selectedLetterheadType.value) {
+    isInvalidFormVisible.value = true
+    return
+  }
   refForm.value?.validate().then(isValid => {
     if (isValid.valid) {
       isInvalidFormVisible.value = false
@@ -429,7 +433,7 @@ const updateDocument = async (isDraft: boolean) => {
     const id = document.value.id
     const authorId = useCookie('userId').value
     const publicationNumberType = publicationNumberTypeInput.value
-    const type = selectedLetterheadType.value == '1' ? 1 : 2
+    const type = Number(document.value.type)
     const priority = document.value.priority
     const subject = document.value.subject
     const body = document.value.body
@@ -604,7 +608,7 @@ const updateDocument = async (isDraft: boolean) => {
                 ></AppSelect>
             </VCol>
 
-            <!-- <VCol cols="12" v-if="publicationNumberTypeInput === 3 && isPublicationNumberEditable">
+            <VCol cols="12" v-show="publicationNumberTypeInput === 3 && isPublicationNumberEditable">
               <AppTextField
                 :rules="[requiredValidator]"
                 v-model="customInputNumber"
@@ -612,7 +616,7 @@ const updateDocument = async (isDraft: boolean) => {
                 placeholder="Example: 01/Gov/R/2/2025"
                 class="me-3"
               />
-            </VCol> -->
+            </VCol>
 
             <VCol cols="12" v-show="!isPublicationNumberEditable">
               <AppTextField
@@ -808,7 +812,7 @@ const updateDocument = async (isDraft: boolean) => {
 
               <VCol cols="auto" class="d-flex align-center" v-if="!approvers[0].isDisabled">
                 <VCheckbox
-                    v-model="isInternalRecipientsEnable"
+                    v-model="approvers[0].signature"
                     label="Print Signature"
                     density="compact"
                     hide-details
