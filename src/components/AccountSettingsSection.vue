@@ -17,165 +17,365 @@ interface Emit {
 const emit = defineEmits<Emit>()
 const props = defineProps<Props>()
 
-const avatarStyle = computed(() => {
-  return { 
-    backgroundColor: "#C7C2F9", 
-    border: "1px solid emptyImageBox", 
-    borderRadius: "50%",
-    width: "100px",
-    height: "100px",
-    backgroundPosition: "center",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center"
-  };
-});
-
-const showUpdateProfileDialog = () => {
-  emit('update:isUpdateProfileDialogVisible', true)
-}
-
-const showChangeEmailDialog = () => {
-  emit('update:isChangeEmailDialogVisible', true)
-}
-
-const showDeleteAccountDialog = () => {
-  emit('update:isDeleteAccountDialogVisible', true)
-}
+const showUpdateProfileDialog = () => emit('update:isUpdateProfileDialogVisible', true)
+const showChangeEmailDialog   = () => emit('update:isChangeEmailDialogVisible', true)
+const showDeleteAccountDialog = () => emit('update:isDeleteAccountDialogVisible', true)
 
 const userConfirmed = ref(false)
-
-function getInitials(): string {
-    let initials = "";
-    
-    if (props.user?.firstName) initials += props.user?.firstName.charAt(0).toUpperCase();
-    if (props.user?.lastName) initials += props.user?.lastName.charAt(0).toUpperCase();
-    
-    return initials;
-}
-
 </script>
 
 <template>
-  <VCardText>
-    <VRow>
-        <VCol cols="12">
-          <div class="d-flex align-center flex-wrap">
-              <div :style="avatarStyle">
-                <VLabel style="font-size: 40px; font-weight: bold; color: black; height: 100px;">{{ getInitials() }}</VLabel>
-              </div>
+  <div class="pas-wrap">
 
-            <VRow style="flex-direction: column;" class="ml-5">
-              <VLabel style="font-size: 25px; color: black; font-weight: 500; margin-bottom: 6px;">
-                {{ props.user?.firstName }} {{ props.user?.lastName }}
-              </VLabel>
-              <VLabel style="font-size: 20px; font-weight: lighter;color: #6D6B77;">
-                {{ props.user?.position.name }}
-              </VLabel>
-            </VRow>
+    <!-- Personal Info Card -->
+    <div class="pas-card">
+      <div class="pas-ch">
+        <span class="pas-ch__ic">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.4" r="3.8" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M5.5 19.2a6.5 6.5 0 0 1 13 0"/></svg>
+        </span>
+        <div>
+          <h2 class="pas-ch__title">Informasi Pribadi</h2>
+          <div class="pas-ch__sub">Data diri dan jabatan Anda</div>
+        </div>
+        <button class="pas-btn pas-btn--ghost pas-ch__act" @click="showUpdateProfileDialog">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M5 19h3l9.2-9.2a1.6 1.6 0 0 0 0-2.3l-1.7-1.7a1.6 1.6 0 0 0-2.3 0L4 14.9V19Z"/><path fill="none" stroke="currentColor" stroke-width="1.7" d="M13.5 6.5 17 10"/></svg>
+          Ubah
+        </button>
+      </div>
+      <div class="pas-cbody">
+        <div class="pas-fgrid">
+          <div class="pas-field">
+            <label>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.4" r="3.8" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M5.5 19.2a6.5 6.5 0 0 1 13 0"/></svg>
+              Nama Depan
+            </label>
+            <div class="pas-val">{{ props.user?.firstName || '—' }}</div>
           </div>
-        <VSpacer></VSpacer>
-        </VCol>
-
-        <VDivider style="margin-top: 20px; margin-bottom: 20px;"/>
-
-        <VCol class="d-flex flex-wrap gap-5">
-          <VLabel style="font-size: 20px; color: black;">
-              Personal Information
-            </VLabel>
-            <VSpacer></VSpacer>
-            <VBtn color="primary" @click="showUpdateProfileDialog">
-              Edit
-            </VBtn>
-        </VCol>
-
-        <VCol cols="12" class="d-flex flex-wrap gap-5">
-        <div class="info-box">
-          <div class="label">First Name</div>
-          <div class="value">{{ props.user?.firstName }}</div>
+          <div class="pas-field">
+            <label>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.4" r="3.8" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M5.5 19.2a6.5 6.5 0 0 1 13 0"/></svg>
+              Nama Belakang
+            </label>
+            <div class="pas-val">{{ props.user?.lastName || '—' }}</div>
+          </div>
+          <div class="pas-field">
+            <label>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M6.5 4h3l1.4 3.5-2 1.3a11 11 0 0 0 4.8 4.8l1.3-2 3.5 1.4v3a1.5 1.5 0 0 1-1.6 1.5A14.5 14.5 0 0 1 5 5.6 1.5 1.5 0 0 1 6.5 4Z"/></svg>
+              Nomor Telepon
+            </label>
+            <div class="pas-val">{{ props.user?.phone || '—' }}</div>
+          </div>
+          <div class="pas-field">
+            <label>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="11" r="2.1" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M13.5 9.5h3.2M13.5 12.5h3.2M6.6 15.6a2.7 2.7 0 0 1 4.8 0"/></svg>
+              Posisi Jabatan
+            </label>
+            <div class="pas-val">{{ props.user?.position?.name || '—' }}</div>
+          </div>
         </div>
+      </div>
+    </div>
 
-        <div class="info-box">
-          <div class="label">Last Name</div>
-          <div class="value">{{ props.user?.lastName }}</div>
+    <!-- Email Card -->
+    <div class="pas-card">
+      <div class="pas-ch">
+        <span class="pas-ch__ic">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.4" y="5.6" width="17.2" height="12.8" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="m4.6 7.5 7.4 5.2 7.4-5.2"/></svg>
+        </span>
+        <div>
+          <h2 class="pas-ch__title">Email Terdaftar</h2>
+          <div class="pas-ch__sub">Digunakan untuk masuk dan notifikasi</div>
         </div>
-      </VCol>
-
-      <VCol cols="12" class="d-flex flex-wrap gap-5">
-        <div class="info-box">
-          <div class="label">Phone Number</div>
-          <div class="value">{{ props.user?.phone }}</div>
+      </div>
+      <div class="pas-cbody">
+        <div class="pas-email-row">
+          <div class="pas-field pas-field--grow">
+            <label>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.4" y="5.6" width="17.2" height="12.8" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="m4.6 7.5 7.4 5.2 7.4-5.2"/></svg>
+              Alamat Email
+            </label>
+            <div class="pas-val">
+              {{ props.user?.email || '—' }}
+              <span class="pas-verified">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M12 3.4 5 5.9v5.5c0 4.2 3 7.1 7 9.2 4-2.1 7-5 7-9.2V5.9z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="m9 12 2.2 2.2 4-4.2"/></svg>
+                Terverifikasi
+              </span>
+            </div>
+          </div>
+          <button class="pas-btn pas-btn--ghost" @click="showChangeEmailDialog">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.4" y="5.6" width="17.2" height="12.8" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="m4.6 7.5 7.4 5.2 7.4-5.2"/></svg>
+            Ganti Email
+          </button>
         </div>
+      </div>
+    </div>
 
-        <div class="info-box">
-          <div class="label">Job Position</div>
-          <div class="value">{{ props.user?.position.name }}</div>
+    <!-- Danger Zone Card -->
+    <div class="pas-card pas-card--danger">
+      <div class="pas-ch">
+        <span class="pas-ch__ic">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M12 4.5 3.5 19h17z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 10v4"/><circle cx="12" cy="16.6" r="1.05" fill="currentColor"/></svg>
+        </span>
+        <div>
+          <h2 class="pas-ch__title">Nonaktifkan Akun</h2>
+          <div class="pas-ch__sub">Tindakan yang dapat dibatalkan kapan saja</div>
         </div>
-      </VCol>
+      </div>
+      <div class="pas-cbody">
+        <p class="pas-danger__desc">Dengan menonaktifkan akun, profil dan informasi Anda akan disembunyikan sementara. Anda dapat mengaktifkannya kembali kapan pun di masa mendatang.</p>
+        <label class="pas-confirm" :class="{ 'pas-confirm--checked': userConfirmed }" @click="userConfirmed = !userConfirmed">
+          <span class="pas-cbox">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="m5.5 12.5 4 4 9-9.5"/></svg>
+          </span>
+          <span>Saya mengonfirmasi ingin menonaktifkan akun saya</span>
+        </label>
+        <button
+          class="pas-btn pas-btn--deactivate"
+          :class="{ 'pas-btn--deactivate-on': userConfirmed }"
+          :disabled="!userConfirmed"
+          @click="showDeleteAccountDialog"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M12 4.5 3.5 19h17z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 10v4"/><circle cx="12" cy="16.6" r="1.05" fill="currentColor"/></svg>
+          Nonaktifkan Akun
+        </button>
+      </div>
+    </div>
 
-      <VDivider style="margin-top: 20px; margin-bottom: 20px;"/>
-
-      <VCol class="d-flex flex-wrap gap-5">
-        <VLabel style="font-size: 20px; color: black;">
-          Registered Email
-        </VLabel>
-      </VCol>
-
-      <VCol cols="12">
-        <div class="label">Email</div>
-        <div class="value">{{ props.user?.email }}</div>
-      </VCol>
-
-      <VCol cols="12">
-        <VBtn color="primary" @click="showChangeEmailDialog">
-          Change Email
-        </VBtn>
-      </VCol>
-
-      <VDivider style="margin-top: 20px; margin-bottom: 20px;"/>
-
-      <VCol cols="12">
-        <VLabel style="font-size: 20px; color: #444050;">
-        Delete Account
-      </VLabel>
-      </VCol>
-
-      <VCol cols="12">
-        <VLabel style="font-size: 15px; color: #6D6B77;">
-          By deactivating your account, your profile and information will be temporarily hidden, and you can reactivate it anytime in the future.
-        </VLabel>
-      </VCol>
-
-      <VCol cols="12">
-        <VCheckbox
-         v-model="userConfirmed"
-         label="I confirm that I want to deactivate my account"
-         />
-      </VCol>
-
-      <VCol cols="12">
-        <VBtn color="error" :disabled="!userConfirmed" @click="showDeleteAccountDialog">
-          Deactivate Account
-        </VBtn>
-      </VCol>
-    </VRow>
-  </VCardText>
+  </div>
 </template>
-  
-<style scoped>
-.info-box {
-  min-width: 200px; /* Adjust for consistent width */
-  flex: 1; /* Makes items flexible */
+
+<style scoped lang="scss">
+.pas-wrap {
+  --pas-navy:      #3d5fc8;
+  --pas-navy-deep: #2e4db5;
+  --pas-navy-tint: #eef1fb;
+  --pas-red:       #dc2626;
+  --pas-red-tint:  #fef2f2;
+  --pas-green:     #16a34a;
+  --pas-green-tint:#f0fdf4;
+  --pas-ink-strong:#1e2440;
+  --pas-ink:       #4b5280;
+  --pas-muted:     #8b90b8;
+  --pas-line:      #e8eaf2;
+  --pas-line-soft: #f0f2f7;
+  --pas-field-bg:  #fafbfe;
+  --pas-shadow:    0 1px 2px rgba(20,24,40,.04), 0 14px 34px -22px rgba(20,24,40,.22);
+
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 0 28px 36px;
 }
 
-.label {
-  font-size: 14px;
-  color: #6D6B77;
-  margin-bottom: 4px;
+/* ===== Card ===== */
+.pas-card {
+  background: #fff;
+  border: 1px solid var(--pas-line);
+  border-radius: 20px;
+  box-shadow: var(--pas-shadow);
+  overflow: hidden;
+
+  &--danger {
+    border-color: rgba(220,38,38,.22);
+    .pas-ch__ic { background: var(--pas-red-tint); color: var(--pas-red); }
+    .pas-ch { border-bottom-color: rgba(220,38,38,.10); }
+  }
 }
 
-.value {
-  font-size: 20px;
-  color: #444050;
+/* ===== Card Header ===== */
+.pas-ch {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--pas-line-soft);
+}
+
+.pas-ch__ic {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--pas-navy-tint);
+  color: var(--pas-navy);
+  display: grid;
+  place-items: center;
+  flex: none;
+
+  svg { width: 21px; height: 21px; }
+}
+
+.pas-ch__title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--pas-ink-strong);
+}
+
+.pas-ch__sub {
+  font-size: 12.5px;
+  color: var(--pas-muted);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.pas-ch__act { margin-left: auto; }
+
+/* ===== Buttons ===== */
+.pas-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 18px;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  border-radius: 11px;
+  cursor: pointer;
+  transition: .18s;
+  white-space: nowrap;
+  border: 0;
+
+  svg { width: 17px; height: 17px; }
+
+  &--ghost {
+    background: #fff;
+    color: var(--pas-navy);
+    border: 1.5px solid rgba(61,95,200,.22);
+    &:hover { background: var(--pas-navy-tint); border-color: var(--pas-navy); }
+  }
+
+  &--deactivate {
+    height: 48px;
+    padding: 0 24px;
+    font-size: 14.5px;
+    background: var(--pas-red);
+    color: #fff;
+    opacity: .45;
+    pointer-events: none;
+    box-shadow: 0 8px 18px -8px rgba(220,38,38,.60);
+
+    &-on {
+      opacity: 1;
+      pointer-events: auto;
+      &:hover { filter: brightness(1.05); transform: translateY(-1px); }
+    }
+  }
+}
+
+/* ===== Card Body ===== */
+.pas-cbody { padding: 24px; }
+
+/* ===== Field Grid ===== */
+.pas-fgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 22px;
+
+  @media (max-width: 640px) { grid-template-columns: 1fr; }
+}
+
+.pas-field {
+  &--grow { flex: 1; }
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--pas-muted);
+    margin-bottom: 8px;
+
+    svg { width: 14px; height: 14px; color: var(--pas-navy); }
+  }
+}
+
+.pas-val {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 15px;
+  background: var(--pas-field-bg);
+  border: 1px solid var(--pas-line);
+  border-radius: 11px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--pas-ink-strong);
+  letter-spacing: -0.01em;
+}
+
+.pas-verified {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--pas-green);
+
+  svg { width: 15px; height: 15px; }
+}
+
+/* ===== Email Row ===== */
+.pas-email-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+
+  @media (max-width: 640px) { flex-direction: column; align-items: stretch; }
+}
+
+/* ===== Danger Zone ===== */
+.pas-danger__desc {
+  margin: 0 0 18px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--pas-ink);
+  font-weight: 500;
+  max-width: 640px;
+}
+
+.pas-confirm {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--pas-red-tint);
+  border: 1px solid rgba(220,38,38,.16);
+  border-radius: 12px;
+  margin-bottom: 18px;
+  cursor: pointer;
+  user-select: none;
+
+  &--checked .pas-cbox {
+    background: var(--pas-red);
+    border-color: var(--pas-red);
+
+    svg { opacity: 1; }
+  }
+
+  span:last-child {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--pas-ink-strong);
+  }
+}
+
+.pas-cbox {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  border: 2px solid rgba(220,38,38,.35);
+  background: #fff;
+  flex: none;
+  display: grid;
+  place-items: center;
+  transition: .16s;
+
+  svg { width: 14px; height: 14px; color: #fff; opacity: 0; transition: .16s; }
 }
 </style>

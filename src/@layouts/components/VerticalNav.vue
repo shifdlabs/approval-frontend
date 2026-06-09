@@ -1,10 +1,11 @@
 <script lang="ts" setup>
 import { GroupWithFormats } from '@/models/document-number/group.with.format'
+import { mapGroupedWithFormat } from '@/utils/model.mapper'
 import { layoutConfig } from '@layouts'
-import { VerticalNavGroup, VerticalNavLink, VerticalNavSectionTitle } from '@layouts/components'
 import { useLayoutConfigStore } from '@layouts/stores/config'
 import { injectionKeyIsVerticalNavHovered } from '@layouts/symbols'
-import type { NavGroup, NavLink, NavSectionTitle, VerticalNavItems } from '@layouts/types'
+import type { NavLink, NavSectionTitle, VerticalNavItems } from '@layouts/types'
+import { getComputedNavLinkToProp, isNavLinkActive } from '@layouts/utils'
 import type { Component } from 'vue'
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 import { VNodeRenderer } from './VNodeRenderer'
@@ -17,108 +18,70 @@ interface Props {
 }
 
 const router = useRouter()
-
-const props = withDefaults(defineProps<Props>(), {
-  tag: 'aside',
-})
-
+const props = withDefaults(defineProps<Props>(), { tag: 'aside' })
 const refNav = ref()
-
 const isHovered = useElementHover(refNav)
-
 provide(injectionKeyIsVerticalNavHovered, isHovered)
-
 const configStore = useLayoutConfigStore()
-
-const resolveNavItemComponent = (item: NavLink | NavSectionTitle | NavGroup): unknown => {
-  if ('heading' in item)
-    return VerticalNavSectionTitle
-  if ('children' in item)
-    return VerticalNavGroup
-
-  return VerticalNavLink
-}
-
-/*
-  ℹ️ Close overlay side when route is changed
-  Close overlay vertical nav when link is clicked
-*/
 const route = useRoute()
 
-watch(() => route.name, () => {
-  props.toggleIsOverlayNavActive(false)
-})
+watch(() => route.name, () => props.toggleIsOverlayNavActive(false))
 
 const isVerticalNavScrolled = ref(false)
-const updateIsVerticalNavScrolled = (val: boolean) => isVerticalNavScrolled.value = val
-
 const handleNavScroll = (evt: Event) => {
   isVerticalNavScrolled.value = (evt.target as HTMLElement).scrollTop > 0
 }
 
 const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered)
 
-function onCreateDocumentTapped(): void {
-  router.push('/document/create')
-}
-
 const isBookingDocumentNumberDialogVisible = ref(false)
 const isRefetchList = ref(false)
 const groupedWithFormat = ref<GroupWithFormats[]>([])
-const items = [{ title: 'Document', value: 1, props: {
-      prependIcon: 'tabler-file-pencil',
-      rounded: 'xxl',
-    }}, { title: 'Booking Number', value: 2, props: {
-      prependIcon: 'tabler-list-numbers',
-      rounded: 'xxl',
-    }}]
 
-const selectedItem = ref(0)
-watch(selectedItem, (newVal) => {
-  const selectedValue = Array.isArray(newVal) ? newVal[0] : newVal
-  const selected = items.find(item => item.value === selectedValue)
-  if (selected?.value == 1 ) {
-    onCreateDocumentTapped()
-  } else if (selected?.value == 2){
-    isBookingDocumentNumberDialogVisible.value = true
+const fetchNumberingFormat = async () => {
+  try {
+    const res = await useApi('/numbering/format/grouped', { method: 'GET' })
+    const value = res.data.value as { data: any[] }
+    groupedWithFormat.value = (value?.data && Array.isArray(value.data))
+      ? value.data.map(mapGroupedWithFormat)
+      : []
+  } catch {
+    groupedWithFormat.value = []
   }
+}
 
-  selectedItem.value = 0
+onMounted(() => fetchNumberingFormat())
+
+const refetchList = () => {
+  if (isRefetchList.value) window.location.reload()
+}
+
+const role = Number(useCookie('role').value)
+
+type SbGroup = { heading: string; items: NavLink[] }
+
+const groupedNavItems = computed<SbGroup[]>(() => {
+  const groups: SbGroup[] = []
+  let cur: SbGroup | null = null
+  for (const item of props.navItems) {
+    if ('heading' in item) {
+      cur = { heading: (item as NavSectionTitle).heading, items: [] }
+      groups.push(cur)
+    } else if (cur && 'title' in item) {
+      cur.items.push(item as NavLink)
+    }
+  }
+  return groups
 })
 
-      const fetchNumberingFormat = async () => {
-        try {
-          const res = await useApi('/numbering/format/grouped', {
-            method: 'GET'
-          });
+const collapsedSections = ref(new Set<string>())
 
-          console.log(res.data.value);
-
-          // Properly type the response
-          const value = res.data.value as { data: any[] };
-
-          // Map the raw data into your GroupWithFormats[] with null check
-          if (value && value.data && Array.isArray(value.data)) {
-            groupedWithFormat.value = value.data.map(mapGroupedWithFormat);
-          } else {
-            groupedWithFormat.value = [];
-          }
-        } catch (e) {
-          console.log(e);
-          groupedWithFormat.value = [];
-        }
-      };
-
-      onMounted(() => {
-        fetchNumberingFormat()
-      })
-
-      const refetchList = async () => {
-        if (isRefetchList) {
-          window.location.reload()
-        }
-      }
-
+const toggleSection = (key: string) => {
+  if (hideTitleAndIcon.value) return
+  const s = new Set(collapsedSections.value)
+  s.has(key) ? s.delete(key) : s.add(key)
+  collapsedSections.value = s
+}
 </script>
 
 <template>
@@ -127,52 +90,38 @@ watch(selectedItem, (newVal) => {
     ref="refNav"
     data-allow-mismatch
     class="layout-vertical-nav"
-    :class="[
-      {
-        'overlay-nav': configStore.isLessThanOverlayNavBreakpoint,
-        'hovered': isHovered,
-        'visible': isOverlayNavActive,
-        'scrolled': isVerticalNavScrolled,
-      },
-    ]"
+    :class="{
+      'overlay-nav': configStore.isLessThanOverlayNavBreakpoint,
+      'hovered': isHovered,
+      'visible': isOverlayNavActive,
+      'scrolled': isVerticalNavScrolled,
+    }"
   >
-    <!-- 👉 Header -->
+    <!-- Header -->
     <div class="nav-header">
       <slot name="nav-header">
-        <RouterLink
-          to="/"
-          class="app-logo app-title-wrapper"
-        >
+        <RouterLink to="/" class="app-logo app-title-wrapper">
           <VNodeRenderer :nodes="layoutConfig.app.logo" />
-
           <Transition name="vertical-nav-app-title">
-            <h1
-              v-show="!hideTitleAndIcon"
-              class="app-logo-title"
-            >
-              {{ layoutConfig.app.title }}
-            </h1>
+            <div v-show="!hideTitleAndIcon" class="app-brand-text">
+              <h1 class="app-logo-title">{{ layoutConfig.app.title }}</h1>
+              <span class="app-logo-sub">Digital Mail</span>
+            </div>
           </Transition>
         </RouterLink>
-        <!-- 👉 Vertical nav actions -->
-        <!-- Show toggle collapsible in >md and close button in <md -->
+
         <div class="header-action">
-          <Component
-            :is="layoutConfig.app.iconRenderer || 'div'"
-            v-show="configStore.isVerticalNavCollapsed"
-            class="d-none nav-unpin"
-            :class="configStore.isVerticalNavCollapsed && 'd-lg-block'"
-            v-bind="layoutConfig.icons.verticalNavUnPinned"
+          <!-- Chevron collapse/expand button (desktop) -->
+          <button
+            class="sb-collapse-btn d-none d-lg-flex"
+            :title="configStore.isVerticalNavCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
             @click="configStore.isVerticalNavCollapsed = !configStore.isVerticalNavCollapsed"
-          />
-          <Component
-            :is="layoutConfig.app.iconRenderer || 'div'"
-            v-show="!configStore.isVerticalNavCollapsed"
-            class="d-none nav-pin"
-            :class="!configStore.isVerticalNavCollapsed && 'd-lg-block'"
-            v-bind="layoutConfig.icons.verticalNavPinned"
-            @click="configStore.isVerticalNavCollapsed = !configStore.isVerticalNavCollapsed"
-          />
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m14 7-5 5 5 5" />
+            </svg>
+          </button>
+          <!-- Close overlay (mobile) -->
           <Component
             :is="layoutConfig.app.iconRenderer || 'div'"
             class="d-lg-none"
@@ -182,70 +131,101 @@ watch(selectedItem, (newVal) => {
         </div>
       </slot>
     </div>
-    <Transition name="vertical-nav-app-title">
-      <VMenu open-on-hover>
-        <template #activator="{ props }">
-        <VBtn 
-        v-bind="props"
-        color="primary" 
-        variant="outlined" 
-        class="ml-3 mr-4 mb-4 mt-1"
-        :style="hideTitleAndIcon ? 'min-width: 45px;' : 'width: calc(100% - 28px);'"
-        >
-        <VIcon
-          start
-          icon="tabler-plus"
-          size="20"
-          :class="hideTitleAndIcon ? 'ml-1' : 'ml-0'"
-        />
-        <Transition name="vertical-nav-app-title">
-          <label v-show="!hideTitleAndIcon">Create New Document</label>
-        </Transition>
-      </VBtn>
-          <!-- <VBtn v-bind="props">
-            On hover
-          </VBtn> -->
-        </template>
 
-        <VList 
-        :items="items" 
-        density="comfortable" 
-        v-model:selected="selectedItem"
-        item-title="title"
-        item-value="value"
-        />
-      </VMenu>
-    </Transition>
     <slot name="before-nav-items">
       <div class="vertical-nav-items-shadow" />
     </slot>
-    <slot
-      name="nav-items"
-      :update-is-vertical-nav-scrolled="updateIsVerticalNavScrolled"
+
+    <PerfectScrollbar
+      tag="nav"
+      class="sb-nav nav-items"
+      :options="{ wheelPropagation: false }"
+      @ps-scroll-y="handleNavScroll"
     >
-      <PerfectScrollbar
-        :key="configStore.isAppRTL"
-        tag="ul"
-        class="nav-items"
-        :options="{ wheelPropagation: false }"
-        @ps-scroll-y="handleNavScroll"
+      <!-- "Buat Baru" section — role 1 only -->
+      <div
+        v-if="role === 1"
+        class="sb-group"
+        :class="{ 'sb-group--collapsed': collapsedSections.has('__baru') }"
       >
-        <Component
-          :is="resolveNavItemComponent(item)"
-          v-for="(item, index) in navItems"
-          :key="index"
-          :item="item"
-        />
-      </PerfectScrollbar>
-    </slot>
+        <button class="sb-section" @click="toggleSection('__baru')">
+          <span v-show="!hideTitleAndIcon" class="sb-section__label">Buat Baru</span>
+          <span v-show="!hideTitleAndIcon" class="sb-section__chev">
+            <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m7 10 5 5 5-5" /></svg>
+          </span>
+          <span v-show="hideTitleAndIcon" class="sb-mini-divider" />
+        </button>
+        <div class="sb-items">
+          <div class="sb-items-inner">
+            <button
+              class="sb-action"
+              :class="{ 'sb-action--mini': hideTitleAndIcon }"
+              title="Booking Number"
+              @click="isBookingDocumentNumberDialogVisible = true"
+            >
+              <span class="sb-action__ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <path stroke-width="1.7" d="M10.5 7h9.5M10.5 16.5h9.5" />
+                  <path stroke-width="1.5" d="M4.1 5.9 5.5 5.1V10" />
+                  <path stroke-width="1.5" d="M3.7 14.1c.1-1.5 2.6-1.5 2.6.1 0 1.1-2.6 2.3-2.6 4.1h2.8" />
+                </svg>
+              </span>
+              <span v-show="!hideTitleAndIcon" class="sb-action__label">Booking Number</span>
+              <span v-show="!hideTitleAndIcon" class="sb-action__plus">
+                <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M12 5.5v13M5.5 12h13" /></svg>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dynamic groups from navigation/vertical/index.ts -->
+      <div
+        v-for="group in groupedNavItems"
+        :key="group.heading"
+        class="sb-group"
+        :class="{ 'sb-group--collapsed': collapsedSections.has(group.heading) }"
+      >
+        <button class="sb-section" @click="toggleSection(group.heading)">
+          <span v-show="!hideTitleAndIcon" class="sb-section__label">{{ group.heading }}</span>
+          <span v-show="!hideTitleAndIcon" class="sb-section__chev">
+            <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m7 10 5 5 5-5" /></svg>
+          </span>
+          <span v-show="hideTitleAndIcon" class="sb-mini-divider" />
+        </button>
+        <div class="sb-items">
+          <div class="sb-items-inner">
+            <Component
+              :is="item.to ? 'RouterLink' : 'a'"
+              v-for="(item, i) in group.items"
+              :key="i"
+              class="sb-link"
+              :class="{ 'sb-link--active': isNavLinkActive(item, router) }"
+              v-bind="getComputedNavLinkToProp(item)"
+              :title="item.title"
+            >
+              <span class="sb-link__ico">
+                <Component
+                  :is="layoutConfig.app.iconRenderer || 'span'"
+                  v-bind="(item.icon ?? layoutConfig.verticalNav?.defaultNavItemIconProps) as Record<string, unknown>"
+                />
+              </span>
+              <span v-show="!hideTitleAndIcon" class="sb-link__label">{{ item.title }}</span>
+            </Component>
+          </div>
+        </div>
+      </div>
+    </PerfectScrollbar>
+
     <slot name="after-nav-items" />
   </Component>
 
-    <BookingDocumentNumberDialog
+  <BookingDocumentNumberDialog
     v-model:isDialogVisible="isBookingDocumentNumberDialogVisible"
     :data="groupedWithFormat"
     v-model:is-refetch-list="isRefetchList"
-    @update:isRefetchList="refetchList"/>
+    @update:isRefetchList="refetchList"
+  />
 </template>
 
 <style lang="scss" scoped>
@@ -253,22 +233,71 @@ watch(selectedItem, (newVal) => {
   display: flex;
   align-items: center;
   column-gap: 0.75rem;
+}
 
-  .app-logo-title {
-    font-size: 1.375rem;
-    font-weight: 700;
-    letter-spacing: 0.25px;
-    line-height: 1.5rem;
-    text-transform: capitalize;
-  }
+.app-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  min-width: 0;
+}
+
+.app-logo-title {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.app-logo-sub {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sb-muted);
+  white-space: nowrap;
+  margin-top: 3px;
 }
 </style>
 
 <style lang="scss">
 @use "@configured-variables" as variables;
-@use "@layouts/styles/mixins";
+@use "@core/scss/base/mixins";
+@use "@layouts/styles/mixins" as layoutsMixins;
 
-// 👉 Vertical Nav
+// ── Layout system styles (preserved) ────────────────────────────
+.layout-nav-type-vertical {
+  .layout-vertical-nav {
+    color: rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity));
+
+    @include mixins.elevation(4);
+
+    .nav-header {
+      padding-inline-end: 0.125rem;
+
+      .app-logo .app-title {
+        font-size: 22px;
+      }
+    }
+
+    .nav-items {
+      padding-block: 0.25rem;
+    }
+  }
+
+  &.layout-vertical-nav-collapsed {
+    .layout-vertical-nav:not(.hovered) {
+      .nav-header .header-action {
+        opacity: 0;
+      }
+    }
+  }
+}
+
+// ── Core layout (position, size, flex — must stay) ───────────────
 .layout-vertical-nav {
   position: fixed;
   z-index: variables.$layout-vertical-nav-z-index;
@@ -299,19 +328,9 @@ watch(selectedItem, (newVal) => {
     }
   }
 
-  .app-title-wrapper {
-    margin-inline-end: auto;
-  }
+  .app-title-wrapper { margin-inline-end: auto; }
 
-  .nav-items {
-    block-size: 100%;
-
-    // ℹ️ We no loner needs this overflow styles as perfect scrollbar applies it
-    // overflow-x: hidden;
-
-    // // ℹ️ We used `overflow-y` instead of `overflow` to mitigate overflow x. Revert back if any issue found.
-    // overflow-y: auto;
-  }
+  .nav-items { block-size: 100%; }
 
   .nav-item-title {
     overflow: hidden;
@@ -320,7 +339,6 @@ watch(selectedItem, (newVal) => {
     white-space: nowrap;
   }
 
-  // 👉 Collapsed
   .layout-vertical-nav-collapsed & {
     &:not(.hovered) {
       inline-size: variables.$layout-vertical-nav-collapsed-width;
@@ -328,17 +346,345 @@ watch(selectedItem, (newVal) => {
   }
 }
 
+// ── Sidebar design tokens ────────────────────────────────────────
+.layout-vertical-nav {
+  --sb-navy:       #314f91;
+  --sb-navy-tint:  #e4efff;
+  --sb-text:       #494d54;
+  --sb-strong:     #22272f;
+  --sb-muted:      #82868e;
+  --sb-section-c:  #95989f;
+  --sb-hover:      #f3f4f7;
+  --sb-divider:    #e4e6ea;
+  --sb-act-border: #d7deed;
+}
+
+.v-theme--dark .layout-vertical-nav {
+  --sb-navy:       #6d8fe2;
+  --sb-navy-tint:  #1d283f;
+  --sb-text:       #b8bec8;
+  --sb-strong:     #eff2f7;
+  --sb-muted:      #82868e;
+  --sb-section-c:  #6b7079;
+  --sb-hover:      #1e2229;
+  --sb-divider:    #25292f;
+  --sb-act-border: #2c3340;
+}
+
+// ── Collapse button (chevron) ────────────────────────────────────
+.layout-vertical-nav {
+  .sb-collapse-btn {
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 0;
+    background: transparent;
+    color: var(--sb-muted);
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease;
+    flex: none;
+
+    svg {
+      width: 18px;
+      height: 18px;
+      transition: transform 0.25s ease-in-out;
+    }
+
+    &:hover {
+      background: var(--sb-hover);
+      color: var(--sb-strong);
+    }
+  }
+}
+
+// Rotate chevron when nav is collapsed (pointing right = expand)
+.layout-vertical-nav-collapsed .layout-vertical-nav .sb-collapse-btn svg {
+  transform: rotate(180deg);
+}
+
+// Hide collapse button in mini mode (collapsed + not hovered)
+.layout-vertical-nav-collapsed .layout-vertical-nav:not(.hovered) .sb-collapse-btn {
+  display: none !important;
+}
+
+// ── Nav container ────────────────────────────────────────────────
+.layout-vertical-nav {
+  .sb-nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px 14px 0;
+    overflow-x: hidden;
+  }
+
+  // ── Group ───────────────────────────────────────────────────────
+  .sb-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  // ── Section header (accordion toggle) ───────────────────────────
+  .sb-section {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--sb-section-c);
+    padding: 14px 12px 7px;
+    white-space: nowrap;
+    transition: color 0.16s ease;
+
+    &:hover { color: var(--sb-strong); }
+
+    .sb-section__label { flex: 1; text-align: left; }
+
+    .sb-section__chev {
+      width: 16px;
+      height: 16px;
+      flex: none;
+      display: grid;
+      place-items: center;
+      color: var(--sb-muted);
+      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+
+      svg { width: 14px; height: 14px; }
+    }
+
+    .sb-mini-divider {
+      display: block;
+      height: 1px;
+      width: 24px;
+      margin: 0 auto;
+      background: var(--sb-divider);
+    }
+  }
+
+  // Collapsed state: rotate chevron + hide items
+  .sb-group--collapsed {
+    .sb-section .sb-section__chev { transform: rotate(-90deg); }
+    .sb-items { max-height: 0; }
+  }
+
+  // ── Accordion expand/collapse ────────────────────────────────────
+  .sb-items {
+    overflow: hidden;
+    max-height: 480px; // fits up to ~10 items at 44px + padding
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sb-items-inner {
+    display: flex;
+    flex-direction: column;
+  }
+
+  // ── Action button (Booking Number) ───────────────────────────────
+  .sb-action {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: calc(100% - 4px);
+    margin: 1px 2px;
+    height: 46px;
+    padding: 0 11px 0 12px;
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 700;
+    letter-spacing: -0.008em;
+    color: var(--sb-navy);
+    background: transparent;
+    border: 1.5px dashed var(--sb-act-border);
+    border-radius: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.18s ease, border-color 0.18s ease;
+
+    &:hover {
+      background: var(--sb-navy-tint);
+      border-color: var(--sb-navy);
+      border-style: solid;
+    }
+
+    .sb-action__ico {
+      width: 22px;
+      height: 22px;
+      flex: none;
+      display: grid;
+      place-items: center;
+
+      svg { width: 21px; height: 21px; }
+    }
+
+    .sb-action__label { flex: 1; text-align: left; }
+
+    .sb-action__plus {
+      width: 23px;
+      height: 23px;
+      border-radius: 7px;
+      background: var(--sb-navy);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      flex: none;
+
+      svg { width: 15px; height: 15px; }
+    }
+
+    &.sb-action--mini {
+      width: 52px;
+      margin: 2px auto;
+      padding: 0;
+      justify-content: center;
+      background: var(--sb-navy);
+      border-color: var(--sb-navy);
+      border-style: solid;
+      color: #fff;
+    }
+  }
+
+  // ── Nav links ────────────────────────────────────────────────────
+  .sb-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 44px;
+    padding: 0 12px;
+    margin: 1px 2px;
+    border-radius: 10px;
+    color: var(--sb-text);
+    text-decoration: none;
+    font-size: 14.5px;
+    font-weight: 600;
+    letter-spacing: -0.006em;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.16s ease, color 0.16s ease;
+
+    &:hover {
+      background: var(--sb-hover);
+      color: var(--sb-strong);
+    }
+
+    .sb-link__ico {
+      width: 22px;
+      height: 22px;
+      flex: none;
+      display: grid;
+      place-items: center;
+      color: inherit;
+
+      .v-icon { font-size: 21px !important; color: inherit !important; }
+    }
+
+    .sb-link__label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    // Active state: navy tint bg + left indicator bar
+    &.sb-link--active {
+      background: var(--sb-navy-tint) !important;
+      color: var(--sb-navy) !important;
+      font-weight: 700;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3.5px;
+        height: 22px;
+        border-radius: 0 3px 3px 0;
+        background: var(--sb-navy);
+      }
+    }
+  }
+}
+
+// ── Mini mode adjustments ────────────────────────────────────────
+$mini: ".layout-vertical-nav-collapsed .layout-vertical-nav:not(.hovered)";
+
+#{$mini} {
+  .sb-section {
+    pointer-events: none;
+    padding: 16px 0 6px;
+  }
+
+  // Always show items (no accordion collapse in mini mode)
+  .sb-items {
+    max-height: 480px !important;
+  }
+
+  .sb-link {
+    justify-content: center;
+    padding: 0;
+    width: 52px;
+    height: 48px;
+    margin: 2px auto;
+    gap: 0;
+
+    &.sb-link--active::before {
+      height: 26px;
+    }
+  }
+}
+
+// ── Transition animations ────────────────────────────────────────
+.vertical-nav-section-title-enter-active,
+.vertical-nav-section-title-leave-active {
+  transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
+}
+
+.vertical-nav-section-title-enter-from,
+.vertical-nav-section-title-leave-to {
+  opacity: 0;
+  transform: translateX(15px);
+
+  @include layoutsMixins.rtl {
+    transform: translateX(-15px);
+  }
+}
+
+.vertical-nav-app-title-enter-active,
+.vertical-nav-app-title-leave-active {
+  transition: opacity 0.1s ease-in-out, transform 0.12s ease-in-out;
+}
+
+.vertical-nav-app-title-enter-from,
+.vertical-nav-app-title-leave-to {
+  opacity: 0;
+  transform: translateX(-15px);
+
+  @include layoutsMixins.rtl {
+    transform: translateX(15px);
+  }
+}
+
 // Small screen vertical nav transition
-@media (max-width: 1279px) {
-  .layout-vertical-nav {
-    &:not(.visible) {
+.layout-vertical-nav {
+  &:not(.visible) {
+    @media (max-width: 1279px) {
       transform: translateX(-#{variables.$layout-vertical-nav-width});
 
-      @include mixins.rtl {
+      @include layoutsMixins.rtl {
         transform: translateX(variables.$layout-vertical-nav-width);
       }
     }
+  }
 
+  @media (max-width: 1279px) {
     transition: transform 0.25s ease-in-out;
   }
 }

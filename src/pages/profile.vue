@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue'
 import UpdateBiodataDialog from '@/components/dialogs/UpdateBiodataDialog.vue';
-import { useProfileController } from '@/controllers/reguler/profile-controller'
+import { useProfileController } from '@/controllers/reguler/profile-controller';
+import { computed, nextTick, onMounted, ref } from 'vue';
 
 const {
   user,
@@ -52,6 +52,15 @@ const isUpdateBiodataDialogVisible = ref(false)
 const isChangeEmailDialogVisible = ref(false)
 const isDeleteAccountDialogVisible = ref(false)
 const router = useRouter()
+
+const userInitials = computed(() => {
+  const f = user.value?.firstName?.charAt(0).toUpperCase() ?? ''
+  const l = user.value?.lastName?.charAt(0).toUpperCase() ?? ''
+  return f + l || '?'
+})
+const userFullName = computed(() =>
+  [user.value?.firstName, user.value?.lastName].filter(Boolean).join(' ') || '—'
+)
 
 const signaturePad = ref<any>(null)
 const isSignaturePadVisible = ref(false)
@@ -229,12 +238,44 @@ const downloadSignature = (format: 'png' | 'jpg') => {
 
 </script>
 <template>
-  <VCard>
-    <VTabs v-model="currentTab" style="margin-top: 20px;">
-      <VTab>Account Settings</VTab>
-      <VTab>Security</VTab>
-      <VTab>Digital Signature</VTab>
-    </VTabs>
+  <div class="pa-page">
+
+    <!-- ===== Profile Hero ===== -->
+    <div class="pa-card pa-hero">
+      <div class="pa-avatar">
+        {{ userInitials }}
+        <span class="pa-avatar__ring"></span>
+      </div>
+      <div class="pa-hero__info">
+        <h1 class="pa-hero__name">{{ userFullName }}</h1>
+        <div class="pa-hero__tags">
+          <span v-if="user?.position?.name" class="pa-chip pa-chip--role">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.4" r="3.8" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M5.5 19.2a6.5 6.5 0 0 1 13 0"/></svg>
+            {{ user.position.name }}
+          </span>
+          <span class="pa-chip pa-chip--active">
+            <span class="pa-chip__dot"></span>Akun Aktif
+          </span>
+        </div>
+        <div class="pa-hero__email">{{ user?.email }}</div>
+      </div>
+    </div>
+
+    <!-- ===== Custom Tabs ===== -->
+    <div class="pa-tabs">
+      <button :class="['pa-tab', currentTab === 'item-1' && 'pa-tab--on']" @click="currentTab = 'item-1'">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" d="M4 6.5h12M4 10h8M4 13.5h12M4 17h6"/></svg>
+        Profil
+      </button>
+      <button :class="['pa-tab', currentTab === 'item-2' && 'pa-tab--on']" @click="currentTab = 'item-2'">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.2" y="10.5" width="13.6" height="9.3" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" d="M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5"/></svg>
+        Keamanan
+      </button>
+      <button :class="['pa-tab', currentTab === 'item-3' && 'pa-tab--on']" @click="currentTab = 'item-3'">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M4 15.5c1.6-.8 2.7-3.4 3-6 .2-1.6-.6-2.2-1.3-1-.9 1.6-.9 5.8.1 7.7.7 1.3 1.9.9 2.6-.6.6-1.3 1.3-1 1.6.2.2.9.9 1.3 1.7 1.1 1-.2 1.8-1 2.2-1.9"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M4.5 19.5h15"/></svg>
+        Tanda Tangan
+      </button>
+    </div>
 
     <VWindow v-model="currentTab">
       <VWindowItem value="item-1">
@@ -249,174 +290,184 @@ const downloadSignature = (format: 'png' | 'jpg') => {
         <AccountSecuritySection />
       </VWindowItem>
       <VWindowItem value="item-3">
-        <VCardText class="pt-8">
-          <VRow>
-            <VCol cols="12" lg="8">
-              <div class="signature-management-header mb-6">
-                <div class="d-flex align-center mb-2">
-                  <VIcon icon="tabler-signature" size="32" color="primary" class="me-3" />
+        <div class="ttd-wrap">
+        
+          <!-- ===== Main Grid ===== -->
+          <div class="ttd-grid">
+
+            <!-- Hero Card -->
+            <div class="ttd-card ttd-hero">
+
+              <!-- Empty State -->
+              <div v-if="!hasExistingSignature" class="ttd-hero__inner">
+                <div class="ttd-sig-badge">
+                  <div class="ttd-sig-badge__plate">
+                    <svg viewBox="0 0 92 52" aria-hidden="true">
+                      <path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M6 38c4-2 7-8 8-15s0-12-3-9-3 19 0 26c2 5 6 3 8-3s3-16 6-20 4 4 3 11-2 13 1 14 6-9 9-13 4 0 4 4 1 7 4 6 6-5 9-6 5 1 9 0"/>
+                    </svg>
+                    <span class="ttd-sig-badge__baseline"></span>
+                  </div>
+                  <div class="ttd-sig-badge__seal">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m7.5 12.4 3 3 6-7"/>
+                    </svg>
+                  </div>
+                </div>
+                <h2 class="ttd-hero__title">Belum Ada Tanda Tangan Digital</h2>
+                <p class="ttd-hero__desc">Buat tanda tangan digital Anda untuk menyetujui dan mengesahkan dokumen secara elektronik — tanpa cetak, tanpa scan.</p>
+                <div class="ttd-actions">
+                  <button class="ttd-btn ttd-btn--primary" @click="openSignaturePad">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 5.5v13M5.5 12h13"/></svg>
+                    Buat Tanda Tangan Digital
+                  </button>
+                </div>
+                <div class="ttd-hint">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.2" y="10.5" width="13.6" height="9.3" rx="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" d="M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5"/><circle cx="12" cy="15" r="1.4" fill="currentColor"/></svg>
+                  Terenkripsi & tersimpan aman pada akun Anda
+                </div>
+              </div>
+
+              <!-- Active State -->
+              <div v-else class="ttd-hero__active">
+                <div class="ttd-active-preview">
+                  <div class="ttd-active-preview__plate">
+                    <img :src="signatureUrl" alt="Tanda Tangan Digital" class="ttd-active-preview__img" />
+                    <span class="ttd-active-preview__baseline"></span>
+                  </div>
+                  <div class="ttd-active-preview__seal">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m7.5 12.4 3 3 6-7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="ttd-active-info">
+                  <span class="ttd-chip ttd-chip--active ttd-chip--mb">
+                    <span class="ttd-chip__dot"></span>Tanda Tangan Aktif
+                  </span>
+                  <h2 class="ttd-hero__title">Tanda Tangan Digital Aktif</h2>
+                  <p class="ttd-hero__desc">Tanda tangan Anda siap digunakan untuk persetujuan dokumen. Anda bisa memperbarui atau menggantinya kapan saja.</p>
+                  <div class="ttd-actions ttd-actions--left">
+                    <button class="ttd-btn ttd-btn--primary" @click="openSignaturePad">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M11 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+                      Perbarui
+                    </button>
+                    <button class="ttd-btn ttd-btn--ghost" @click="downloadSignature('jpg')">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+                      Lihat
+                    </button>
+                    <button class="ttd-btn ttd-btn--danger" :disabled="isDeletingSignature" @click="handleDeleteSignature">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><polyline fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" points="3 6 5 6 21 6"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                      {{ isDeletingSignature ? 'Menghapus...' : 'Hapus' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Rail -->
+            <div class="ttd-rail">
+
+              <!-- Stats Card -->
+              <div class="ttd-card ttd-panel">
+                <div class="ttd-panel__head">
+                  <span class="ttd-panel__ic">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M4 4v15a1 1 0 0 0 1 1h15"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M8 15l3.2-3.8 2.6 2.2L19 7.5"/></svg>
+                  </span>
                   <div>
-                    <h2 class="text-h5 text-primary mb-1">Digital Signature Management</h2>
-                    <p class="text-body-2 text-medium-emphasis mb-0">
-                      Manage your digital signature for document approval and authentication
-                    </p>
+                    <h3 class="ttd-panel__title">Statistik</h3>
+                    <div class="ttd-panel__sub">Ringkasan tanda tangan Anda</div>
+                  </div>
+                </div>
+                <div class="ttd-stat-rows">
+                  <div class="ttd-stat-row">
+                    <span class="ttd-stat-row__key">
+                      <span class="ttd-stat-row__dot">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5.4" width="16" height="15" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M8 3.5v3.6M16 3.5v3.6M4.3 10h15.4"/></svg>
+                      </span>Dibuat
+                    </span>
+                    <span class="ttd-stat-row__val" :class="{ 'ttd-stat-row__val--na': !userSignature?.createdAt }">
+                      {{ userSignature?.createdAt ? new Date(userSignature.createdAt).toLocaleDateString('id-ID') : '—' }}
+                    </span>
+                  </div>
+                  <div class="ttd-stat-row">
+                    <span class="ttd-stat-row__key">
+                      <span class="ttd-stat-row__dot">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M19 5.5v4h-4M5 18.5v-4h4"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M18.4 9.4A7 7 0 0 0 6.3 7.6L5 9M5.6 14.6a7 7 0 0 0 12.1 1.8L19 15"/></svg>
+                      </span>Terakhir Diperbarui
+                    </span>
+                    <span class="ttd-stat-row__val" :class="{ 'ttd-stat-row__val--na': !userSignature?.updatedAt }">
+                      {{ userSignature?.updatedAt ? new Date(userSignature.updatedAt).toLocaleDateString('id-ID') : '—' }}
+                    </span>
+                  </div>
+                  <div class="ttd-stat-row">
+                    <span class="ttd-stat-row__key">
+                      <span class="ttd-stat-row__dot">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M3.5 12h3.2l2.3-6 4 14 2.6-8h4.9"/></svg>
+                      </span>Status
+                    </span>
+                    <span :class="['ttd-chip', hasExistingSignature ? 'ttd-chip--active' : 'ttd-chip--inactive']">
+                      <span class="ttd-chip__dot"></span>
+                      {{ hasExistingSignature ? 'Aktif' : 'Nonaktif' }}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <VCard class="signature-status-card mb-6" elevation="2">
-                <VCardText>
-                  <div v-if="!hasExistingSignature" class="signature-empty-state">
-                    <div class="text-center py-8">
-                      <div class="mb-4">
-                        <VIcon icon="tabler-signature" size="64" color="grey-lighten-2" />
-                      </div>
-                      <h3 class="text-h6 mb-2">No Digital Signature Found</h3>
-                      <p class="text-body-2 text-medium-emphasis mb-4">
-                        Create your digital signature to approve documents electronically
-                      </p>
-                      <VBtn 
-                        color="primary" 
-                        size="large"
-                        @click="openSignaturePad"
-                        class="signature-create-btn"
-                      >
-                        <VIcon icon="tabler-plus" class="me-2" />
-                        Create Digital Signature
-                      </VBtn>
-                    </div>
-                  </div>
+              <!-- Secure Card -->
+              <div class="ttd-card ttd-secure">
+                <span class="ttd-secure__ic">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.2" y="10.5" width="13.6" height="9.3" rx="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" d="M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5"/><circle cx="12" cy="15" r="1.4" fill="currentColor"/></svg>
+                </span>
+                <div>
+                  <h4 class="ttd-secure__title">Aman & Sah Secara Hukum</h4>
+                  <p class="ttd-secure__desc">Setiap tanda tangan dienkripsi dan terikat pada identitas Anda sesuai standar autentikasi elektronik.</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-                  <div v-else class="signature-active-state">
-                    <div class="d-flex align-start">
-                      <div class="signature-preview-container me-4">
-                        <div class="signature-preview-wrapper">
-                          <img 
-                            :src="signatureUrl" 
-                            alt="Digital Signature"
-                            class="signature-preview-image"
-                          />
-                          <div class="signature-overlay">
-                            <VIcon icon="tabler-check-circle" color="success" size="24" />
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div class="signature-info flex-grow-1">
-                        <div class="d-flex align-center mb-2">
-                          <VChip color="success" size="small" class="me-2">
-                            <VIcon icon="tabler-check" class="me-1" size="16" />
-                            Active
-                          </VChip>
-                        </div>
-                        
-                        <h4 class="text-h6 mb-2">Digital Signature Active</h4>
-                        <p class="text-body-2 text-medium-emphasis mb-4">
-                          Your digital signature is ready for document approval. You can update or replace it anytime.
-                        </p>
-                        
-                        <div class="signature-actions">
-                          <VBtn 
-                            color="primary" 
-                            variant="outlined"
-                            size="small"
-                            @click="openSignaturePad"
-                            class="me-2 mb-2"
-                          >
-                            <VIcon icon="tabler-edit" class="me-1" />
-                            Update Signature
-                          </VBtn>
-                          
-                          <VBtn 
-                            color="info" 
-                            variant="outlined"
-                            size="small"
-                            @click="downloadSignature('jpg')"
-                            class="me-2 mb-2"
-                          >
-                            <VIcon icon="tabler-eye" class="me-1" />
-                            View
-                          </VBtn>
-                          
-                          <VBtn 
-                            color="error" 
-                            variant="outlined"
-                            size="small"
-                            @click="handleDeleteSignature"
-                            :loading="isDeletingSignature"
-                            :disabled="isDeletingSignature"
-                            class="mb-2"
-                          >
-                            <VIcon icon="tabler-trash" class="me-1" />
-                            {{ isDeletingSignature ? 'Deleting...' : 'Delete' }}
-                          </VBtn>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </VCardText>
-              </VCard>
+          <!-- ===== Benefits ===== -->
+          <div class="ttd-card ttd-benefits">
+            <div class="ttd-benefits__head">
+              <h3 class="ttd-benefits__title">Tentang Tanda Tangan Digital</h3>
+              <span class="ttd-benefits__sub">Kenapa beralih ke tanda tangan elektronik</span>
+            </div>
+            <div class="ttd-blist">
+              <div class="ttd-bitem">
+                <span class="ttd-bitem__ic">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M5 19c0-7 4-13 14-13 0 9-5 14-12 14a6 6 0 0 1-2-1Z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M8 18c2.5-4 5-6.5 9-8.5"/></svg>
+                </span>
+                <span class="ttd-bitem__t">Tanpa Cetak</span>
+                <span class="ttd-bitem__d">Setujui dokumen secara aman tanpa mencetak satu lembar pun.</span>
+              </div>
+              <div class="ttd-bitem">
+                <span class="ttd-bitem__ic">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M12 4v16M7 20h10M4 8l4-2 4 2M20 8l-4-2-4 2"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M2 12.5 4 8l2 4.5a2.2 2.2 0 0 1-4 0ZM18 12.5 20 8l2 4.5a2.2 2.2 0 0 1-4 0Z"/></svg>
+                </span>
+                <span class="ttd-bitem__t">Sah Secara Hukum</span>
+                <span class="ttd-bitem__d">Autentikasi elektronik yang mengikat dan diakui secara resmi.</span>
+              </div>
+              <div class="ttd-bitem">
+                <span class="ttd-bitem__ic">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M13 3 5 13.5h6L11 21l8-10.5h-6z"/></svg>
+                </span>
+                <span class="ttd-bitem__t">Proses Lebih Cepat</span>
+                <span class="ttd-bitem__d">Alur persetujuan dokumen berjalan dalam hitungan detik.</span>
+              </div>
+              <div class="ttd-bitem">
+                <span class="ttd-bitem__ic">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M7 4.5h7l4 4V19a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5.5a1 1 0 0 1 1-1Z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M9.5 12.5l1.8 1.8 3.4-3.6"/></svg>
+                </span>
+                <span class="ttd-bitem__t">Jejak Audit</span>
+                <span class="ttd-bitem__d">Riwayat lengkap dan terlacak untuk setiap dokumen yang ditandatangani.</span>
+              </div>
+            </div>
+          </div>
 
-              <VCard class="signature-info-card" elevation="1">
-                <VCardText>
-                  <div class="d-flex align-start">
-                    <VIcon icon="tabler-info-circle" color="info" class="me-3 mt-1" />
-                    <div>
-                      <h4 class="text-subtitle-1 mb-2">About Digital Signatures</h4>
-                      <ul class="signature-benefits-list">
-                        <li>Secure document approval without printing</li>
-                        <li>Legally binding electronic authentication</li>
-                        <li>Faster document processing workflow</li>
-                        <li>Audit trail for all signed documents</li>
-                      </ul>
-                    </div>
-                  </div>
-                </VCardText>
-              </VCard>
-            </VCol>
-            
-            <VCol cols="12" lg="4">
-              <VCard class="signature-stats-card" elevation="1">
-                <VCardText>
-                  <h4 class="text-h6 mb-4">Signature Statistics</h4>
-                  
-                  <div class="stat-item">
-                    <div class="d-flex justify-space-between align-center mb-3">
-                      <span class="text-body-2">Signature Created</span>
-                      <span class="text-caption text-medium-emphasis">
-                        {{ userSignature?.createdAt ? new Date(userSignature.createdAt).toLocaleDateString('id-ID') : 'N/A' }}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div class="stat-item">
-                    <div class="d-flex justify-space-between align-center mb-3">
-                      <span class="text-body-2">Last Updated</span>
-                      <span class="text-caption text-medium-emphasis">
-                        {{ userSignature?.updatedAt ? new Date(userSignature.updatedAt).toLocaleDateString('id-ID') : 'N/A' }}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div class="stat-item">
-                    <div class="d-flex justify-space-between align-center">
-                      <span class="text-body-2">Signature Status</span>
-                      <VChip 
-                        :color="hasExistingSignature ? 'success' : 'warning'" 
-                        size="small"
-                      >
-                        {{ hasExistingSignature ? 'Active' : 'Inactive' }}
-                      </VChip>
-                    </div>
-                  </div>
-                </VCardText>
-              </VCard>
-            </VCol>
-          </VRow>
-        </VCardText>
+        </div>
       </VWindowItem>
     </VWindow>
-  </VCard>
+  </div>
 
   <UpdateBiodataDialog
     v-model:user="user"
@@ -583,117 +634,750 @@ const downloadSignature = (format: 'png' | 'jpg') => {
   </VDialog>
 </template>
 
-<style scoped>
-.signature-management-header {
-  border-left: 4px solid rgb(var(--v-theme-primary));
-  padding-left: 16px;
+<style scoped lang="scss">
+/* ===== Page wrapper ===== */
+.pa-page {
+  --pa-navy:       #3d5fc8;
+  --pa-navy-deep:  #2e4db5;
+  --pa-navy-tint:  #eef1fb;
+  --pa-green:      #16a34a;
+  --pa-green-tint: #f0fdf4;
+  --pa-ink-strong: #1e2440;
+  --pa-ink:        #4b5280;
+  --pa-muted:      #8b90b8;
+  --pa-line:       #e8eaf2;
+  --pa-shadow:     0 1px 2px rgba(20,24,40,.04), 0 14px 34px -22px rgba(20,24,40,.22);
+  --pa-shadow-card:0 1px 2px rgba(20,24,40,.05), 0 22px 48px -30px rgba(20,24,40,.26);
+
+  /* Break out of .layout-page-content's padding-inline: 1.5rem so width matches navbar */
+  margin-inline: -1.5rem;
+  padding: 28px 0 56px;
 }
 
-.signature-status-card {
-  border: 1px solid rgb(var(--v-border-color));
-  transition: all 0.3s ease;
+/* ===== Shared card ===== */
+.pa-card {
+  background: #fff;
+  border: 1px solid var(--pa-line);
+  border-radius: 20px;
+  box-shadow: var(--pa-shadow-card);
 }
 
-.signature-status-card:hover {
-  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.1);
-}
-
-.signature-empty-state {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 12px;
-  border: 2px dashed rgb(var(--v-border-color));
-}
-
-.signature-create-btn {
-  background: linear-gradient(45deg, rgb(var(--v-theme-primary)) 0%, #1565c0 100%);
-  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.3);
-  transition: all 0.3s ease;
-}
-
-.signature-create-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(var(--v-theme-primary), 0.4);
-}
-
-.signature-preview-container {
+/* ===== Profile Hero ===== */
+.pa-hero {
   position: relative;
-  min-width: 200px;
-}
-
-.signature-preview-wrapper {
-  position: relative;
-  background: white;
-  border: 2px solid rgb(var(--v-theme-success));
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(var(--v-theme-success), 0.2);
-}
-
-.signature-preview-image {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  border-radius: 6px;
-}
-
-.signature-overlay {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background: rgb(var(--v-theme-success));
-  border-radius: 50%;
-  padding: 4px;
-  box-shadow: 0 2px 8px rgba(var(--v-theme-success), 0.3);
-}
-
-.signature-actions {
+  padding: 26px 28px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  align-items: center;
+  gap: 20px;
+  overflow: hidden;
+  margin-inline: 32px;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(120% 160% at 0% 0%, var(--pa-navy-tint) 0%, transparent 55%);
+    pointer-events: none;
+  }
 }
 
-.signature-info-card {
-  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-  border: 1px solid rgba(var(--v-theme-info), 0.2);
-}
-
-.signature-benefits-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.signature-benefits-list li {
-  padding: 8px 0;
-  padding-left: 24px;
+.pa-avatar {
   position: relative;
-  border-bottom: 1px solid rgba(var(--v-border-color), 0.5);
+  width: 76px;
+  height: 76px;
+  border-radius: 22px;
+  flex: none;
+  background: linear-gradient(150deg, var(--pa-navy) 0%, var(--pa-navy-deep) 100%);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 27px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  box-shadow: 0 12px 26px -10px rgba(61,95,200,.60);
 }
 
-.signature-benefits-list li:last-child {
-  border-bottom: none;
-}
-
-.signature-benefits-list li:before {
-  content: '✓';
+.pa-avatar__ring {
   position: absolute;
-  left: 0;
-  color: rgb(var(--v-theme-success));
-  font-weight: bold;
+  inset: -4px;
+  border-radius: 26px;
+  border: 1.5px solid rgba(61,95,200,.22);
+  pointer-events: none;
 }
 
-.signature-stats-card {
-  background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%);
-  border: 1px solid rgba(var(--v-theme-warning), 0.2);
+.pa-hero__info {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
 
-.stat-item {
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(var(--v-border-color), 0.3);
+.pa-hero__name {
+  margin: 0;
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--pa-ink-strong);
 }
 
-.stat-item:last-child {
-  border-bottom: none;
+.pa-hero__tags {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.pa-hero__email {
+  font-size: 13px;
+  color: var(--pa-muted);
+  font-weight: 500;
+}
+
+/* ===== Chips ===== */
+.pa-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 99px;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+
+  svg { width: 15px; height: 15px; }
+
+  &--role {
+    color: var(--pa-navy);
+    background: var(--pa-navy-tint);
+    border: 1px solid rgba(61,95,200,.16);
+  }
+
+  &--active {
+    color: var(--pa-green);
+    background: var(--pa-green-tint);
+  }
+}
+
+.pa-chip__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  background: var(--pa-green);
+  box-shadow: 0 0 0 3px rgba(22,163,74,.22);
+}
+
+/* ===== Custom Tabs ===== */
+.pa-tabs {
+  display: inline-flex;
+  gap: 4px;
+  margin: 22px 0 14px 32px;
+  padding: 4px;
+  background: #f0f1f7;
+  border: 1px solid var(--pa-line);
+  border-radius: 13px;
+}
+
+.pa-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--pa-muted);
+  border: 0;
+  background: transparent;
+  padding: 9px 18px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: .18s;
+
+  svg { width: 17px; height: 17px; }
+
+  &:hover { color: var(--pa-ink-strong); }
+
+  &--on {
+    background: #fff;
+    color: var(--pa-navy);
+    box-shadow: 0 1px 2px rgba(0,0,0,.07), 0 2px 8px -4px rgba(0,0,0,.12);
+  }
+}
+
+/* ===== Design tokens (scoped to ttd-wrap) ===== */
+.ttd-wrap {
+  --ttd-navy:        #3d5fc8;
+  --ttd-navy-deep:   #2e4db5;
+  --ttd-navy-tint:   #eef1fb;
+  --ttd-navy-tint-2: #dde4f5;
+  --ttd-amber:       #d97706;
+  --ttd-amber-tint:  #fffbeb;
+  --ttd-green:       #16a34a;
+  --ttd-green-tint:  #f0fdf4;
+  --ttd-ink-strong:  #111827;
+  --ttd-ink:         #1f2a4a;
+  --ttd-muted:       #6b7280;
+  --ttd-line:        #e8eaf2;
+  --ttd-line-soft:   #f0f2f7;
+  --ttd-shadow:      0 1px 2px rgba(20,24,40,.04), 0 12px 32px -20px rgba(20,24,40,.22);
+  --ttd-shadow-card: 0 1px 2px rgba(20,24,40,.05), 0 20px 44px -28px rgba(20,24,40,.28);
+
+  padding: 16px 32px 56px;
+}
+
+/* ===== Shared card ===== */
+.ttd-card {
+  background: #fff;
+  border: 1px solid var(--ttd-line);
+  border-radius: 20px;
+  box-shadow: var(--ttd-shadow);
+}
+
+/* ===== Header ===== */
+.ttd-head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.ttd-mark {
+  width: 62px;
+  height: 62px;
+  flex: none;
+  border-radius: 18px;
+  background: var(--ttd-navy);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  box-shadow: 0 10px 24px -10px rgba(61,95,200,.65);
+
+  svg { width: 36px; height: 28px; }
+}
+
+.ttd-head__text { flex: 1; min-width: 0; }
+
+.ttd-head__title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--ttd-ink-strong);
+}
+
+.ttd-head__sub {
+  margin: 5px 0 0;
+  font-size: 14.5px;
+  color: var(--ttd-muted);
+  font-weight: 600;
+}
+
+/* Status badge */
+.ttd-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 9px 15px;
+  border-radius: 99px;
+
+  &--inactive {
+    color: var(--ttd-amber);
+    background: var(--ttd-amber-tint);
+    border: 1px solid rgba(217,119,6,.28);
+  }
+
+  &--active {
+    color: var(--ttd-green);
+    background: var(--ttd-green-tint);
+    border: 1px solid rgba(22,163,74,.28);
+  }
+}
+
+.ttd-status__pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+  background: currentColor;
+}
+
+.ttd-status--inactive .ttd-status__pulse {
+  box-shadow: 0 0 0 4px rgba(217, 119, 6, .22);
+}
+
+.ttd-status--active .ttd-status__pulse {
+  box-shadow: 0 0 0 4px rgba(22, 163, 74, .22);
+}
+
+/* ===== Layout ===== */
+.ttd-grid {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 22px;
+  align-items: start;
+  margin-bottom: 22px;
+
+  @media (max-width: 980px) { grid-template-columns: 1fr; }
+}
+
+/* ===== Hero card ===== */
+.ttd-hero {
+  padding: 14px;
+  box-shadow: var(--ttd-shadow-card);
+}
+
+.ttd-hero__inner {
+  border: 1.5px dashed #c9d1ec;
+  border-radius: 15px;
+  background:
+    radial-gradient(120% 80% at 50% 0%, var(--ttd-navy-tint) 0%, transparent 60%),
+    #fff;
+  padding: 56px 40px 52px;
+  text-align: center;
+  transition: border-color .2s ease;
+
+  &:hover { border-color: var(--ttd-navy); }
+}
+
+/* Signature badge illustration */
+.ttd-sig-badge {
+  position: relative;
+  width: 160px;
+  height: 112px;
+  margin: 0 auto 28px;
+}
+
+.ttd-sig-badge__plate {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid var(--ttd-line);
+  box-shadow: var(--ttd-shadow);
+  display: grid;
+  place-items: center;
+  color: var(--ttd-navy);
+  overflow: hidden;
+
+  svg { width: 116px; height: 66px; }
+}
+
+.ttd-sig-badge__baseline {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 24px;
+  height: 1.5px;
+  background: #d4daf0;
+  pointer-events: none;
+}
+
+.ttd-sig-badge__seal {
+  position: absolute;
+  right: -12px;
+  bottom: -12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--ttd-navy);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 18px -8px rgba(61,95,200,.70);
+  border: 3px solid #fff;
+  color: #fff;
+
+  svg { width: 24px; height: 24px; }
+}
+
+.ttd-hero__title {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ttd-ink-strong);
+}
+
+.ttd-hero__desc {
+  margin: 9px auto 0;
+  max-width: 420px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--ttd-ink);
+  font-weight: 600;
+}
+
+/* Hint line */
+.ttd-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 22px;
+  font-size: 12.5px;
+  color: var(--ttd-muted);
+  font-weight: 500;
+
+  svg { width: 16px; height: 16px; color: var(--ttd-navy); }
+}
+
+
+/* ===== Buttons ===== */
+.ttd-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 26px;
+  flex-wrap: wrap;
+
+  &--left { justify-content: flex-start; }
+}
+
+.ttd-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 50px;
+  padding: 0 24px;
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  border-radius: 13px;
+  cursor: pointer;
+  transition: .18s;
+  white-space: nowrap;
+  border: 0;
+
+  svg { width: 19px; height: 19px; }
+
+  &:disabled { opacity: .55; cursor: not-allowed; transform: none !important; }
+
+  &--primary {
+    background: var(--ttd-navy);
+    color: #fff;
+    box-shadow: 0 10px 22px -10px rgba(61,95,200,.70);
+    &:hover { background: var(--ttd-navy-deep); transform: translateY(-1px); }
+  }
+
+  &--ghost {
+    background: #fff;
+    color: var(--ttd-navy);
+    border: 1.5px solid #c9d1ec;
+    &:hover { background: var(--ttd-navy-tint); border-color: var(--ttd-navy); }
+  }
+
+  &--danger {
+    background: #fff;
+    color: #dc2626;
+    border: 1.5px solid #fecaca;
+    &:hover { background: #fef2f2; border-color: #dc2626; }
+  }
+}
+
+/* ===== Active state ===== */
+.ttd-hero__active {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  padding: 40px 32px;
+  text-align: center;
+
+  @media (min-width: 600px) {
+    flex-direction: row;
+    text-align: left;
+    align-items: flex-start;
+  }
+}
+
+.ttd-active-preview {
+  position: relative;
+  flex: none;
+}
+
+.ttd-active-preview__plate {
+  background: #fff;
+  border: 1.5px solid var(--ttd-line);
+  border-radius: 18px;
+  padding: 18px 22px 28px;
+  box-shadow: var(--ttd-shadow);
+  position: relative;
+  min-width: 190px;
+}
+
+.ttd-active-preview__img {
+  display: block;
+  max-width: 160px;
+  height: auto;
+}
+
+.ttd-active-preview__baseline {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 14px;
+  height: 1.5px;
+  background: #d4daf0;
+}
+
+.ttd-active-preview__seal {
+  position: absolute;
+  right: -10px;
+  bottom: -10px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--ttd-green);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 18px -8px rgba(22,163,74,.70);
+  border: 3px solid #fff;
+  color: #fff;
+
+  svg { width: 20px; height: 20px; }
+}
+
+.ttd-active-info {
+  flex: 1;
+  min-width: 0;
+
+  .ttd-hero__desc { margin: 9px 0 0; max-width: none; }
+}
+
+/* ===== Right Rail ===== */
+.ttd-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* Stats panel */
+.ttd-panel { padding: 22px 24px; }
+
+.ttd-panel__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.ttd-panel__ic {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--ttd-navy-tint);
+  color: var(--ttd-navy);
+  display: grid;
+  place-items: center;
+  flex: none;
+
+  svg { width: 22px; height: 22px; }
+}
+
+.ttd-panel__title {
+  margin: 0;
+  font-size: 16.5px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: var(--ttd-ink-strong);
+}
+
+.ttd-panel__sub {
+  font-size: 12px;
+  color: var(--ttd-muted);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.ttd-stat-rows { margin-top: 14px; }
+
+.ttd-stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 0;
+  border-top: 1px solid var(--ttd-line-soft);
+
+  &:first-child { border-top: 0; }
+}
+
+.ttd-stat-row__key {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ttd-ink);
+}
+
+.ttd-stat-row__dot {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #f5f6fa;
+  color: var(--ttd-muted);
+  display: grid;
+  place-items: center;
+  flex: none;
+
+  svg { width: 18px; height: 18px; }
+}
+
+.ttd-stat-row__val {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ttd-ink-strong);
+  font-variant-numeric: tabular-nums;
+
+  &--na { color: var(--ttd-muted); font-weight: 600; }
+}
+
+/* Chip */
+.ttd-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 99px;
+
+  &--active {
+    color: var(--ttd-green);
+    background: var(--ttd-green-tint);
+  }
+
+  &--inactive {
+    color: var(--ttd-amber);
+    background: var(--ttd-amber-tint);
+  }
+
+  &--mb { display: inline-flex; margin-bottom: 10px; }
+}
+
+.ttd-chip__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  background: currentColor;
+}
+
+/* Secure card */
+.ttd-secure {
+  padding: 18px 20px;
+  display: flex;
+  gap: 13px;
+  align-items: flex-start;
+  background: var(--ttd-navy-tint);
+  border-color: rgba(61,95,200,.14);
+}
+
+.ttd-secure__ic {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: var(--ttd-navy);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  flex: none;
+
+  svg { width: 26px; height: 26px; }
+}
+
+.ttd-secure__title {
+  margin: 2px 0 4px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ttd-ink-strong);
+  letter-spacing: -0.01em;
+}
+
+.ttd-secure__desc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ttd-ink);
+  font-weight: 600;
+}
+
+/* ===== Benefits ===== */
+.ttd-benefits { padding: 24px 26px 26px; }
+
+.ttd-benefits__head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.ttd-benefits__title {
+  margin: 0;
+  font-size: 16.5px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: var(--ttd-ink-strong);
+}
+
+.ttd-benefits__sub {
+  font-size: 13px;
+  color: var(--ttd-muted);
+  font-weight: 500;
+}
+
+.ttd-blist {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+
+  @media (max-width: 980px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 560px)  { grid-template-columns: 1fr; }
+}
+
+.ttd-bitem {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--ttd-line);
+  border-radius: 15px;
+  background: #fafafa;
+  transition: .18s;
+
+  &:hover {
+    border-color: rgba(61,95,200,.30);
+    box-shadow: var(--ttd-shadow);
+    transform: translateY(-2px);
+  }
+}
+
+.ttd-bitem__ic {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--ttd-navy-tint);
+  color: var(--ttd-navy);
+  display: grid;
+  place-items: center;
+
+  svg { width: 26px; height: 26px; }
+}
+
+.ttd-bitem__t {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ttd-ink-strong);
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.ttd-bitem__d {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ttd-ink);
+  font-weight: 600;
 }
 
 .signature-dialog {
@@ -776,18 +1460,10 @@ const downloadSignature = (format: 'png' | 'jpg') => {
 }
 
 @media (max-width: 768px) {
-  .signature-actions {
-    justify-content: center;
-  }
-  
-  .signature-preview-container {
-    min-width: 150px;
-  }
-  
   .signature-pad-content {
     padding: 16px;
   }
-  
+
   .signature-dialog-actions {
     padding: 16px;
   }

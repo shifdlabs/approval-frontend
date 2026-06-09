@@ -20,7 +20,7 @@ export default [
           icon: { icon: 'tabler-star' },
         },
         {
-          title: 'Booking Number',
+          title: 'My Bookings',
           to: { name: 'reguler-booking' },
           icon: { icon: 'tabler-sort-descending-2' },
         },
