@@ -12,19 +12,21 @@ const {
   handleFileSelected,
   removeImage
 } = letterHeadController();
+
+const { t } = useI18n()
 </script>
 
 <template>
     <VCard class="mb-6">
     <template #title>
       <div class="v-card-title text-wrap">
-        Manage Letterhead
+        {{ t('letterhead.title') }}
       </div>
     </template>
 
     <template #subtitle>
       <div class="text-wrap">
-        All the information you’ve entered below will be compiled into a letterhead for your letter.
+        {{ t('letterhead.subtitle') }}
       </div>
     </template>
     <VCardText>
@@ -41,7 +43,7 @@ const {
                   variant="tonal"
                   @click="removeImage"
                 >
-                  Remove
+                  {{ t('letterhead.remove') }}
                 </VBtn>
               </div>
             </div>
@@ -53,10 +55,10 @@ const {
 
             <VRow style="flex-direction: column;" class="ml-2">
               <VLabel>
-                Allowed formats: PNG, JPG, JPEG. Max size of 1Mb
+                {{ t('letterhead.allowedFormats') }}
               </VLabel>
               <VLabel v-if="imageUrl != ''" class="text-success">
-                ✓ Letterhead uploaded
+                {{ t('letterhead.uploaded') }}
               </VLabel>
             </VRow>
           </div>
@@ -66,56 +68,56 @@ const {
         <VCol cols="12">
           <AppTextField
             v-model="initialFormData.companyName"
-            label="Company Name"
-            placeholder="Enter your company name"
+            :label="t('letterhead.companyName')"
+            :placeholder="t('letterhead.companyNamePh')"
           />
         </VCol>
 
         <VCol cols="12">
           <AppTextField
             v-model="initialFormData.description"
-            label="Description"
-            placeholder="Enter your company description"
+            :label="t('letterhead.description')"
+            :placeholder="t('letterhead.descriptionPh')"
           />
         </VCol>
 
-        <VCol 
+        <VCol
         cols="12"
         md="6">
           <AppTextField
             v-model="initialFormData.email"
-            label="Email"
-            placeholder="Enter your company email"
+            :label="t('letterhead.email')"
+            :placeholder="t('letterhead.emailPh')"
           />
         </VCol>
 
-        <VCol 
+        <VCol
         cols="12"
         md="6">
           <AppTextField
             v-model="initialFormData.phoneNumber"
-            label="Phone Number"
-            placeholder="Enter your company phone number"
+            :label="t('letterhead.phone')"
+            :placeholder="t('letterhead.phonePh')"
           />
         </VCol>
 
-        <VCol 
+        <VCol
         cols="12"
         md="6">
           <AppTextField
             v-model="initialFormData.address"
-            label="Address"
-            placeholder="Enter your company address"
+            :label="t('letterhead.address')"
+            :placeholder="t('letterhead.addressPh')"
           />
         </VCol>
 
-        <VCol 
+        <VCol
         cols="12"
         md="6">
           <AppTextField
             v-model="initialFormData.city"
-            label="City"
-            placeholder="Enter your company city"
+            :label="t('letterhead.city')"
+            :placeholder="t('letterhead.cityPh')"
           />
         </VCol>
 
@@ -129,16 +131,16 @@ const {
                 @click="previewLetterhead"
                 :disabled="isSaving"
               >
-                Preview as Letterhead
+                {{ t('letterhead.preview') }}
               </VBtn>
 
-              <VBtn 
+              <VBtn
               type="submit"
               @click="updateLetterhead"
               :loading="isSaving"
               :disabled="isSaving"
               >
-                Save Changes
+                {{ isSaving ? t('letterhead.saving') : t('letterhead.save') }}
               </VBtn>
             </VCol>
       </VRow>
@@ -157,7 +159,7 @@ const {
       size="64"
       color="primary"
     />
-    <div class="text-h6 mt-4">Saving...</div>
+    <div class="text-h6 mt-4">{{ t('letterhead.saving') }}</div>
   </VOverlay>
 
   <VSnackbar
@@ -165,14 +167,14 @@ const {
     multi-line
     :timeout="3000"
   >
-    Your data has been successfully stored.
+    {{ t('letterhead.saved') }}
 
     <template #actions>
       <VBtn
         color="success"
         @click="isSuccessSnackbarVisible = false"
       >
-        Close
+        {{ t('letterhead.close') }}
       </VBtn>
     </template>
   </VSnackbar>

@@ -17,6 +17,8 @@ const dialogModelValueUpdate = (val: boolean) => {
   emit('update:isDialogVisible', val)
 }
 
+const { t } = useI18n()
+
 const userRole = (value?: number) => {
   if (value === 1)
     return { color: 'secondary', text: 'Reguler' }
@@ -28,9 +30,9 @@ const userRole = (value?: number) => {
 
 const accessType = (hasAccess?: boolean) => {
   if (hasAccess)
-    return { color: 'success', text: 'Active' }
+    return { color: 'success', text: t('common.active') }
   else
-    return { color: 'error', text: 'Disabled' }
+    return { color: 'error', text: t('common.disabled') }
 }
 
 </script>
@@ -48,14 +50,14 @@ const accessType = (hasAccess?: boolean) => {
       <VCardText>
         <!-- 👉 Title -->
         <h4 class="text-h4 text-center mb-2">
-          Detail User
+          {{ t('detailUser.title') }}
         </h4>
 
         <!-- 👉 Form -->
         <VRow>
         <VCol cols="6">
             <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;">
-            Employee ID
+            {{ t('detailUser.employeeId') }}
             </VLabel>
             <h6 class="text-h6" style="max-width: 200px;">
             {{ props.user?.id }}
@@ -64,7 +66,7 @@ const accessType = (hasAccess?: boolean) => {
 
         <VCol cols="6">
             <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;">
-            Email
+            {{ t('detailUser.email') }}
             </VLabel>
             <h6 class="text-h6">
             {{ props.user?.email }}
@@ -75,7 +77,7 @@ const accessType = (hasAccess?: boolean) => {
         <VRow>
         <VCol cols="6">
             <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;">
-            First Name
+            {{ t('detailUser.firstName') }}
             </VLabel>
             <h6 class="text-h6">
             {{ props.user?.firstName }}
@@ -84,7 +86,7 @@ const accessType = (hasAccess?: boolean) => {
 
         <VCol cols="6">
             <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;">
-            Last Name
+            {{ t('detailUser.lastName') }}
             </VLabel>
             <h6 class="text-h6">
             {{ props.user?.lastName }}
@@ -95,7 +97,7 @@ const accessType = (hasAccess?: boolean) => {
         <VRow>
         <VCol cols="6">
             <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;">
-            Position
+            {{ t('detailUser.position') }}
             </VLabel>
             <h6 class="text-h6">
             {{ props.user?.position.name }}
@@ -104,7 +106,7 @@ const accessType = (hasAccess?: boolean) => {
 
         <VCol cols="6">
             <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;">
-            Phone Number
+            {{ t('common.phone') }}
             </VLabel>
             <h6 class="text-h6">
             {{ props.user?.phone }}
@@ -116,7 +118,7 @@ const accessType = (hasAccess?: boolean) => {
         <VCol cols="6">
             <div class="d-flex flex-column align-items-start">
             <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;">
-            User Role
+            {{ t('common.role') }}
             </VLabel>
             <VChip
             :color="userRole(props.user?.role).color"
@@ -130,7 +132,7 @@ const accessType = (hasAccess?: boolean) => {
         <VCol cols="6">
             <div class="d-flex flex-column align-items-start">
                 <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;">
-                Access
+                {{ t('common.access') }}
                 </VLabel>
                 <VChip
                 :color="accessType(props.user?.access).color"

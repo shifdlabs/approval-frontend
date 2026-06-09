@@ -10,6 +10,8 @@ const {
   headers,
   onTapFilter,
 } = historiesController();
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -20,7 +22,7 @@ const {
           <div class="d-flex align-center flex-wrap">
             <AppTextField
               v-model="searchQuery"
-              placeholder="Search Subject"
+              :placeholder="t('histories.search')"
               style="inline-size: 200px; width: 500px;"
               class="me-3"
               clearable
@@ -46,19 +48,19 @@ const {
             <VSelect
               v-model="filterType"
               :items="['Internal', 'External']"
-              label="Select Type"
+              :label="t('histories.selectType')"
               clearable
             />
             <VSelect
               v-model="filterPriority"
               :items="['High', 'Medium', 'Low']"
-              label="Select Priority"
+              :label="t('histories.selectPriority')"
               clearable
             />
             <VSelect
               v-model="filterStatus"
               :items="['Approved', 'Rejected']"
-              label="Select Status"
+              :label="t('histories.selectStatus')"
               clearable
             />
           </div>

@@ -39,32 +39,32 @@ const {
 
         <VCardText class="text-center">
           <h4 class="text-h4 mb-1">
-            Welcome to <span class="text-capitalize">Shifd {{ themeConfig.app.title }}</span>
+            {{ $t('auth.loginTitle') }} <span class="text-capitalize">{{ themeConfig.app.title }}</span>
           </h4>
           <p class="mb-0">
-            Please sign-in to your account
+            {{ $t('auth.loginSubtitle') }}
           </p>
 
           <VAlert v-if="isLoginError" color="error" class="mt-4">
-            {{ loginErrorMessage || 'The email or password you entered is incorrect.' }}
+            {{ loginErrorMessage || $t('auth.wrongCredentials') }}
           </VAlert>
 
           <VAlert v-if="isAccountInactive" color="error" class="mt-4">
-            {{ loginErrorMessage || 'The account has been disabled, contact your administrator.' }}
+            {{ loginErrorMessage || $t('auth.accountDisabled') }}
           </VAlert>
         </VCardText>
 
         <VCardText>
-          <VForm 
+          <VForm
           ref="refVForm"
           @submit.prevent="onSubmit">
             <VRow>
               <VCol cols="12">
                 <AppTextField
                   v-model="credentials.email"
-                  label="Email"
+                  :label="$t('auth.email')"
                   type="email"
-                  placeholder="johndoe@email.com"
+                  :placeholder="$t('auth.emailPh')"
                   :rules="[requiredValidator, emailValidator]"
                 />
               </VCol>
@@ -73,7 +73,7 @@ const {
               <VCol cols="12">
                 <AppTextField
                   v-model="credentials.password"
-                  label="Password"
+                  :label="$t('auth.password')"
                   placeholder="············"
                   :type="isPasswordVisible ? 'text' : 'password'"
                   autocomplete="password"
@@ -89,7 +89,7 @@ const {
                   :disabled="isInProgress"
                   class="mt-6"
                 >
-                  Login
+                  {{ $t('auth.loginBtn') }}
                 </VBtn>
               </VCol>
 
@@ -113,8 +113,8 @@ const {
             size="50"
             class="mb-4"
           />
-          <div class="text-white text-h6">Logging in...</div>
-          <div class="text-white text-body-2 mt-2">Please wait</div>
+          <div class="text-white text-h6">{{ $t('auth.loggingIn') }}</div>
+          <div class="text-white text-body-2 mt-2">{{ $t('common.pleaseWait') }}</div>
         </VCardText>
       </VCard>
     </VDialog>

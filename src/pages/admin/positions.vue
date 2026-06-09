@@ -21,6 +21,8 @@ const {
   submitEditPositionForm,
   selectedPositionName,
 } = positionsController();
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -31,7 +33,7 @@ const {
           <div class="d-flex align-center flex-wrap">
             <AppTextField
               v-model="searchQuery"
-              placeholder="Search Job Position"
+              :placeholder="t('positions.search')"
               style="inline-size: 200px; width: 500px;"
               class="me-3"
               @input="applyFilters"
@@ -41,7 +43,7 @@ const {
           <VSpacer />
           <div class="d-flex align-center flex-wrap gap-4">
             <VBtn prepend-icon="tabler-plus" @click="isCreatePositionDialogVisible = true">
-              Add Job Position
+              {{ t('positions.addNew') }}
             </VBtn>
           </div>
         </div>

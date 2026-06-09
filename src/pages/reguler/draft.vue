@@ -73,13 +73,15 @@ const filterPriority = ref<string | null>(null);
 const isFilterSectionVisible = ref(false);
 const isLoading = ref(false);
 
-const headers = [
-  { title: 'SUBJECT', key: 'subject' },
-  { title: 'BODY', key: 'body' },
-  { title: 'TYPE', key: 'type' },
-  { title: 'PRIORITY', key: 'priority' },
-  { title: 'LAST UPDATE', key: 'lastUpdate' },
-];
+const { t } = useI18n()
+
+const headers = computed(() => [
+  { title: t('draft.columns.subject'), key: 'subject' },
+  { title: t('draft.columns.body'), key: 'body' },
+  { title: t('draft.columns.type'), key: 'type' },
+  { title: t('draft.columns.priority'), key: 'priority' },
+  { title: t('draft.columns.lastUpdate'), key: 'lastUpdate' },
+]);
 
 const fetchDraftDocuments = async () => {
   isLoading.value = true;
@@ -158,7 +160,7 @@ function onTapRow(
           <div class="d-flex align-center flex-wrap">
             <AppTextField
               v-model="searchQuery"
-              placeholder="Search Subject"
+              :placeholder="t('draft.search')"
               style="inline-size: 200px; width: 500px;"
               class="me-3"
               clearable
@@ -185,13 +187,13 @@ function onTapRow(
             <VSelect
               v-model="filterType"
               :items="['Internal', 'External']"
-              label="Select Type"
+              :label="t('draft.selectType')"
               clearable
             />
             <VSelect
               v-model="filterPriority"
               :items="['High', 'Medium', 'Low']"
-              label="Select Priority"
+              :label="t('draft.selectPriority')"
               clearable
             />
           </div>

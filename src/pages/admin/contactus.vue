@@ -9,13 +9,14 @@ const {
   toggleFAQ,
 } = contactUsController()
 
+const { t } = useI18n()
 </script>
 
 <template>
   <VRow class="match-height">
     <VCol cols="12">
       <AppCardCode
-        title="FAQ"
+        :title="t('contactUs.faq')"
         variant="outlined"
         :code="{ ts: '<template>...</template>', js: '<template>...</template>' }"
         class="custom-card purple-text"
@@ -25,19 +26,19 @@ const {
     </VCol>
     <VCol cols="12">
       <div class="text-center mb-6">
-        <h2 class="purple-text">Questions</h2>
-        <p class="text-lg">You still have questions?</p>
-        <p>If you cannot find a question in our FAQ, you can contact us.</p>
+        <h2 class="purple-text">{{ t('contactUs.questions') }}</h2>
+        <p class="text-lg">{{ t('contactUs.still') }}</p>
+        <p>{{ t('contactUs.canContact') }}</p>
       </div>
       <div class="d-flex justify-center mb-6">
         <div class="text-center mx-4">
           <img :src="phoneIcon" alt="Phone Icon" height="48" />
-          <p class="text-lg font-bold purple-text">Phone</p>
+          <p class="text-lg font-bold purple-text">{{ t('contactUs.phone') }}</p>
           <p>+1 234 567 890</p>
         </div>
         <div class="text-center mx-4">
           <img :src="emailIcon" alt="Email Icon" height="48" />
-          <p class="text-lg font-bold purple-text">Email</p>
+          <p class="text-lg font-bold purple-text">{{ t('contactUs.email') }}</p>
           <p>support@example.com</p>
         </div>
       </div>

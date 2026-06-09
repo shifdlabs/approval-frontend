@@ -23,7 +23,6 @@ const {
   isDetailUserDialogVisible,
   isUpdateUserDialogVisible,
   isFilterSectionVisible,
-  headers,
   fetchUsers,
   refetchList,
   userRole,
@@ -44,6 +43,18 @@ const {
   unlockUser,
 } = usersController();
 
+const { t } = useI18n()
+
+const headers = computed(() => [
+  { title: 'ID', key: 'id' },
+  { title: t('common.firstName') + ' & ' + t('common.lastName'), key: 'name' },
+  { title: t('common.email'), key: 'email' },
+  { title: t('common.jobPosition'), key: 'position' },
+  { title: t('common.role'), key: 'role' },
+  { title: t('common.access'), key: 'access' },
+  { title: t('common.actions'), key: 'actions' },
+])
+
 const isImportUsersDialogVisible = ref(false);
 
 const handleImportComplete = async () => {
@@ -61,7 +72,7 @@ const handleImportComplete = async () => {
           <div class="d-flex align-center flex-wrap">
             <AppTextField
               v-model="searchQuery"
-              placeholder="Search Users"
+              :placeholder="t('users.search')"
               style="inline-size: 200px; width: 500px;"
               class="me-3"
               :maxlength="100"
@@ -81,15 +92,15 @@ const handleImportComplete = async () => {
           <VSpacer />
           <div class="d-flex align-center flex-wrap gap-4">
             <VBtn prepend-icon="tabler-plus" @click="isCreateUserDialogVisible = true">
-              Add New User
+              {{ t('users.addNew') }}
             </VBtn>
 
             <VBtn prepend-icon="tabler-file-import" @click="isImportUsersDialogVisible = true">
-              Import Users
+              {{ t('users.importBtn') }}
             </VBtn>
- 
+
             <VBtn v-if="selected.length > 0" color="error" prepend-icon="tabler-trash" @click="showDeleteMultipleUserDialog">
-              Delete Selected Users
+              {{ t('users.deleteSelected') }}
             </VBtn>
           </div>
         </div>
@@ -102,28 +113,28 @@ const handleImportComplete = async () => {
         <div class="d-flex justify-end flex-wrap gap-y-4 gap-x-6">
           <AppSelect
             v-model="filteredPosition"
-            label="Job Position"
-            placeholder="Select Job Position"
+            :label="t('users.filters.jobPosition')"
+            :placeholder="t('users.filters.selectPosition')"
             :items="positions"
             item-title="name"
             item-value="id"
             clearable
           />
- 
+
           <AppSelect
             v-model="filteredRole"
-            label="User Type"
-            placeholder="Select User Type"
+            :label="t('users.filters.userType')"
+            :placeholder="t('users.filters.selectType')"
             :items="roleTypeValue"
             item-title="title"
             item-value="value"
             clearable
           />
- 
+
           <AppSelect
             v-model="filteredAccess"
-            label="Access Type"
-            placeholder="Select Access Type"
+            :label="t('users.filters.access')"
+            :placeholder="t('users.filters.selectAccess')"
             :items="accessTypeValue"
             item-title="title"
             item-value="value"
@@ -207,37 +218,37 @@ const handleImportComplete = async () => {
                       value="editUser"
                       @click="editItem(item)"
                     >
-                      Edit User
+                      {{ t('users.actions.edit') }}
                     </VListItem>
- 
+
                     <VListItem
                       value="changePassword"
                       @click="changePassword(item)"
                     >
-                      Change Password
+                      {{ t('users.actions.changePassword') }}
                     </VListItem>
- 
+
                     <VListItem
                       value="changeRole"
                       @click="showChangeRoleDialog(item)"
                     >
                       <div v-if="item.role == 99">
-                        Set as Reguler User
+                        {{ t('users.actions.setReguler') }}
                       </div>
                       <div v-else>
-                        Set as Admin
+                        {{ t('users.actions.setAdmin') }}
                       </div>
                     </VListItem>
- 
+
                     <VListItem
                       value="changeAccess"
                       @click="showChangeAcceessDialog(item)"
                     >
                       <div v-if="item.access == true">
-                        Disabled Access
+                        {{ t('users.actions.disable') }}
                       </div>
                       <div v-else>
-                        Enabled Access
+                        {{ t('users.actions.enable') }}
                       </div>
                     </VListItem>
 
@@ -246,7 +257,7 @@ const handleImportComplete = async () => {
                       @click="showUnlockUserDialog(item)"
                     >
                       <VIcon start icon="tabler-lock-open" size="20" />
-                      Unlock Account
+                      {{ t('users.actions.unlock') }}
                     </VListItem>
                   </VList>
                 </VMenu>

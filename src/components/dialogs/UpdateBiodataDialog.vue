@@ -100,6 +100,8 @@ const onFormReset = () => {
 const dialogModelValueUpdate = (val: boolean) => {
   emit('update:isDialogVisible', val)
 }
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -115,19 +117,19 @@ const dialogModelValueUpdate = (val: boolean) => {
       <VCardText>
         <!-- 👉 Title -->
         <h4 class="text-h4 text-center mb-2">
-            Edit Personal Information
+          {{ t('settings.updatePersonal') }}
         </h4>
-        
+
         <p class="text-center mb-6">
-            Updating personal information will be applied to all related data.
+          {{ t('settings.updatePersonalSub') }}
         </p>
 
         <VAlert v-if="isErrorUniqueEmail" color="error" class="mt-4">
-          Inputted email already registered.
+          {{ t('common.emailAlreadyRegistered') }}
         </VAlert>
 
         <VAlert v-if="!isAllInputtedValid" color="error" class="mt-6 mb-6">
-          Please follow the rules of the input form.
+          {{ t('common.errorFormInput') }}
         </VAlert>
 
         <!-- 👉 Form -->
@@ -141,8 +143,8 @@ const dialogModelValueUpdate = (val: boolean) => {
             <VCol cols="12" md="6">
               <AppTextField
                 v-model="formData.firstName"
-                label="First Name"
-                placeholder="Enter your first name"
+                :label="t('common.firstName')"
+                :placeholder="t('common.firstNamePh')"
                 :rules="[requiredValidator, maxLengthValidator(100)]"
               />
             </VCol>
@@ -151,8 +153,8 @@ const dialogModelValueUpdate = (val: boolean) => {
             <VCol cols="12" md="6">
               <AppTextField
                 v-model="formData.lastName"
-                label="Last Name"
-                placeholder="Enter your last name"
+                :label="t('common.lastName')"
+                :placeholder="t('common.lastNamePh')"
                 :rules="[requiredValidator, maxLengthValidator(100)]"
               />
             </VCol>
@@ -161,9 +163,9 @@ const dialogModelValueUpdate = (val: boolean) => {
             <VCol cols="12" md="6">
               <AppTextField
                 v-model="formData.phone"
-                label="Phone Number"
+                :label="t('common.phone')"
                 type="tel"
-                placeholder="Enter your phone number"
+                :placeholder="t('common.phonePh')"
                 :rules="[requiredValidator, phoneValidator]"
               />
             </VCol>
@@ -175,16 +177,16 @@ const dialogModelValueUpdate = (val: boolean) => {
             >
               <AppSelect
                 v-model="formData.positionId"
-                label="Job Position"
-                placeholder="Please enter a job position"
+                :label="t('common.jobPosition')"
+                :placeholder="t('common.jobPositionPh')"
                 :items="props.position"
                 item-title="name"
                 item-value="id"
                 clearable
               />
             </VCol>
-            
-            <!-- 👉 Register and Cancel -->
+
+            <!-- 👉 Cancel and Update -->
             <VCol
               cols="12"
               class="d-flex flex-wrap gap-4"
@@ -195,13 +197,13 @@ const dialogModelValueUpdate = (val: boolean) => {
                 variant="outlined"
                 @click="onFormReset"
               >
-                Cancel
+                {{ t('common.cancel') }}
               </VBtn>
 
-              <VBtn 
+              <VBtn
               type="submit"
               >
-                Update
+                {{ t('common.update') }}
               </VBtn>
             </VCol>
           </VRow>

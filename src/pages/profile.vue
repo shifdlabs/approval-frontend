@@ -12,7 +12,7 @@ const {
   currentSignature,
   isSavingSignature,
   signatureUrl,
-  
+  isLoading,
 
   initializeProfile,
   fetchProfile,
@@ -23,6 +23,7 @@ const {
 } = useProfileController()
 
 
+const { t } = useI18n()
 const isDeletingSignature = ref(false)
 
 const handleDeleteSignature = async () => {
@@ -240,6 +241,13 @@ const downloadSignature = (format: 'png' | 'jpg') => {
 <template>
   <div class="pa-page">
 
+    <!-- Loading overlay -->
+    <div v-if="isLoading" class="pa-loading">
+      <VProgressCircular indeterminate color="primary" size="48" />
+    </div>
+
+    <template v-else>
+
     <!-- ===== Profile Hero ===== -->
     <div class="pa-card pa-hero">
       <div class="pa-avatar">
@@ -254,7 +262,7 @@ const downloadSignature = (format: 'png' | 'jpg') => {
             {{ user.position.name }}
           </span>
           <span class="pa-chip pa-chip--active">
-            <span class="pa-chip__dot"></span>Akun Aktif
+            <span class="pa-chip__dot"></span>{{ $t('profile.activeAccount') }}
           </span>
         </div>
         <div class="pa-hero__email">{{ user?.email }}</div>
@@ -265,15 +273,15 @@ const downloadSignature = (format: 'png' | 'jpg') => {
     <div class="pa-tabs">
       <button :class="['pa-tab', currentTab === 'item-1' && 'pa-tab--on']" @click="currentTab = 'item-1'">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" d="M4 6.5h12M4 10h8M4 13.5h12M4 17h6"/></svg>
-        Profil
+        {{ $t('profile.tabs.profile') }}
       </button>
       <button :class="['pa-tab', currentTab === 'item-2' && 'pa-tab--on']" @click="currentTab = 'item-2'">
         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.2" y="10.5" width="13.6" height="9.3" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" d="M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5"/></svg>
-        Keamanan
+        {{ $t('profile.tabs.security') }}
       </button>
       <button :class="['pa-tab', currentTab === 'item-3' && 'pa-tab--on']" @click="currentTab = 'item-3'">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M4 15.5c1.6-.8 2.7-3.4 3-6 .2-1.6-.6-2.2-1.3-1-.9 1.6-.9 5.8.1 7.7.7 1.3 1.9.9 2.6-.6.6-1.3 1.3-1 1.6.2.2.9.9 1.3 1.7 1.1 1-.2 1.8-1 2.2-1.9"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M4.5 19.5h15"/></svg>
-        Tanda Tangan
+        {{ $t('profile.tabs.signature') }}
       </button>
     </div>
 
@@ -313,17 +321,17 @@ const downloadSignature = (format: 'png' | 'jpg') => {
                     </svg>
                   </div>
                 </div>
-                <h2 class="ttd-hero__title">Belum Ada Tanda Tangan Digital</h2>
-                <p class="ttd-hero__desc">Buat tanda tangan digital Anda untuk menyetujui dan mengesahkan dokumen secara elektronik — tanpa cetak, tanpa scan.</p>
+                <h2 class="ttd-hero__title">{{ $t('profile.signature.noSignature') }}</h2>
+                <p class="ttd-hero__desc">{{ $t('profile.signature.noSignatureDesc') }}</p>
                 <div class="ttd-actions">
                   <button class="ttd-btn ttd-btn--primary" @click="openSignaturePad">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 5.5v13M5.5 12h13"/></svg>
-                    Buat Tanda Tangan Digital
+                    {{ $t('profile.signature.create') }}
                   </button>
                 </div>
                 <div class="ttd-hint">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.2" y="10.5" width="13.6" height="9.3" rx="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" d="M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5"/><circle cx="12" cy="15" r="1.4" fill="currentColor"/></svg>
-                  Terenkripsi & tersimpan aman pada akun Anda
+                  {{ $t('profile.signature.encrypted') }}
                 </div>
               </div>
 
@@ -342,22 +350,22 @@ const downloadSignature = (format: 'png' | 'jpg') => {
                 </div>
                 <div class="ttd-active-info">
                   <span class="ttd-chip ttd-chip--active ttd-chip--mb">
-                    <span class="ttd-chip__dot"></span>Tanda Tangan Aktif
+                    <span class="ttd-chip__dot"></span>{{ $t('profile.signature.activeTitle') }}
                   </span>
-                  <h2 class="ttd-hero__title">Tanda Tangan Digital Aktif</h2>
-                  <p class="ttd-hero__desc">Tanda tangan Anda siap digunakan untuk persetujuan dokumen. Anda bisa memperbarui atau menggantinya kapan saja.</p>
+                  <h2 class="ttd-hero__title">{{ $t('profile.signature.activeTitle') }}</h2>
+                  <p class="ttd-hero__desc">{{ $t('profile.signature.activeDesc') }}</p>
                   <div class="ttd-actions ttd-actions--left">
                     <button class="ttd-btn ttd-btn--primary" @click="openSignaturePad">
                       <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M11 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
-                      Perbarui
+                      {{ $t('profile.signature.update') }}
                     </button>
                     <button class="ttd-btn ttd-btn--ghost" @click="downloadSignature('jpg')">
                       <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
-                      Lihat
+                      {{ $t('profile.signature.view') }}
                     </button>
                     <button class="ttd-btn ttd-btn--danger" :disabled="isDeletingSignature" @click="handleDeleteSignature">
                       <svg viewBox="0 0 24 24" aria-hidden="true"><polyline fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" points="3 6 5 6 21 6"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-                      {{ isDeletingSignature ? 'Menghapus...' : 'Hapus' }}
+                      {{ isDeletingSignature ? $t('profile.signature.deleting') : $t('profile.signature.delete') }}
                     </button>
                   </div>
                 </div>
@@ -374,8 +382,8 @@ const downloadSignature = (format: 'png' | 'jpg') => {
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M4 4v15a1 1 0 0 0 1 1h15"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M8 15l3.2-3.8 2.6 2.2L19 7.5"/></svg>
                   </span>
                   <div>
-                    <h3 class="ttd-panel__title">Statistik</h3>
-                    <div class="ttd-panel__sub">Ringkasan tanda tangan Anda</div>
+                    <h3 class="ttd-panel__title">{{ $t('profile.signature.stats') }}</h3>
+                    <div class="ttd-panel__sub">{{ $t('profile.signature.statsTitle') }}</div>
                   </div>
                 </div>
                 <div class="ttd-stat-rows">
@@ -383,7 +391,7 @@ const downloadSignature = (format: 'png' | 'jpg') => {
                     <span class="ttd-stat-row__key">
                       <span class="ttd-stat-row__dot">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5.4" width="16" height="15" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M8 3.5v3.6M16 3.5v3.6M4.3 10h15.4"/></svg>
-                      </span>Dibuat
+                      </span>{{ $t('profile.signature.created') }}
                     </span>
                     <span class="ttd-stat-row__val" :class="{ 'ttd-stat-row__val--na': !userSignature?.createdAt }">
                       {{ userSignature?.createdAt ? new Date(userSignature.createdAt).toLocaleDateString('id-ID') : '—' }}
@@ -393,7 +401,7 @@ const downloadSignature = (format: 'png' | 'jpg') => {
                     <span class="ttd-stat-row__key">
                       <span class="ttd-stat-row__dot">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M19 5.5v4h-4M5 18.5v-4h4"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M18.4 9.4A7 7 0 0 0 6.3 7.6L5 9M5.6 14.6a7 7 0 0 0 12.1 1.8L19 15"/></svg>
-                      </span>Terakhir Diperbarui
+                      </span>{{ $t('profile.signature.lastUpdated') }}
                     </span>
                     <span class="ttd-stat-row__val" :class="{ 'ttd-stat-row__val--na': !userSignature?.updatedAt }">
                       {{ userSignature?.updatedAt ? new Date(userSignature.updatedAt).toLocaleDateString('id-ID') : '—' }}
@@ -403,11 +411,11 @@ const downloadSignature = (format: 'png' | 'jpg') => {
                     <span class="ttd-stat-row__key">
                       <span class="ttd-stat-row__dot">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M3.5 12h3.2l2.3-6 4 14 2.6-8h4.9"/></svg>
-                      </span>Status
+                      </span>{{ $t('profile.signature.status') }}
                     </span>
                     <span :class="['ttd-chip', hasExistingSignature ? 'ttd-chip--active' : 'ttd-chip--inactive']">
                       <span class="ttd-chip__dot"></span>
-                      {{ hasExistingSignature ? 'Aktif' : 'Nonaktif' }}
+                      {{ hasExistingSignature ? $t('profile.signature.active') : $t('profile.signature.inactive') }}
                     </span>
                   </div>
                 </div>
@@ -419,8 +427,8 @@ const downloadSignature = (format: 'png' | 'jpg') => {
                   <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.2" y="10.5" width="13.6" height="9.3" rx="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" d="M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5"/><circle cx="12" cy="15" r="1.4" fill="currentColor"/></svg>
                 </span>
                 <div>
-                  <h4 class="ttd-secure__title">Aman & Sah Secara Hukum</h4>
-                  <p class="ttd-secure__desc">Setiap tanda tangan dienkripsi dan terikat pada identitas Anda sesuai standar autentikasi elektronik.</p>
+                  <h4 class="ttd-secure__title">{{ $t('profile.signature.legal') }}</h4>
+                  <p class="ttd-secure__desc">{{ $t('profile.signature.legalDesc') }}</p>
                 </div>
               </div>
             </div>
@@ -429,37 +437,37 @@ const downloadSignature = (format: 'png' | 'jpg') => {
           <!-- ===== Benefits ===== -->
           <div class="ttd-card ttd-benefits">
             <div class="ttd-benefits__head">
-              <h3 class="ttd-benefits__title">Tentang Tanda Tangan Digital</h3>
-              <span class="ttd-benefits__sub">Kenapa beralih ke tanda tangan elektronik</span>
+              <h3 class="ttd-benefits__title">{{ $t('profile.signature.about') }}</h3>
+              <span class="ttd-benefits__sub">{{ $t('profile.signature.why') }}</span>
             </div>
             <div class="ttd-blist">
               <div class="ttd-bitem">
                 <span class="ttd-bitem__ic">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M5 19c0-7 4-13 14-13 0 9-5 14-12 14a6 6 0 0 1-2-1Z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M8 18c2.5-4 5-6.5 9-8.5"/></svg>
                 </span>
-                <span class="ttd-bitem__t">Tanpa Cetak</span>
-                <span class="ttd-bitem__d">Setujui dokumen secara aman tanpa mencetak satu lembar pun.</span>
+                <span class="ttd-bitem__t">{{ $t('profile.signature.features.noPrint') }}</span>
+                <span class="ttd-bitem__d">{{ $t('profile.signature.features.noPrintDesc') }}</span>
               </div>
               <div class="ttd-bitem">
                 <span class="ttd-bitem__ic">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M12 4v16M7 20h10M4 8l4-2 4 2M20 8l-4-2-4 2"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M2 12.5 4 8l2 4.5a2.2 2.2 0 0 1-4 0ZM18 12.5 20 8l2 4.5a2.2 2.2 0 0 1-4 0Z"/></svg>
                 </span>
-                <span class="ttd-bitem__t">Sah Secara Hukum</span>
-                <span class="ttd-bitem__d">Autentikasi elektronik yang mengikat dan diakui secara resmi.</span>
+                <span class="ttd-bitem__t">{{ $t('profile.signature.features.legal') }}</span>
+                <span class="ttd-bitem__d">{{ $t('profile.signature.features.legalDesc') }}</span>
               </div>
               <div class="ttd-bitem">
                 <span class="ttd-bitem__ic">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M13 3 5 13.5h6L11 21l8-10.5h-6z"/></svg>
                 </span>
-                <span class="ttd-bitem__t">Proses Lebih Cepat</span>
-                <span class="ttd-bitem__d">Alur persetujuan dokumen berjalan dalam hitungan detik.</span>
+                <span class="ttd-bitem__t">{{ $t('profile.signature.features.faster') }}</span>
+                <span class="ttd-bitem__d">{{ $t('profile.signature.features.fasterDesc') }}</span>
               </div>
               <div class="ttd-bitem">
                 <span class="ttd-bitem__ic">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M7 4.5h7l4 4V19a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5.5a1 1 0 0 1 1-1Z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M9.5 12.5l1.8 1.8 3.4-3.6"/></svg>
                 </span>
-                <span class="ttd-bitem__t">Jejak Audit</span>
-                <span class="ttd-bitem__d">Riwayat lengkap dan terlacak untuk setiap dokumen yang ditandatangani.</span>
+                <span class="ttd-bitem__t">{{ $t('profile.signature.features.audit') }}</span>
+                <span class="ttd-bitem__d">{{ $t('profile.signature.features.auditDesc') }}</span>
               </div>
             </div>
           </div>
@@ -467,6 +475,8 @@ const downloadSignature = (format: 'png' | 'jpg') => {
         </div>
       </VWindowItem>
     </VWindow>
+
+    </template><!-- end v-else -->
   </div>
 
   <UpdateBiodataDialog
@@ -493,9 +503,9 @@ const downloadSignature = (format: 'png' | 'jpg') => {
         <div class="d-flex align-center">
           <VIcon icon="tabler-signature" color="primary" class="me-3" />
           <div>
-            <h3 class="text-h5 mb-1">Create Digital Signature</h3>
+            <h3 class="text-h5 mb-1">{{ $t('profile.signatureDialog.title') }}</h3>
             <p class="text-body-2 text-medium-emphasis mb-0">
-              Draw your signature in the area below
+              {{ $t('profile.signatureDialog.instruction') }}
             </p>
           </div>
         </div>
@@ -511,7 +521,7 @@ const downloadSignature = (format: 'png' | 'jpg') => {
           border="start"
         >
           <VIcon icon="tabler-info-circle" class="me-2" />
-          Use your mouse or touch device to create your signature. Make sure it's clear and legible.
+          {{ $t('profile.signatureDialog.usageNote') }}
         </VAlert>
         
         <div class="signature-pad-container">
@@ -536,11 +546,11 @@ const downloadSignature = (format: 'png' | 'jpg') => {
             <VCol cols="12" md="6">
               <VSelect
                 v-model="signatureOptions.penColor"
-                label="Pen Color"
+                :label="$t('profile.signatureDialog.penColor')"
                 :items="[
-                  { title: 'Blue (Recommended)', value: '#1976d2' },
-                  { title: 'Black', value: '#000000' },
-                  { title: 'Navy', value: '#0d47a1' }
+                  { title: $t('profile.signatureDialog.blueRec'), value: '#1976d2' },
+                  { title: $t('profile.signatureDialog.black'), value: '#000000' },
+                  { title: $t('profile.signatureDialog.navy'), value: '#0d47a1' }
                 ]"
                 variant="outlined"
                 density="compact"
@@ -550,7 +560,7 @@ const downloadSignature = (format: 'png' | 'jpg') => {
             <VCol cols="12" md="6">
               <VSlider
                 v-model="signatureOptions.maxWidth"
-                label="Pen Width"
+                :label="$t('profile.signatureDialog.penWidth')"
                 min="1"
                 max="6"
                 step="1"
@@ -572,22 +582,22 @@ const downloadSignature = (format: 'png' | 'jpg') => {
           class="me-2"
         >
           <VIcon icon="tabler-x" class="me-1" />
-          Cancel
+          {{ $t('profile.signatureDialog.cancel') }}
         </VBtn>
-        
-        <VBtn 
-          color="warning" 
+
+        <VBtn
+          color="warning"
           variant="outlined"
           @click="clearSignaturePad"
           class="me-2"
         >
           <VIcon icon="tabler-eraser" class="me-1" />
-          Clear
+          {{ $t('profile.signatureDialog.clear') }}
         </VBtn>
-        
+
         <VSpacer />
-        
-        <VBtn 
+
+        <VBtn
           color="success"
           @click="saveSignature"
           :disabled="isSignatureEmpty || isSavingSignature"
@@ -596,7 +606,7 @@ const downloadSignature = (format: 'png' | 'jpg') => {
           class="signature-save-btn"
         >
           <VIcon icon="tabler-check" class="me-2" />
-          {{ isSavingSignature ? 'Saving...' : 'Save Signature' }}
+          {{ isSavingSignature ? $t('profile.signatureDialog.saving') : $t('profile.signatureDialog.save') }}
         </VBtn>
       </VCardActions>
     </VCard>
@@ -610,9 +620,9 @@ const downloadSignature = (format: 'png' | 'jpg') => {
     <!-- Dialog close btn -->
     <DialogCloseBtn @click="isDeleteAccountDialogVisible = !isDeleteAccountDialogVisible" />
           <!-- Dialog Content -->
-    <VCard title="Confirm Account Deletion">
+    <VCard :title="$t('profile.deleteDialog.title')">
       <VCardText>
-        Are you sure you want to delete your account? Your profile and information will be temporarily hidden, and you can reactivate it at any time.
+        {{ $t('profile.deleteDialog.description') }}
       </VCardText>
 
       <VCardText class="d-flex justify-end gap-3 flex-wrap">
@@ -620,14 +630,14 @@ const downloadSignature = (format: 'png' | 'jpg') => {
           color="primary"
           @click="isDeleteAccountDialogVisible = false"
         >
-          Cancel
+          {{ $t('common.cancel') }}
         </VBtn>
 
-        <VBtn 
+        <VBtn
         color="error"
         variant="tonal"
         @click="deleteAccount">
-          Yes, Delete This Account
+          {{ $t('profile.deleteDialog.confirm') }}
         </VBtn>
       </VCardText>
     </VCard>
@@ -636,6 +646,13 @@ const downloadSignature = (format: 'png' | 'jpg') => {
 
 <style scoped lang="scss">
 /* ===== Page wrapper ===== */
+.pa-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
 .pa-page {
   --pa-navy:       #3d5fc8;
   --pa-navy-deep:  #2e4db5;
@@ -649,9 +666,10 @@ const downloadSignature = (format: 'png' | 'jpg') => {
   --pa-shadow:     0 1px 2px rgba(20,24,40,.04), 0 14px 34px -22px rgba(20,24,40,.22);
   --pa-shadow-card:0 1px 2px rgba(20,24,40,.05), 0 22px 48px -30px rgba(20,24,40,.26);
 
-  /* Break out of .layout-page-content's padding-inline: 1.5rem so width matches navbar */
+  /* Break out of .layout-page-content's padding so width matches navbar */
   margin-inline: -1.5rem;
-  padding: 28px 0 56px;
+  margin-block-start: -1.5rem;
+  padding: 0 0 56px;
 }
 
 /* ===== Shared card ===== */

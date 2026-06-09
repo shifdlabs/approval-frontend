@@ -110,6 +110,8 @@ const onFormReset = () => {
 const dialogModelValueUpdate = (val: boolean) => {
   emit('update:isDialogVisible', val);
 };
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -125,15 +127,15 @@ const dialogModelValueUpdate = (val: boolean) => {
       <VCardText>
         <!-- 👉 Title -->
         <h4 class="text-h4 text-center mb-2">
-          Register New User
+          {{ t('users.create.title') }}
         </h4>
 
         <VAlert v-if="isErrorUniqueEmail" color="error" class="mt-4">
-          Inputted email already registered.
+          {{ t('common.emailAlreadyRegistered') }}
         </VAlert>
 
         <VAlert v-if="!isAllInputtedValid" color="error" class="mt-6 mb-6">
-          Please follow the rules of the input form.
+          {{ t('common.errorFormInput') }}
         </VAlert>
 
         <!-- 👉 Form -->
@@ -147,8 +149,8 @@ const dialogModelValueUpdate = (val: boolean) => {
             <VCol cols="12">
               <AppTextField
                 v-model="formData.firstName"
-                label="First Name"
-                placeholder="Enter your first name"
+                :label="t('common.firstName')"
+                :placeholder="t('common.firstNamePh')"
                 :rules="[requiredValidator, maxLengthValidator(100)]"
               />
             </VCol>
@@ -157,8 +159,8 @@ const dialogModelValueUpdate = (val: boolean) => {
             <VCol cols="12">
               <AppTextField
                 v-model="formData.lastName"
-                label="Last Name"
-                placeholder="Enter your last name"
+                :label="t('common.lastName')"
+                :placeholder="t('common.lastNamePh')"
                 :rules="[requiredValidator, maxLengthValidator(100)]"
               />
             </VCol>
@@ -167,9 +169,9 @@ const dialogModelValueUpdate = (val: boolean) => {
             <VCol cols="12">
               <AppTextField
                 v-model="formData.email"
-                label="Email"
+                :label="t('common.email')"
                 type="email"
-                placeholder="Enter your email address"
+                :placeholder="t('common.emailPh')"
                 :rules="[requiredValidator, emailValidator]"
               />
             </VCol>
@@ -178,9 +180,9 @@ const dialogModelValueUpdate = (val: boolean) => {
             <VCol cols="12">
               <AppTextField
                 v-model="formData.phoneNumber"
-                label="Phone Number"
+                :label="t('common.phone')"
                 type="tel"
-                placeholder="Enter your phone number"
+                :placeholder="t('common.phonePh')"
                 :rules="[requiredValidator, phoneValidator]"
               />
             </VCol>
@@ -189,8 +191,8 @@ const dialogModelValueUpdate = (val: boolean) => {
             <VCol cols="12">
               <AppSelect
                 v-model="formData.positionId"
-                label="Job Position"
-                placeholder="Select a job position"
+                :label="t('common.jobPosition')"
+                :placeholder="t('common.jobPositionPh')"
                 :items="props.position"
                 item-title="name"
                 item-value="id"
@@ -202,7 +204,7 @@ const dialogModelValueUpdate = (val: boolean) => {
             <VCol cols="12">
               <AppTextField
                 v-model="formData.password"
-                label="Password"
+                :label="t('common.password')"
                 autocomplete="password"
                 placeholder="············"
                 :type="isPasswordVisible ? 'text' : 'password'"
@@ -216,7 +218,7 @@ const dialogModelValueUpdate = (val: boolean) => {
             <VCol cols="12">
               <AppTextField
                 v-model="formData.confirmPassword"
-                label="Confirm Password"
+                :label="t('common.confirmPassword')"
                 placeholder="············"
                 :type="isConfirmPasswordVisible ? 'text' : 'password'"
                 autocomplete="password"
@@ -234,7 +236,7 @@ const dialogModelValueUpdate = (val: boolean) => {
                 <VLabel
                   class="mb-1 text-body-2 text-wrap"
                   style="line-height: 15px;"
-                  text="Role"
+                  :text="t('common.role')"
                 />
                 <VRadioGroup
                   v-model="formData.role"
@@ -260,24 +262,24 @@ const dialogModelValueUpdate = (val: boolean) => {
                 <VLabel
                   class="mb-1 text-body-2 text-wrap"
                   style="line-height: 15px;"
-                  text="Access to system"
+                  :text="t('common.access')"
                 />
                 <VRadioGroup
                   v-model="formData.access"
                   inline
                 >
                   <VRadio
-                    label="Active"
+                    :label="t('common.active')"
                     :value=true
                   />
                   <VRadio
-                    label="Disabled"
+                    :label="t('common.disabled')"
                     :value=false
                   />
                 </VRadioGroup>
               </div>
             </VCol>
-            
+
             <!-- 👉 Register and Cancel -->
             <VCol
               cols="12"
@@ -288,13 +290,13 @@ const dialogModelValueUpdate = (val: boolean) => {
                 variant="tonal"
                 @click="onFormReset"
               >
-                Cancel
+                {{ t('common.cancel') }}
               </VBtn>
 
-              <VBtn 
+              <VBtn
               type="submit"
               >
-                Register
+                {{ t('common.register') }}
               </VBtn>
             </VCol>
           </VRow>

@@ -12,7 +12,6 @@ const {
   documentTypeValue,
   priorityValue,
   statusValue,
-  headers,
   documentType,
   priorityCard,
   statusCard,
@@ -21,6 +20,17 @@ const {
   onTapFilter,
   onTapRow
 } = authorizationController()
+
+const { t } = useI18n()
+
+const headers = computed(() => [
+  { title: t('common.subject'), key: 'subject' },
+  { title: t('common.body'), key: 'body' },
+  { title: t('common.type'), key: 'type' },
+  { title: t('common.priority'), key: 'priority' },
+  { title: t('common.status'), key: 'status' },
+  { title: t('common.updatedAt'), key: 'updatedAt' },
+])
 </script>
 
 <template>
@@ -31,7 +41,7 @@ const {
           <div class="d-flex align-center flex-wrap">
             <AppTextField
               v-model="searchQuery"
-              placeholder="Search Subject"
+              :placeholder="t('authorization.search')"
               style="inline-size: 200px; width: 500px;"
               class="me-3"
               clearable
@@ -59,8 +69,8 @@ const {
         <div class="d-flex justify-end flex-wrap gap-y-4 gap-x-6">
           <AppSelect
             v-model="filteredType"
-            label="Document Type"
-            placeholder="Select Document Type"
+            :label="t('authorization.documentType')"
+            :placeholder="t('authorization.selectType')"
             :items="documentTypeValue"
             item-title="title"
             item-value="value"
@@ -69,8 +79,8 @@ const {
 
           <AppSelect
             v-model="filteredPriority"
-            label="Priority"
-            placeholder="Select Priority Type"
+            :label="t('authorization.priority')"
+            :placeholder="t('authorization.selectPriority')"
             :items="priorityValue"
             item-title="title"
             item-value="value"
@@ -79,8 +89,8 @@ const {
 
           <AppSelect
             v-model="filteredStatus"
-            label="Status"
-            placeholder="Select Status Type"
+            :label="t('authorization.status')"
+            :placeholder="t('authorization.selectStatus')"
             :items="statusValue"
             item-title="title"
             item-value="value"

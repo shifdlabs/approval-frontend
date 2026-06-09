@@ -21,6 +21,8 @@ const {
   onTapFilter,
   onTapRow
 } = approvalsController()
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -31,7 +33,7 @@ const {
           <div class="d-flex align-center flex-wrap">
             <AppTextField
               v-model="searchQuery"
-              placeholder="Search Users"
+              :placeholder="t('approvals.search')"
               style="inline-size: 200px; width: 500px;"
               class="me-3"
             />
@@ -58,8 +60,8 @@ const {
         <div class="d-flex justify-end flex-wrap gap-y-4 gap-x-6">
           <AppSelect
             v-model="filteredType"
-            label="Document Type"
-            placeholder="Select Document Type"
+            :label="t('approvals.documentType')"
+            :placeholder="t('approvals.selectType')"
             :items="documentTypeValue"
             item-title="title"
             item-value="value"
@@ -68,8 +70,8 @@ const {
 
           <AppSelect
             v-model="filteredPriority"
-            label="Priority"
-            placeholder="Select Priority Type"
+            :label="t('approvals.priority')"
+            :placeholder="t('approvals.selectPriority')"
             :items="priorityValue"
             item-title="title"
             item-value="value"
@@ -78,8 +80,8 @@ const {
 
           <AppSelect
             v-model="filteredStatus"
-            label="Status"
-            placeholder="Select Status Type"
+            :label="t('approvals.status')"
+            :placeholder="t('approvals.selectStatus')"
             :items="statusValue"
             item-title="title"
             item-value="value"

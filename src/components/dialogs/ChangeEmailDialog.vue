@@ -80,6 +80,8 @@ const onFormReset = () => {
 const dialogModelValueUpdate = (val: boolean) => {
   emit('update:isDialogVisible', val)
 }
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -95,15 +97,15 @@ const dialogModelValueUpdate = (val: boolean) => {
       <VCardText>
         <!-- 👉 Title -->
         <h4 class="text-h4 text-center mb-2">
-            Update Email Address
+          {{ t('changeEmail.title') }}
         </h4>
 
         <VAlert v-if="isErrorUniqueEmail" color="error" class="mt-4">
-          Inputted email already registered.
+          {{ t('common.emailAlreadyRegistered') }}
         </VAlert>
 
         <VAlert v-if="!isAllInputtedValid" color="error" class="mt-6 mb-6">
-          Please follow the rules of the input form.
+          {{ t('common.errorFormInput') }}
         </VAlert>
 
         <!-- 👉 Form -->
@@ -113,26 +115,25 @@ const dialogModelValueUpdate = (val: boolean) => {
           @submit.prevent="onFormSubmit"
         >
           <VRow>
-            <!-- 👉 First Name -->
             <VCol cols="12" md="6">
               <AppTextField
                 v-model="formData.email"
-                label="New Email"
+                :label="t('changeEmail.newEmail')"
                 type="email"
-                placeholder="Enter your new email"
+                :placeholder="t('changeEmail.newEmailPh')"
                 :rules="[requiredValidator, emailValidator]"
               />
             </VCol>
 
             <VCol cols="12" md="6" class="pl-5">
               <VRow>
-                <p style="font-size: 15px; font-weight: 500;">Requirment:</p>
-                <p>* Email must be valid and in the correct format.</p>
-                <p>* Make sure you're inputing an active office email.</p>
+                <p style="font-size: 15px; font-weight: 500;">{{ t('changeEmail.requirement') }}</p>
+                <p>{{ t('changeEmail.rule1') }}</p>
+                <p>{{ t('changeEmail.rule2') }}</p>
               </VRow>
             </VCol>
-            
-            <!-- 👉 Register and Cancel -->
+
+            <!-- 👉 Cancel and Change -->
             <VCol
               cols="12"
               class="d-flex flex-wrap gap-4"
@@ -143,13 +144,13 @@ const dialogModelValueUpdate = (val: boolean) => {
                 variant="outlined"
                 @click="onFormReset"
               >
-                Cancel
+                {{ t('changeEmail.cancel') }}
               </VBtn>
 
-              <VBtn 
+              <VBtn
               type="submit"
               >
-                Change
+                {{ t('changeEmail.change') }}
               </VBtn>
             </VCol>
           </VRow>

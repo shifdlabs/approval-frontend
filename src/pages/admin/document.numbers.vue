@@ -112,21 +112,23 @@ const submitNewGroupForm = async () => {
   }
 }
 
-const headers = [
-  { title: 'FORMAT NAME', key: 'name' },
-  { title: 'FORMAT', key: 'format' },
-  { title: 'INCREMENTED BY GROUP', key: 'incrementedByGroup' },
-  { title: 'SEPARATOR', key: 'separator' },
-  { title: 'CREATED AT', key: 'createdAt' },
-]
+const { t } = useI18n()
+
+const headers = computed(() => [
+  { title: t('documentNumbers.columns.name'), key: 'name' },
+  { title: t('documentNumbers.columns.format'), key: 'format' },
+  { title: t('documentNumbers.columns.incrementedByGroup'), key: 'incrementedByGroup' },
+  { title: t('documentNumbers.columns.separator'), key: 'separator' },
+  { title: t('documentNumbers.columns.createdAt'), key: 'createdAt' },
+])
 
 const groupBy = [{ key: 'group' }]
 
 const incrementedStateColor = (status: boolean) => {
   if (status == true) {
-    return { color: 'success', text: 'YES' }
+    return { color: 'success', text: t('documentNumbers.columns.yes') }
   } else {
-    return { color: 'error', text: 'NO' }
+    return { color: 'error', text: t('documentNumbers.columns.no') }
   }
 }
 
@@ -141,7 +143,7 @@ const getIcon = (props: Record<string, unknown>) => props.icon as any
           <div class="d-flex align-center flex-wrap">
             <AppTextField
               v-model="searchQuery"
-              placeholder="Search Number Formats"
+              :placeholder="t('documentNumbers.search')"
               style="inline-size: 200px; width: 500px;"
               class="me-3"
             />
@@ -150,11 +152,11 @@ const getIcon = (props: Record<string, unknown>) => props.icon as any
           <VSpacer />
           <div class="d-flex align-center flex-wrap gap-4">
             <VBtn prepend-icon="tabler-affiliate" @click="isCreateGroupFormatDialogVisible = true">
-              Create Group of Format
+              {{ t('documentNumbers.createGroup') }}
             </VBtn>
- 
+
             <VBtn prepend-icon="tabler-code-asterisk" @click="isCreateFormatDialogVisible = true">
-              Add New Format
+              {{ t('documentNumbers.addFormat') }}
             </VBtn>
           </div>
         </div>
@@ -227,7 +229,7 @@ const getIcon = (props: Record<string, unknown>) => props.icon as any
       persistent 
       class="v-dialog-sm"
     >
-    <VCard title="Create Group Format">      
+    <VCard :title="t('documentNumbers.createGroupDialog.title')">
       <VCardText>
         <VAlert
           v-if="isSuccessCreateGroupFormat"
@@ -241,7 +243,7 @@ const getIcon = (props: Record<string, unknown>) => props.icon as any
           <VCol cols="12">
             <VTextField
               v-model="newGroupData.name"
-              label="Group Name"
+              :label="t('documentNumbers.createGroupDialog.groupName')"
               :rules="[formRules.required]"
               required
             />
@@ -250,20 +252,20 @@ const getIcon = (props: Record<string, unknown>) => props.icon as any
           <VCol cols="12">
             <VTextarea
               v-model="newGroupData.description"
-              label="Description"
+              :label="t('documentNumbers.createGroupDialog.description')"
               rows="2"
-              placeholder="Describe about this group format"
+              :placeholder="t('documentNumbers.createGroupDialog.descPh')"
             />
           </VCol>
         </VForm>
       </VCardText>
-      
+
       <VCardText class="d-flex justify-end gap-3 flex-wrap">
         <VBtn color="primary" variant="outlined" @click="isCreateGroupFormatDialogVisible = false">
-          Cancel
+          {{ t('common.cancel') }}
         </VBtn>
         <VBtn color="primary" :disabled="!isFormValid" @click="submitNewGroupForm">
-          Create
+          {{ t('documentNumbers.createGroupDialog.create') }}
         </VBtn>
       </VCardText>
     </VCard>

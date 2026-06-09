@@ -33,8 +33,8 @@ watch(
     </VTooltip>
 
     <VMenu
-
       activator="parent"
+      content-class="sb-menu"
       offset="12px"
       :width="180"
     >
@@ -47,7 +47,6 @@ watch(
           :key="name"
           :value="name"
           :prepend-icon="icon"
-          color="primary"
           @click="() => { configStore.theme = name }"
         >
           <VListItemTitle class="text-capitalize">

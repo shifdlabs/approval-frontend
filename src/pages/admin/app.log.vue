@@ -11,6 +11,8 @@ const {
   onRowClicked,
   onTapFilter,
 } = appLogController();
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -21,7 +23,7 @@ const {
           <div class="d-flex align-center flex-wrap">
             <AppTextField
               v-model="searchQuery"
-              placeholder="Search User ID"
+              :placeholder="t('appLog.searchUserId')"
               style="inline-size: 200px; width: 500px;"
               class="me-3"
             />
@@ -48,7 +50,7 @@ const {
             <VCol cols="12" md="6">
                 <AppDateTimePicker
                 v-model="filteredDate"
-                label="Filter By Date"
+                :label="t('appLog.filterByDate')"
                 placeholder="Select date"
                 clearable
             />

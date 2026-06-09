@@ -58,6 +58,8 @@ const formatsForSelectedGroup = computed<Format[]>(() => {
   const group = props.data.find(g => g.group === selectedGroupName.value);
   return group ? group.formats : [];
 });
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -72,14 +74,14 @@ const formatsForSelectedGroup = computed<Format[]>(() => {
       <VCardText>
         <!-- 👉 Title -->
         <h4 class="text-h4 text-center mb-2">
-          Create Publication Format
+          {{ t('booking.dialog.title') }}
         </h4>
         <VRow>
             <VCol cols="12">
                 <AppSelect
                         v-model="selectedGroupName"
-                        label="Group of Format"
-                        placeholder="Select Group Format"
+                        :label="t('publicationFormat.groupFormat')"
+                        :placeholder="t('publicationFormat.selectGroup')"
                         :items="props.data"
                         item-value="group"
                         item-title="group"
@@ -89,8 +91,8 @@ const formatsForSelectedGroup = computed<Format[]>(() => {
             <VCol cols="12">
                 <AppSelect
                         v-model="selectedFormatId"
-                        label="Format Name"
-                        placeholder="Select Format Name"
+                        :label="t('publicationFormat.formatName')"
+                        :placeholder="t('publicationFormat.selectFormat')"
                         :items="formatsForSelectedGroup"
                         item-value="id"
                         item-title="name"
@@ -106,10 +108,10 @@ const formatsForSelectedGroup = computed<Format[]>(() => {
             color="primary"
             @click="dialogModelValueUpdate(false)"
             >
-            Cancel
+            {{ t('common.cancel') }}
             </VBtn>
             <VBtn color="primary" @click="onFormSubmit">
-            Booking Number
+            {{ t('booking.dialog.bookingBtn') }}
             </VBtn>
         </VCardText>
         </VCard>

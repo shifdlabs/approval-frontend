@@ -22,6 +22,8 @@ const showChangeEmailDialog   = () => emit('update:isChangeEmailDialogVisible', 
 const showDeleteAccountDialog = () => emit('update:isDeleteAccountDialogVisible', true)
 
 const userConfirmed = ref(false)
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -34,12 +36,12 @@ const userConfirmed = ref(false)
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.4" r="3.8" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M5.5 19.2a6.5 6.5 0 0 1 13 0"/></svg>
         </span>
         <div>
-          <h2 class="pas-ch__title">Informasi Pribadi</h2>
-          <div class="pas-ch__sub">Data diri dan jabatan Anda</div>
+          <h2 class="pas-ch__title">{{ t('settings.personal.title') }}</h2>
+          <div class="pas-ch__sub">{{ t('settings.personal.subtitle') }}</div>
         </div>
         <button class="pas-btn pas-btn--ghost pas-ch__act" @click="showUpdateProfileDialog">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M5 19h3l9.2-9.2a1.6 1.6 0 0 0 0-2.3l-1.7-1.7a1.6 1.6 0 0 0-2.3 0L4 14.9V19Z"/><path fill="none" stroke="currentColor" stroke-width="1.7" d="M13.5 6.5 17 10"/></svg>
-          Ubah
+          {{ t('settings.personal.change') }}
         </button>
       </div>
       <div class="pas-cbody">
@@ -47,28 +49,28 @@ const userConfirmed = ref(false)
           <div class="pas-field">
             <label>
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.4" r="3.8" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M5.5 19.2a6.5 6.5 0 0 1 13 0"/></svg>
-              Nama Depan
+              {{ t('settings.personal.firstName') }}
             </label>
             <div class="pas-val">{{ props.user?.firstName || '—' }}</div>
           </div>
           <div class="pas-field">
             <label>
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.4" r="3.8" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M5.5 19.2a6.5 6.5 0 0 1 13 0"/></svg>
-              Nama Belakang
+              {{ t('settings.personal.lastName') }}
             </label>
             <div class="pas-val">{{ props.user?.lastName || '—' }}</div>
           </div>
           <div class="pas-field">
             <label>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M6.5 4h3l1.4 3.5-2 1.3a11 11 0 0 0 4.8 4.8l1.3-2 3.5 1.4v3a1.5 1.5 0 0 1-1.6 1.5A14.5 14.5 0 0 1 5 5.6 1.5 1.5 0 0 1 6.5 4Z"/></svg>
-              Nomor Telepon
+              {{ t('settings.personal.phone') }}
             </label>
             <div class="pas-val">{{ props.user?.phone || '—' }}</div>
           </div>
           <div class="pas-field">
             <label>
               <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="11" r="2.1" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M13.5 9.5h3.2M13.5 12.5h3.2M6.6 15.6a2.7 2.7 0 0 1 4.8 0"/></svg>
-              Posisi Jabatan
+              {{ t('settings.personal.position') }}
             </label>
             <div class="pas-val">{{ props.user?.position?.name || '—' }}</div>
           </div>
@@ -83,8 +85,8 @@ const userConfirmed = ref(false)
           <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.4" y="5.6" width="17.2" height="12.8" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="m4.6 7.5 7.4 5.2 7.4-5.2"/></svg>
         </span>
         <div>
-          <h2 class="pas-ch__title">Email Terdaftar</h2>
-          <div class="pas-ch__sub">Digunakan untuk masuk dan notifikasi</div>
+          <h2 class="pas-ch__title">{{ t('settings.email.title') }}</h2>
+          <div class="pas-ch__sub">{{ t('settings.email.subtitle') }}</div>
         </div>
       </div>
       <div class="pas-cbody">
@@ -92,19 +94,19 @@ const userConfirmed = ref(false)
           <div class="pas-field pas-field--grow">
             <label>
               <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.4" y="5.6" width="17.2" height="12.8" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="m4.6 7.5 7.4 5.2 7.4-5.2"/></svg>
-              Alamat Email
+              {{ t('settings.email.address') }}
             </label>
             <div class="pas-val">
               {{ props.user?.email || '—' }}
               <span class="pas-verified">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M12 3.4 5 5.9v5.5c0 4.2 3 7.1 7 9.2 4-2.1 7-5 7-9.2V5.9z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="m9 12 2.2 2.2 4-4.2"/></svg>
-                Terverifikasi
+                {{ t('settings.email.verified') }}
               </span>
             </div>
           </div>
           <button class="pas-btn pas-btn--ghost" @click="showChangeEmailDialog">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.4" y="5.6" width="17.2" height="12.8" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="m4.6 7.5 7.4 5.2 7.4-5.2"/></svg>
-            Ganti Email
+            {{ t('settings.email.changeBtn') }}
           </button>
         </div>
       </div>
@@ -117,17 +119,17 @@ const userConfirmed = ref(false)
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M12 4.5 3.5 19h17z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 10v4"/><circle cx="12" cy="16.6" r="1.05" fill="currentColor"/></svg>
         </span>
         <div>
-          <h2 class="pas-ch__title">Nonaktifkan Akun</h2>
-          <div class="pas-ch__sub">Tindakan yang dapat dibatalkan kapan saja</div>
+          <h2 class="pas-ch__title">{{ t('settings.danger.title') }}</h2>
+          <div class="pas-ch__sub">{{ t('settings.danger.subtitle') }}</div>
         </div>
       </div>
       <div class="pas-cbody">
-        <p class="pas-danger__desc">Dengan menonaktifkan akun, profil dan informasi Anda akan disembunyikan sementara. Anda dapat mengaktifkannya kembali kapan pun di masa mendatang.</p>
+        <p class="pas-danger__desc">{{ t('settings.danger.desc') }}</p>
         <label class="pas-confirm" :class="{ 'pas-confirm--checked': userConfirmed }" @click="userConfirmed = !userConfirmed">
           <span class="pas-cbox">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="m5.5 12.5 4 4 9-9.5"/></svg>
           </span>
-          <span>Saya mengonfirmasi ingin menonaktifkan akun saya</span>
+          <span>{{ t('settings.danger.confirm') }}</span>
         </label>
         <button
           class="pas-btn pas-btn--deactivate"
@@ -136,7 +138,7 @@ const userConfirmed = ref(false)
           @click="showDeleteAccountDialog"
         >
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M12 4.5 3.5 19h17z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 10v4"/><circle cx="12" cy="16.6" r="1.05" fill="currentColor"/></svg>
-          Nonaktifkan Akun
+          {{ t('settings.danger.deactivate') }}
         </button>
       </div>
     </div>

@@ -7,7 +7,7 @@
           <div class="d-flex align-center flex-wrap">
             <AppTextField
               v-model="searchQuery"
-              placeholder="Search Subject"
+              :placeholder="t('progress.search')"
               style="inline-size: 200px; width: 500px;"
               class="me-3"
               clearable
@@ -34,13 +34,13 @@
             <VSelect
               v-model="filterType"
               :items="['Internal', 'External']"
-              label="Select Type"
+              :label="t('progress.selectType')"
               clearable
             />
             <VSelect
               v-model="filterPriority"
               :items="['High', 'Medium', 'Low']"
-              label="Select Priority"
+              :label="t('progress.selectPriority')"
               clearable
             />
           </div>
@@ -104,13 +104,15 @@ const filterPriority = ref<string | null>(null);
 const isFilterSectionVisible = ref(false);
 const router = useRouter()
 
-const headers = [
-  { title: 'SUBJECT', key: 'subject' },
-  { title: 'BODY', key: 'body' },
-  { title: 'TYPE', key: 'type' },
-  { title: 'PRIORITY', key: 'priority' },
-  { title: 'CURRENT APPROVAL', key: 'currentApprovalName' },
-];
+const { t } = useI18n()
+
+const headers = computed(() => [
+  { title: t('progress.columns.subject'), key: 'subject' },
+  { title: t('progress.columns.body'), key: 'body' },
+  { title: t('progress.columns.type'), key: 'type' },
+  { title: t('progress.columns.priority'), key: 'priority' },
+  { title: t('progress.columns.currentApproval'), key: 'currentApprovalName' },
+]);
 
 const documents = ref<Document[]>([])
 

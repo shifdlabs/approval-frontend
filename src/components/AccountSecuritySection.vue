@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { User } from '@/models/users/users';
 import { VForm } from 'vuetify/components';
 
+const { t } = useI18n()
 const isCurrentPasswordVisible = ref(false)
 const isNewPasswordVisible      = ref(false)
 const isConfirmPasswordVisible  = ref(false)
@@ -29,7 +30,7 @@ const fetchProfile = async () => {
 
 const passwordStrength = computed(() => {
   const v = formData.value.newPassword
-  if (!v) return { score: 0, label: 'Lemah', color: '#e8eaf2', checks: { len: false, lower: false, num: false } }
+  if (!v) return { score: 0, label: t('security.strength.weak'), color: '#e8eaf2', checks: { len: false, lower: false, num: false } }
 
   const checks = {
     len:   v.length >= 8,
@@ -39,7 +40,7 @@ const passwordStrength = computed(() => {
   let score = Object.values(checks).filter(Boolean).length
   if (v.length >= 12 && score === 3) score = 4
 
-  const labels = ['Lemah', 'Lemah', 'Sedang', 'Kuat', 'Sangat Kuat']
+  const labels = [t('security.strength.weak'), t('security.strength.weak'), t('security.strength.medium'), t('security.strength.strong'), t('security.strength.veryStrong')]
   const colors = ['#e8eaf2', '#ef4444', '#f59e0b', '#3d5fc8', '#16a34a']
   return { score, label: labels[score], color: colors[score], checks }
 })
@@ -62,14 +63,14 @@ const updatePassword = async () => {
 
     onFetchError((err: any) => {
       console.error('Fetch error:', err)
-      alert('Gagal memperbarui kata sandi. Periksa kata sandi saat ini dan coba lagi.')
+      alert(t('security.alertFailed'))
     })
 
     await execute()
 
     if (error.value) {
       console.error('Error updating password:', error.value)
-      alert('Gagal memperbarui kata sandi.')
+      alert(t('security.alertFailed2'))
       return
     }
 
@@ -79,11 +80,11 @@ const updatePassword = async () => {
       isSuccessDialogVisible.value        = true
       refVForm.value?.reset()
     } else {
-      alert('Gagal memperbarui kata sandi. Coba lagi.')
+      alert(t('security.alertRetry'))
     }
   } catch (e) {
     console.error('Exception updating password:', e)
-    alert('Terjadi kesalahan saat memperbarui kata sandi.')
+    alert(t('security.alertError'))
   }
 }
 
@@ -110,25 +111,25 @@ const onFormSubmit = async () => {
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M11.8 11.2 20 11.2M17.5 11.2v3M14.4 11.2v2.4"/></svg>
           </span>
           <div>
-            <h2 class="pse-ch__title">Ubah Kata Sandi</h2>
-            <div class="pse-ch__sub">Perbarui kata sandi untuk menjaga keamanan akun</div>
+            <h2 class="pse-ch__title">{{ t('security.title') }}</h2>
+            <div class="pse-ch__sub">{{ t('security.subtitle') }}</div>
           </div>
         </div>
 
         <!-- Card Body -->
         <div class="pse-cbody">
           <VAlert v-if="!isAllInputtedValid" type="error" variant="tonal" class="pse-alert mb-6" border="start">
-            Harap ikuti aturan form input di bawah.
+            {{ t('security.error') }}
           </VAlert>
 
           <div class="pse-pwd-grid">
             <!-- Form Fields -->
             <div class="pse-form">
               <div class="pse-ipt">
-                <label class="pse-ipt__label">Kata Sandi Saat Ini</label>
+                <label class="pse-ipt__label">{{ t('security.currentPassword') }}</label>
                 <AppTextField
                   v-model="formData.currentPassword"
-                  placeholder="Masukkan kata sandi saat ini"
+                  :placeholder="t('security.currentPasswordPh')"
                   autocomplete="current-password"
                   :type="isCurrentPasswordVisible ? 'text' : 'password'"
                   :append-inner-icon="isCurrentPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
@@ -141,10 +142,10 @@ const onFormSubmit = async () => {
               </div>
 
               <div class="pse-ipt">
-                <label class="pse-ipt__label">Kata Sandi Baru</label>
+                <label class="pse-ipt__label">{{ t('security.newPassword') }}</label>
                 <AppTextField
                   v-model="formData.newPassword"
-                  placeholder="Buat kata sandi baru"
+                  :placeholder="t('security.newPasswordPh')"
                   autocomplete="new-password"
                   :type="isNewPasswordVisible ? 'text' : 'password'"
                   :append-inner-icon="isNewPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
@@ -171,10 +172,10 @@ const onFormSubmit = async () => {
               </div>
 
               <div class="pse-ipt">
-                <label class="pse-ipt__label">Konfirmasi Kata Sandi</label>
+                <label class="pse-ipt__label">{{ t('security.confirmPassword') }}</label>
                 <AppTextField
                   v-model="formData.confirmNewPassword"
-                  placeholder="Ulangi kata sandi baru"
+                  :placeholder="t('security.confirmPasswordPh')"
                   autocomplete="new-password"
                   :type="isConfirmPasswordVisible ? 'text' : 'password'"
                   :append-inner-icon="isConfirmPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
@@ -189,15 +190,15 @@ const onFormSubmit = async () => {
 
             <!-- Requirements Panel -->
             <div class="pse-reqs">
-              <h3 class="pse-reqs__title">Syarat Kata Sandi</h3>
-              <div class="pse-reqs__note">Penuhi semua syarat berikut</div>
+              <h3 class="pse-reqs__title">{{ t('security.requirements.title') }}</h3>
+              <div class="pse-reqs__note">{{ t('security.requirements.note') }}</div>
 
               <div class="pse-req" :class="{ 'pse-req--met': passwordStrength.checks.len }">
                 <span class="pse-req__mk">
                   <svg v-if="passwordStrength.checks.len" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="m5.5 12.5 4 4 9-9.5"/></svg>
                   <svg v-else viewBox="0 0 24 24"><rect x="5.2" y="10.5" width="13.6" height="9.3" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" d="M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5"/></svg>
                 </span>
-                Minimal 8 karakter — semakin panjang semakin baik.
+                {{ t('security.requirements.minChars') }}
               </div>
 
               <div class="pse-req" :class="{ 'pse-req--met': passwordStrength.checks.lower }">
@@ -205,7 +206,7 @@ const onFormSubmit = async () => {
                   <svg v-if="passwordStrength.checks.lower" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="m5.5 12.5 4 4 9-9.5"/></svg>
                   <svg v-else viewBox="0 0 24 24"><rect x="5.2" y="10.5" width="13.6" height="9.3" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" d="M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5"/></svg>
                 </span>
-                Mengandung minimal satu huruf kecil.
+                {{ t('security.requirements.lowercase') }}
               </div>
 
               <div class="pse-req" :class="{ 'pse-req--met': passwordStrength.checks.num }">
@@ -213,7 +214,7 @@ const onFormSubmit = async () => {
                   <svg v-if="passwordStrength.checks.num" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="m5.5 12.5 4 4 9-9.5"/></svg>
                   <svg v-else viewBox="0 0 24 24"><rect x="5.2" y="10.5" width="13.6" height="9.3" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" d="M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5"/></svg>
                 </span>
-                Mengandung satu angka, simbol, atau spasi.
+                {{ t('security.requirements.numberOrSymbol') }}
               </div>
             </div>
           </div>
@@ -223,7 +224,7 @@ const onFormSubmit = async () => {
         <div class="pse-foot">
           <button type="submit" class="pse-btn pse-btn--primary">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M12 3.4 5 5.9v5.5c0 4.2 3 7.1 7 9.2 4-2.1 7-5 7-9.2V5.9z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="m9 12 2.2 2.2 4-4.2"/></svg>
-            Simpan Kata Sandi
+            {{ t('security.saveBtn') }}
           </button>
         </div>
 
@@ -234,11 +235,11 @@ const onFormSubmit = async () => {
   <!-- Confirm Dialog -->
   <VDialog v-model="isChangePasswordDialogVisible" persistent class="v-dialog-sm">
     <DialogCloseBtn @click="isChangePasswordDialogVisible = false" />
-    <VCard title="Konfirmasi Perubahan Kata Sandi">
-      <VCardText>Apakah Anda yakin ingin mengubah kata sandi akun?</VCardText>
+    <VCard :title="t('security.confirmDialog.title')">
+      <VCardText>{{ t('security.confirmDialog.body') }}</VCardText>
       <VCardText class="d-flex justify-end gap-3 flex-wrap">
-        <VBtn color="secondary" variant="tonal" @click="isChangePasswordDialogVisible = false">Batal</VBtn>
-        <VBtn @click="updatePassword">Ya, Ubah Kata Sandi</VBtn>
+        <VBtn color="secondary" variant="tonal" @click="isChangePasswordDialogVisible = false">{{ t('security.confirmDialog.cancel') }}</VBtn>
+        <VBtn @click="updatePassword">{{ t('security.confirmDialog.confirm') }}</VBtn>
       </VCardText>
     </VCard>
   </VDialog>
@@ -246,10 +247,10 @@ const onFormSubmit = async () => {
   <!-- Success Dialog -->
   <VDialog v-model="isSuccessDialogVisible" persistent class="v-dialog-sm">
     <DialogCloseBtn @click="isSuccessDialogVisible = false" />
-    <VCard title="Berhasil">
-      <VCardText>Kata sandi Anda telah berhasil diubah.</VCardText>
+    <VCard :title="t('security.successDialog.title')">
+      <VCardText>{{ t('security.successDialog.body') }}</VCardText>
       <VCardText class="d-flex justify-end gap-3 flex-wrap">
-        <VBtn color="success" @click="isSuccessDialogVisible = false">OK</VBtn>
+        <VBtn color="success" @click="isSuccessDialogVisible = false">{{ t('security.successDialog.ok') }}</VBtn>
       </VCardText>
     </VCard>
   </VDialog>

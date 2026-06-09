@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { GroupWithFormats } from '@/models/document-number/group.with.format'
 import { mapGroupedWithFormat } from '@/utils/model.mapper'
+import { i18n } from '@/plugins/i18n'
 import { layoutConfig } from '@layouts'
 import { useLayoutConfigStore } from '@layouts/stores/config'
 import { injectionKeyIsVerticalNavHovered } from '@layouts/symbols'
@@ -57,6 +58,30 @@ const refetchList = () => {
 }
 
 const role = Number(useCookie('role').value)
+const homeRoute = role === 1 ? '/reguler/dashboard' : role === 99 ? '/admin/users' : '/'
+const name = useCookie('name')
+const jobPosition = useCookie('jobPosition')
+
+const getInitials = computed(() => {
+  const fullName = name.value || ''
+  const parts = fullName.trim().split(' ')
+  const first = parts[0]?.[0] || ''
+  const second = parts[1]?.[0] || parts[0]?.[1] || ''
+  return (first + second).toUpperCase()
+})
+
+const handleLogout = () => {
+  useCookie('accessToken').value = null
+  useCookie('name').value = null
+  useCookie('role').value = null
+  window.location.href = '/'
+}
+
+const sbThemes = [
+  { name: 'light', icon: 'tabler-sun-high' },
+  { name: 'dark', icon: 'tabler-moon-stars' },
+  { name: 'system', icon: 'tabler-device-desktop-analytics' },
+]
 
 type SbGroup = { heading: string; items: NavLink[] }
 
@@ -82,6 +107,21 @@ const toggleSection = (key: string) => {
   s.has(key) ? s.delete(key) : s.add(key)
   collapsedSections.value = s
 }
+
+const { t } = useI18n()
+
+const localeCookie = useCookie<string>('locale', { default: () => 'id' })
+const currentLocale = computed(() => localeCookie.value || 'id')
+
+const setLocale = (lang: string) => {
+  localeCookie.value = lang
+  i18n.global.locale.value = lang as 'id' | 'en'
+}
+
+const langOptions = [
+  { code: 'id', flag: '🇮🇩', label: 'Bahasa Indonesia' },
+  { code: 'en', flag: '🇬🇧', label: 'English' },
+]
 </script>
 
 <template>
@@ -100,7 +140,7 @@ const toggleSection = (key: string) => {
     <!-- Header -->
     <div class="nav-header">
       <slot name="nav-header">
-        <RouterLink to="/" class="app-logo app-title-wrapper">
+        <RouterLink :to="homeRoute" class="app-logo app-title-wrapper">
           <VNodeRenderer :nodes="layoutConfig.app.logo" />
           <Transition name="vertical-nav-app-title">
             <div v-show="!hideTitleAndIcon" class="app-brand-text">
@@ -114,7 +154,7 @@ const toggleSection = (key: string) => {
           <!-- Chevron collapse/expand button (desktop) -->
           <button
             class="sb-collapse-btn d-none d-lg-flex"
-            :title="configStore.isVerticalNavCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+            :title="configStore.isVerticalNavCollapsed ? t('nav.expandSidebar') : t('nav.collapseSidebar')"
             @click="configStore.isVerticalNavCollapsed = !configStore.isVerticalNavCollapsed"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -149,7 +189,7 @@ const toggleSection = (key: string) => {
         :class="{ 'sb-group--collapsed': collapsedSections.has('__baru') }"
       >
         <button class="sb-section" @click="toggleSection('__baru')">
-          <span v-show="!hideTitleAndIcon" class="sb-section__label">Buat Baru</span>
+          <span v-show="!hideTitleAndIcon" class="sb-section__label">{{ t('nav.createNew') }}</span>
           <span v-show="!hideTitleAndIcon" class="sb-section__chev">
             <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m7 10 5 5 5-5" /></svg>
           </span>
@@ -170,7 +210,7 @@ const toggleSection = (key: string) => {
                   <path stroke-width="1.5" d="M3.7 14.1c.1-1.5 2.6-1.5 2.6.1 0 1.1-2.6 2.3-2.6 4.1h2.8" />
                 </svg>
               </span>
-              <span v-show="!hideTitleAndIcon" class="sb-action__label">Booking Number</span>
+              <span v-show="!hideTitleAndIcon" class="sb-action__label">{{ t('nav.bookingNumber') }}</span>
               <span v-show="!hideTitleAndIcon" class="sb-action__plus">
                 <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M12 5.5v13M5.5 12h13" /></svg>
               </span>
@@ -187,7 +227,7 @@ const toggleSection = (key: string) => {
         :class="{ 'sb-group--collapsed': collapsedSections.has(group.heading) }"
       >
         <button class="sb-section" @click="toggleSection(group.heading)">
-          <span v-show="!hideTitleAndIcon" class="sb-section__label">{{ group.heading }}</span>
+          <span v-show="!hideTitleAndIcon" class="sb-section__label">{{ t(group.heading) }}</span>
           <span v-show="!hideTitleAndIcon" class="sb-section__chev">
             <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m7 10 5 5 5-5" /></svg>
           </span>
@@ -210,12 +250,85 @@ const toggleSection = (key: string) => {
                   v-bind="(item.icon ?? layoutConfig.verticalNav?.defaultNavItemIconProps) as Record<string, unknown>"
                 />
               </span>
-              <span v-show="!hideTitleAndIcon" class="sb-link__label">{{ item.title }}</span>
+              <span v-show="!hideTitleAndIcon" class="sb-link__label">{{ t(item.title) }}</span>
             </Component>
           </div>
         </div>
       </div>
     </PerfectScrollbar>
+
+    <!-- Sidebar footer: user profile + theme switcher -->
+    <div class="sb-footer">
+      <div class="sb-footer__divider" />
+      <div class="sb-footer__body" :class="{ 'sb-footer__body--mini': hideTitleAndIcon }">
+        <VBadge dot location="bottom right" offset-x="3" offset-y="3" bordered color="success">
+          <VAvatar class="cursor-pointer sb-ava" size="34">
+            {{ getInitials }}
+            <VMenu activator="parent" content-class="sb-menu sb-menu--account" width="230" location="top end" offset="14px">
+              <VList>
+                <VListItem>
+                  <template #prepend>
+                    <VListItemAction start>
+                      <VBadge dot location="bottom right" offset-x="3" offset-y="3" color="success">
+                        <VAvatar class="sb-ava">{{ getInitials }}</VAvatar>
+                      </VBadge>
+                    </VListItemAction>
+                  </template>
+                  <VListItemTitle class="font-weight-semibold">{{ name }}</VListItemTitle>
+                  <VListItemSubtitle>{{ jobPosition }}</VListItemSubtitle>
+                </VListItem>
+                <VDivider class="my-2" />
+                <VListItem link :to="{ name: 'profile' }">
+                  <template #prepend>
+                    <VIcon class="me-2" icon="tabler-user" size="22" />
+                  </template>
+                  <VListItemTitle>{{ t('nav.profileMenuItem') }}</VListItemTitle>
+                </VListItem>
+                <VDivider class="my-2" />
+                <VListItem @click="handleLogout">
+                  <template #prepend>
+                    <VIcon class="me-2" icon="tabler-logout" size="22" />
+                  </template>
+                  <VListItemTitle>{{ t('nav.logoutMenuItem') }}</VListItemTitle>
+                </VListItem>
+              </VList>
+            </VMenu>
+          </VAvatar>
+        </VBadge>
+        <div v-show="!hideTitleAndIcon" class="sb-footer__info">
+          <span class="sb-footer__name">{{ name }}</span>
+          <span class="sb-footer__pos">{{ jobPosition }}</span>
+        </div>
+        <ThemeSwitcher v-show="!hideTitleAndIcon" :themes="sbThemes" />
+
+        <!-- Language switcher -->
+        <IconBtn
+          v-show="!hideTitleAndIcon"
+          color="rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity))"
+        >
+          <span class="sb-lang-flag">{{ currentLocale === 'id' ? '🇮🇩' : '🇬🇧' }}</span>
+          <VTooltip activator="parent" open-delay="800" scroll-strategy="close">
+            {{ t('language.select') }}
+          </VTooltip>
+          <VMenu activator="parent" content-class="sb-menu" offset="12px" :width="200" location="top end">
+            <VList>
+              <VListItem
+                v-for="lang in langOptions"
+                :key="lang.code"
+                :value="lang.code"
+                :class="{ 'v-list-item--active': currentLocale === lang.code }"
+                @click="setLocale(lang.code)"
+              >
+                <template #prepend>
+                  <span class="me-2" style="font-size:18px;">{{ lang.flag }}</span>
+                </template>
+                <VListItemTitle>{{ lang.label }}</VListItemTitle>
+              </VListItem>
+            </VList>
+          </VMenu>
+        </IconBtn>
+      </div>
+    </div>
 
     <slot name="after-nav-items" />
   </Component>
@@ -346,8 +459,8 @@ const toggleSection = (key: string) => {
   }
 }
 
-// ── Sidebar design tokens ────────────────────────────────────────
-.layout-vertical-nav {
+// ── Sidebar design tokens — global so VMenu teleports can use them
+:root {
   --sb-navy:       #314f91;
   --sb-navy-tint:  #e4efff;
   --sb-text:       #494d54;
@@ -359,7 +472,7 @@ const toggleSection = (key: string) => {
   --sb-act-border: #d7deed;
 }
 
-.v-theme--dark .layout-vertical-nav {
+.v-theme--dark {
   --sb-navy:       #6d8fe2;
   --sb-navy-tint:  #1d283f;
   --sb-text:       #b8bec8;
@@ -637,6 +750,162 @@ $mini: ".layout-vertical-nav-collapsed .layout-vertical-nav:not(.hovered)";
 
     &.sb-link--active::before {
       height: 26px;
+    }
+  }
+}
+
+// ── Sidebar footer ───────────────────────────────────────────────
+.layout-vertical-nav {
+  .sb-footer {
+    padding: 0 14px 12px;
+    flex-shrink: 0;
+
+    &__divider {
+      height: 1px;
+      background: var(--sb-divider);
+      margin-bottom: 10px;
+    }
+
+    &__body {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      transition: background 0.16s ease;
+
+      &:hover { background: var(--sb-hover); }
+
+      &--mini {
+        justify-content: center;
+        padding: 6px 0;
+      }
+    }
+
+    &__info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    &__name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--sb-strong);
+      letter-spacing: -0.006em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.3;
+    }
+
+    &__pos {
+      font-size: 11px;
+      color: var(--sb-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.3;
+    }
+  }
+
+  .sb-ava {
+    background-color: var(--sb-navy-tint) !important;
+    color: var(--sb-navy) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    flex-shrink: 0;
+  }
+}
+
+// ── Meridian dropdown menus (sb-menu content-class) ─────────────
+// VMenu teleports to body so these must be global (non-scoped)
+.sb-menu {
+  // Surface card
+  > .v-overlay__content {
+    border-radius: 14px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10), 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+    overflow: hidden;
+  }
+
+  .v-list {
+    padding: 6px !important;
+    border-radius: 14px !important;
+    background: rgb(var(--v-theme-surface)) !important;
+  }
+
+  .v-list-item {
+    border-radius: 8px !important;
+    min-height: 40px !important;
+    padding-inline: 10px !important;
+
+    &:hover > .v-list-item__overlay {
+      opacity: 0 !important;
+    }
+
+    &:hover {
+      background: var(--sb-hover) !important;
+    }
+
+    // Active / selected state — replace Vuetify primary purple with navy
+    &--active,
+    &.v-list-item--active {
+      background: var(--sb-navy-tint) !important;
+      color: var(--sb-navy) !important;
+
+      .v-list-item__prepend .v-icon,
+      .v-icon {
+        color: var(--sb-navy) !important;
+        opacity: 1 !important;
+      }
+    }
+
+    // Non-active icon & text opacity
+    .v-list-item__prepend .v-icon {
+      opacity: 0.75;
+    }
+
+    .v-list-item-title {
+      font-size: 14px !important;
+      font-weight: 500 !important;
+      letter-spacing: -0.005em !important;
+    }
+  }
+
+  // Divider inside menu
+  .v-divider {
+    border-color: var(--sb-divider) !important;
+    margin-block: 4px !important;
+    opacity: 1 !important;
+  }
+
+  // Avatar in account header row
+  .sb-ava {
+    background-color: var(--sb-navy-tint) !important;
+    color: var(--sb-navy) !important;
+    font-weight: 700 !important;
+  }
+
+}
+
+// User header row — hanya di account menu, bukan theme menu
+.sb-menu--account {
+  .v-list-item:first-child {
+    cursor: default;
+    pointer-events: none;
+
+    .v-list-item-title {
+      font-size: 14.5px !important;
+      font-weight: 600 !important;
+      color: var(--sb-strong) !important;
+    }
+
+    .v-list-item-subtitle {
+      font-size: 12px !important;
+      color: var(--sb-muted) !important;
+      opacity: 1 !important;
     }
   }
 }

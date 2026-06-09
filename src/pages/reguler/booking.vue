@@ -11,12 +11,14 @@ const isFilterSectionVisible = ref(false)
 const filteredGroup = ref<string | null>(null)
 const filteredFormat = ref<string | null>(null)
 
-const headers = [
-    { title: 'DOCUMENT NUMBER', key: 'DocumentNumber' },
-    { title: 'FORMAT NAME', key: 'FormatName' },
-    { title: 'GROUP', key: 'GroupName' },
-    { title: 'CREATED AT', key: 'CreatedAt' },
-]
+const { t } = useI18n()
+
+const headers = computed(() => [
+    { title: t('booking.columns.docNumber'), key: 'DocumentNumber' },
+    { title: t('booking.columns.formatName'), key: 'FormatName' },
+    { title: t('booking.columns.group'), key: 'GroupName' },
+    { title: t('booking.columns.createdAt'), key: 'CreatedAt' },
+])
 
 const onTapFilter = () => {
   filteredGroup.value = null
@@ -148,7 +150,7 @@ const mapBookingNumber = (rawBookingNumber: any): BookedDocumentNumber => {
           <div class="d-flex align-center flex-wrap">
             <AppTextField
               v-model="searchQuery"
-              placeholder="Search Booked Format"
+              :placeholder="t('booking.search')"
               style="inline-size: 200px; width: 500px;"
               class="me-3"
             />
@@ -166,7 +168,7 @@ const mapBookingNumber = (rawBookingNumber: any): BookedDocumentNumber => {
           <VSpacer />
           <div class="d-flex align-center flex-wrap gap-4">
             <VBtn prepend-icon="tabler-plus" @click="isBookingDocumentNumberDialogVisible = true">
-              Create New Booking
+              {{ t('booking.create') }}
             </VBtn>
           </div>
         </div>
@@ -179,8 +181,8 @@ const mapBookingNumber = (rawBookingNumber: any): BookedDocumentNumber => {
           <div class="d-flex justify-end flex-wrap gap-y-4 gap-x-6">
             <AppSelect
               v-model="filteredGroup"
-              label="Group"
-              placeholder="Select Group"
+              :label="t('booking.filters.group')"
+              :placeholder="t('booking.filters.selectGroup')"
               :items="uniqueGroups"
               item-title="title"
               item-value="value"
@@ -189,8 +191,8 @@ const mapBookingNumber = (rawBookingNumber: any): BookedDocumentNumber => {
 
             <AppSelect
               v-model="filteredFormat"
-              label="Format Name"
-              placeholder="Select Format"
+              :label="t('booking.filters.format')"
+              :placeholder="t('booking.filters.selectFormat')"
               :items="uniqueFormats"
               item-title="title"
               item-value="value"

@@ -3,6 +3,7 @@ import { SignatureResponse, SignatureRequest, UpdateSignatureRequest } from '@/m
 import { User } from '@/models/users/users'
 import { Position } from '@/models/positions/position'
 import { uploadS3File, deleteS3File, S3BucketUrl, SignatureFolderName } from '@/utils/s3'
+import { useApi } from '@/composables/useApi'
 
 export function useProfileController() {
   // Reactive state
@@ -16,6 +17,7 @@ export function useProfileController() {
   
   const isProfileLoaded = ref(false)
   const isPositionsLoaded = ref(false)
+  const isLoading = ref(false)
 
   const signatureUrl = computed(() => {
     if (userSignature.value?.imageUrl) {
@@ -29,85 +31,70 @@ export function useProfileController() {
   })
 
   const fetchProfile = async () => {
-    
-    try {
-      const res = await $api('/user/profile', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
+    const { execute, data, error } = useApi('/user/profile', { method: 'GET' }, { immediate: false })
+    await execute()
 
-      console.log('Profile response:', res)
-      if (res.success) {
-        user.value = mapUser(res.data)
-        isProfileLoaded.value = true
-        console.log('User profile loaded:', user.value)
-      }
-    } catch (e) {
-      console.error('Error fetching profile:', e)
+    if (error.value) {
+      console.error('Error fetching profile:', error.value)
+      return
+    }
+
+    const res = data.value as any
+    if (res?.success) {
+      user.value = mapUser(res.data)
+      isProfileLoaded.value = true
     }
   }
 
   const fetchPositions = async () => {
-    try {
-      const res = await $api('/position', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
+    const { execute, data, error } = useApi('/position', { method: 'GET' }, { immediate: false })
+    await execute()
 
-      console.log('Positions response:', res)
-      if (res.success) {
-        positions.value = res.data
-        isPositionsLoaded.value = true
-      }
-    } catch (e) {
-      console.error('Error fetching positions:', e)
+    if (error.value) {
+      console.error('Error fetching positions:', error.value)
+      return
+    }
+
+    const res = data.value as any
+    if (res?.success) {
+      positions.value = res.data
+      isPositionsLoaded.value = true
     }
   }
 
   const fetchUserSignature = async () => {
-    if (!user.value?.id) {
-      console.log('User ID not available yet, skipping signature fetch')
+    if (!user.value?.id) return
+
+    const { execute, data, error } = useApi('/signature', { method: 'GET' }, { immediate: false })
+    await execute()
+
+    if (error.value) {
+      console.error('Error fetching signature:', error.value)
+      resetSignatureState()
       return
     }
 
-    try {
-      const res = await $api('/signature', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
+    const res = data.value as any
+    if (res?.success && res?.data) {
+      const currentUserSignature = res.data.find((sig: SignatureResponse) => sig.userId === user.value?.id)
 
-      console.log('Signature response:', res)
-      if (res.success && res.data) {
-        const currentUserSignature = res.data.find((sig: SignatureResponse) => sig.userId === user.value?.id)
-        
-        if (currentUserSignature) {
-          userSignature.value = currentUserSignature
-          hasExistingSignature.value = true
-          currentSignature.value = signatureUrl.value
-          signatureCreatedDate.value = new Date(currentUserSignature.createdAt).toLocaleDateString('id-ID', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          })
-        } else {
-          resetSignatureState()
-        }
+      if (currentUserSignature) {
+        userSignature.value = currentUserSignature
+        hasExistingSignature.value = true
+        currentSignature.value = signatureUrl.value
+        signatureCreatedDate.value = new Date(currentUserSignature.createdAt).toLocaleDateString('id-ID', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
       } else {
         resetSignatureState()
       }
-    } catch (e) {
-      console.error('Error fetching signature:', e)
+    } else {
       resetSignatureState()
     }
-
   }
 
   const createSignature = async (signatureCanvas: HTMLCanvasElement, fileName: string) => {
@@ -302,14 +289,15 @@ export function useProfileController() {
   }
 
   const loadProfileData = async () => {
-    console.log('Loading profile data - ALWAYS FRESH (no cache)')
-    
-    await fetchProfile()
-    await fetchPositions()
-    
-    if (user.value?.id) {
-      console.log('Fetching signature for user:', user.value.id)
-      await fetchUserSignature()
+    isLoading.value = true
+    try {
+      await fetchProfile()
+      await fetchPositions()
+      if (user.value?.id) {
+        await fetchUserSignature()
+      }
+    } finally {
+      isLoading.value = false
     }
   }
 
@@ -329,6 +317,7 @@ export function useProfileController() {
     signatureUrl,
     isProfileLoaded,
     isPositionsLoaded,
+    isLoading,
     fetchProfile,
     fetchPositions,
     fetchUserSignature,

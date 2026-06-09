@@ -2,7 +2,6 @@
 import { FormatCellType } from '@/enums/format.cell.type';
 import { FormatComponent } from '@/models/numbering-format/format-component';
 import { NumberingGroup } from '@/models/numbering-group/numbering-group';
-import { ref, watch } from 'vue';
 import { VForm } from 'vuetify/components';
 
 interface Props {
@@ -19,6 +18,8 @@ interface Emit {
 const emit = defineEmits<Emit>();
 const props = defineProps<Props>();
 
+const { t } = useI18n()
+
 const separatorTypes = ref([
     { id: '/', name: 'Slash (/)', },
     { id: '-', name: 'Dash (-)' },
@@ -26,9 +27,9 @@ const separatorTypes = ref([
     { id: '.', name: 'Dot (.)' },
 ]);
 
-const incrementedByGroup = ref([
-  { id: true, name: 'Yes' },
-  { id: false, name: 'No' },
+const incrementedByGroup = computed(() => [
+  { id: true, name: t('common.yes') },
+  { id: false, name: t('common.no') },
 ]);
 
 const initialFormData = {
@@ -245,28 +246,28 @@ function buildFormatPath(): string {
       <VCardText>
         <!-- 👉 Title -->
         <h4 class="text-h4 text-center mb-2">
-          Create Publication Format
+          {{ $t('publicationFormat.createTitle') }}
         </h4>
 
         <VForm ref="refMainForm">
           <VAlert v-if="!isAllInputtedValid" color="error" class="mb-4">
-            Please fill in all required fields.
+            {{ $t('publicationFormat.alertFill') }}
           </VAlert>
           <VRow>
                 <!-- 👉 Format Name -->
                 <VCol cols="12">
                   <AppTextField
                     v-model="formData.name"
-                    label="Format Name"
-                    placeholder="Enter the format name"
+                    :label="$t('publicationFormat.formatName')"
+                    :placeholder="$t('publicationFormat.formatNamePh')"
                     :rules="[requiredValidator]"
                   />
                 </VCol>
                 <VCol cols="12">
                     <AppSelect
                         v-model="formData.groupId"
-                        label="Group of Format"
-                        placeholder="Select Group Format"
+                        :label="$t('publicationFormat.groupFormat')"
+                        :placeholder="$t('publicationFormat.selectGroup')"
                         :items="groupFormat"
                         item-value="id"
                         item-title="name"
@@ -290,8 +291,8 @@ function buildFormatPath(): string {
                 <VCol cols="12" sm="6">
                     <AppSelect
                         v-model="formData.separator"
-                        label="Separator Type"
-                        placeholder="Select Separator"
+                        :label="$t('publicationFormat.separator')"
+                        :placeholder="$t('publicationFormat.selectSeparator')"
                         :items="separatorTypes"
                         item-title="name"
                         item-value="id"
@@ -303,8 +304,8 @@ function buildFormatPath(): string {
                 <VCol cols="12" sm="6">
                     <AppSelect
                         v-model="formData.incrementByGroup"
-                        label="Increment By Group"
-                        placeholder="Select Increment Option"
+                        :label="$t('publicationFormat.incrementByGroup')"
+                        :placeholder="$t('publicationFormat.selectIncrement')"
                         :items="incrementedByGroup"
                         item-title="name"
                         item-value="id"
@@ -320,10 +321,10 @@ function buildFormatPath(): string {
           <!-- Left Column -->
           <div class="d-flex flex-column">
             <div class="text-subtitle-1">
-              Format Builder
+              {{ $t('publicationFormat.builderTitle') }}
             </div>
             <div class="text-subtitle-2">
-              (There should be a number cell & Maximum 5 Format Cells)
+              {{ $t('publicationFormat.builderNote') }}
             </div>
           </div>
 
@@ -332,7 +333,7 @@ function buildFormatPath(): string {
 
           <!-- Right Button -->
           <VBtn prepend-icon="tabler-code-plus" @click="onInputFormatCellClicked" :disabled="cellFormats.length == 5">
-            Add Format Cell
+            {{ $t('publicationFormat.addCell') }}
           </VBtn>
         </div>
       </VCardText>
@@ -374,10 +375,10 @@ function buildFormatPath(): string {
           color="primary"
           @click="onFormReset"
         >
-          Close
+          {{ $t('publicationFormat.close') }}
         </VBtn>
         <VBtn color="primary" @click="onFormSubmit">
-          Create Format
+          {{ $t('publicationFormat.createFormat') }}
         </VBtn>
       </VCardText>
     </VCard>
@@ -390,13 +391,13 @@ function buildFormatPath(): string {
 
   <DialogCloseBtn @click="isInputFormatCellFormActive = !isInputFormatCellFormActive" />
   
-  <VCard title="Format Cell Builder">
+  <VCard :title="$t('publicationFormat.cellBuilderTitle')">
     <VForm ref="refVForm" v-model="isCellFromValid">
       <VCardText>
         <AppSelect
         v-model="cellFormatKey"
-        label="Group of Format"
-        placeholder="Select Group Format"
+        :label="$t('publicationFormat.groupFormat')"
+        :placeholder="$t('publicationFormat.selectGroup')"
         :items="filteredCellType"
         item-title="name"
         item-value="key"
@@ -408,24 +409,24 @@ function buildFormatPath(): string {
     <VCardText>
       <AppTextField
         v-model="cellFormatValue"
-        label="Preference Value"
-        placeholder="Input Your Preference Value"
+        :label="$t('publicationFormat.preferenceValue')"
+        :placeholder="$t('publicationFormat.preferenceValuePh')"
         :disabled="cellFormatKey !== FormatCellType.Static.key"
         :rules="cellFormatKey === FormatCellType.Static.key ? [requiredValidator] : []"
       />
     </VCardText>
     </VForm>
-    
+
     <VCardText class="d-flex justify-end flex-wrap gap-3">
         <VBtn
           variant="tonal"
           color="secondary"
           @click="isInputFormatCellFormActive = false"
         >
-          Cancel
+          {{ $t('common.cancel') }}
         </VBtn>
         <VBtn color="primary" @click="onCellFormSubmitted">
-          Add
+          {{ $t('common.add') }}
         </VBtn>
     </VCardText>
   </VCard>

@@ -51,14 +51,16 @@ const stripHtml = (html: string): string => {
   return tmp.textContent || tmp.innerText || ''
 }
 
-const headers = [
-  { title: 'SUBJECT', key: 'subject' },
-  { title: 'BODY', key: 'body' },
-  { title: 'TYPE', key: 'type' },
-  { title: 'PRIORITY', key: 'priority' },
-  { title: 'REJECTED BY', key: 'lastRejector' },
-  { title: 'REASON', key: 'reason' },
-];
+const { t } = useI18n()
+
+const headers = computed(() => [
+  { title: t('rejected.columns.subject'), key: 'subject' },
+  { title: t('rejected.columns.body'), key: 'body' },
+  { title: t('rejected.columns.type'), key: 'type' },
+  { title: t('rejected.columns.priority'), key: 'priority' },
+  { title: t('rejected.columns.rejectedBy'), key: 'lastRejector' },
+  { title: t('rejected.columns.reason'), key: 'reason' },
+]);
 
 const fetchRejectedHistories = async () => {
   isLoading.value = true;
@@ -163,7 +165,7 @@ const filteredDocument = computed(() => {
           <div class="d-flex align-center flex-wrap">
             <AppTextField
               v-model="searchQuery"
-              placeholder="Search Subject"
+              :placeholder="t('rejected.search')"
               style="inline-size: 200px; width: 500px;"
               class="me-3"
               clearable
@@ -190,13 +192,13 @@ const filteredDocument = computed(() => {
             <VSelect
               v-model="filterType"
               :items="['Internal', 'External']"
-              label="Select Type"
+              :label="t('rejected.selectType')"
               clearable
             />
             <VSelect
               v-model="filterPriority"
               :items="['High', 'Medium', 'Low']"
-              label="Select Priority"
+              :label="t('rejected.selectPriority')"
               clearable
             />
           </div>

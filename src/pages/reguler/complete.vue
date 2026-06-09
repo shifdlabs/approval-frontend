@@ -50,14 +50,16 @@ const stripHtml = (html: string): string => {
   return tmp.textContent || tmp.innerText || ''
 }
 
-const headers = [
-  { title: 'SUBJECT', key: 'subject' },
-  { title: 'BODY', key: 'body' },
-  { title: 'TYPE', key: 'type' },
-  { title: 'PRIORITY', key: 'priority' },
-  { title: 'STATUS', key: 'status' },
-  { title: 'COMPLETED AT', key: 'completedAt' },
-];
+const { t } = useI18n()
+
+const headers = computed(() => [
+  { title: t('complete.columns.subject'), key: 'subject' },
+  { title: t('complete.columns.body'), key: 'body' },
+  { title: t('complete.columns.type'), key: 'type' },
+  { title: t('complete.columns.priority'), key: 'priority' },
+  { title: t('complete.columns.status'), key: 'status' },
+  { title: t('complete.columns.completedAt'), key: 'completedAt' },
+]);
 
       const fetchDocuments = async () => {
         try {
@@ -155,7 +157,7 @@ onMounted(() => {
           <div class="d-flex align-center flex-wrap">
             <AppTextField
               v-model="searchQuery"
-              placeholder="Search Subject"
+              :placeholder="t('complete.search')"
               style="inline-size: 200px; width: 500px;"
               class="me-3"
               clearable
@@ -181,13 +183,13 @@ onMounted(() => {
             <VSelect
               v-model="filterType"
               :items="['Internal', 'External']"
-              label="Select Type"
+              :label="t('complete.selectType')"
               clearable
             />
             <VSelect
               v-model="filterStatus"
               :items="['Finish', 'Canceled']"
-              label="Select Status"
+              :label="t('complete.status.selectStatus')"
               clearable
             />
           </div>

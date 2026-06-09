@@ -15,6 +15,7 @@ import PdfView from './pdf-view.vue';
 
 const route = useRoute('preview-id')
 const router = useRouter()
+const { t } = useI18n()
 
 const downloadFile = (fileName: String) => {
   console.log(fileName)
@@ -32,12 +33,12 @@ const generatePDF = async () => {
   }
 }
 
-const headers = [
-  { title: 'APPROVER', key: 'name' },
-  { title: 'ACTION', key: 'isApproved' },
-  { title: 'REASON', key: 'reason' },
-  { title: 'UPDATED AT', key: 'updatedAt' },
-]
+const headers = computed(() => [
+  { title: t('preview.columns.approver'), key: 'name' },
+  { title: t('preview.columns.action'), key: 'isApproved' },
+  { title: t('preview.columns.reason'), key: 'reason' },
+  { title: t('preview.columns.updatedAt'), key: 'updatedAt' },
+])
 
 const histories = ref<History[]>([])
 const document = ref<Document>()
@@ -70,16 +71,16 @@ const showAuthorizationDialog = (isApproved: boolean) => {
 
   if (isApproved) {
     confirmationDialogData.value = ({
-          title: `Are you sure want to APPROVE this document?`,
-          body: 'Please put your comment below.',
-          buttonTitle: 'Approve',
+          title: t('preview.approveConfirm'),
+          body: t('preview.comment'),
+          buttonTitle: t('preview.approve'),
           type: 1
         })
   } else {
     confirmationDialogData.value = ({
-          title: `Are you sure want to REJECT this document?`,
-          body: 'Please put your comment below.',
-          buttonTitle: 'Reject',
+          title: t('preview.rejectConfirm'),
+          body: t('preview.comment'),
+          buttonTitle: t('preview.reject'),
           type: 2
         })
   }
@@ -241,39 +242,27 @@ const fetchData = async () => {
 }
 
 const priorityType = (value: number | null | undefined) => {
-    if (value === 1)
-        return "High"
-    else if (value === 2)
-        return "Medium"
-    else if (value === 3)
-        return "Low"
+    if (value === 1) return t('common.high')
+    else if (value === 2) return t('common.medium')
+    else if (value === 3) return t('common.low')
 }
 
 const documentType = (value: number | undefined) => {
-    if (value === 1)
-        return "Internal"
-    else if (value === 2)
-        return "External"
+    if (value === 1) return t('common.internal')
+    else if (value === 2) return t('common.external')
 }
 
 const actionType = (value: boolean | undefined) => {
-    if (value === true)
-        return "Approved"
-    else if (value === false)
-        return "Rejected"
+    if (value === true) return t('status.approved')
+    else if (value === false) return t('status.rejected')
 }
 
 const statusType = (value: number | undefined) => {
-    if (value === 0)
-        return "Draft"
-    else if (value === 1)
-        return "In Progress"
-    else if (value === 2)
-        return "Finished"
-    else if (value === 3)
-        return "Cancelled"
-    else if (value === 99)
-        return "Rejected"
+    if (value === 0) return t('status.draft')
+    else if (value === 1) return t('status.inProgress')
+    else if (value === 2) return t('status.finish')
+    else if (value === 3) return t('status.cancelled')
+    else if (value === 99) return t('status.rejected')
 }
 
 function formatDate(input: string): string {
@@ -335,14 +324,14 @@ onMounted(() => {
           class="card-title"
           style="font-size: 20px; font-weight: 600;"
         >
-          Detail Information
+          {{ $t('preview.detailInfo') }}
         </VLabel>
         <VDivider/>
       </VRow>
 
       <VRow style="flex-direction: column; padding-top: 16px;">
           <VLabel style="font-size: 13px;">
-            Publication Number
+            {{ $t('preview.publicationNumber') }}
           </VLabel>
           <VLabel style="font-size: 18px; font-weight: 600;">
             {{ document?.publicationValue }}
@@ -351,7 +340,7 @@ onMounted(() => {
 
       <VRow style="flex-direction: column; padding-top: 16px;">
           <VLabel style="font-size: 13px;">
-            Priority Level
+            {{ $t('preview.priorityLevel') }}
           </VLabel>
           <VLabel style="font-size: 18px; font-weight: 600;">
             {{ priorityType(document?.priority) }}
@@ -360,7 +349,7 @@ onMounted(() => {
 
       <VRow style="flex-direction: column; padding-top: 16px;">
           <VLabel style="font-size: 13px;">
-            Document Type
+            {{ $t('preview.documentType') }}
           </VLabel>
           <VLabel style="font-size: 18px; font-weight: 600;">
             {{ documentType(Number(document?.type)) }}
@@ -369,7 +358,7 @@ onMounted(() => {
 
       <VRow style="flex-direction: column; padding-top: 16px;">
           <VLabel style="font-size: 13px;">
-            Status
+            {{ $t('common.status') }}
           </VLabel>
           <VLabel style="font-size: 18px; font-weight: 600;">
             {{ statusType(document?.status) }}
@@ -378,7 +367,7 @@ onMounted(() => {
 
         <VRow style="flex-direction: column; padding-top: 16px;" v-if="internalRecipient?.length > 0">
           <VLabel style="font-size: 13px;">
-            Internal Recipients
+            {{ $t('preview.internalRecipients') }}
           </VLabel>
 
           <div v-for="(recipient, index) in internalRecipient">
@@ -390,7 +379,7 @@ onMounted(() => {
 
         <VRow style="flex-direction: column; padding-top: 16px;" v-if="document?.externalRecipient != ''">
           <VLabel style="font-size: 13px;">
-            External Recipients
+            {{ $t('preview.externalRecipients') }}
           </VLabel>
 
           <VLabel style="font-size: 18px; font-weight: 600;">
@@ -408,7 +397,7 @@ onMounted(() => {
             @click="generatePDF"
             :loading="pdfViewComponent?.isGeneratingPDF"
           >
-            PDF Preview
+            {{ $t('preview.pdfPreview') }}
         </VBtn>
 
         <VBtn
@@ -418,7 +407,7 @@ onMounted(() => {
             @click="updateDocument"
             v-if="isAllowToUpdate"
           >
-            Update Document
+            {{ $t('preview.updateDocument') }}
         </VBtn>
 
         <VRow dense v-if="document?.isApprover">
@@ -428,7 +417,7 @@ onMounted(() => {
               color="error"
               @click="showAuthorizationDialog(false)"
             >
-              Reject
+              {{ $t('preview.reject') }}
             </VBtn>
           </VCol>
 
@@ -439,7 +428,7 @@ onMounted(() => {
               color="success"
               @click="showAuthorizationDialog(true)"
             >
-              Approve
+              {{ $t('preview.approve') }}
             </VBtn>
           </VCol>
         </VRow>
@@ -459,7 +448,7 @@ onMounted(() => {
           class="card-title"
           style="font-size: 20px; font-weight: 200;"
         >
-          Subject
+          {{ $t('common.subject') }}
         </VLabel>
 
         <VDivider style="margin-bottom: 13px;"/>
@@ -477,7 +466,7 @@ onMounted(() => {
           class="card-title"
           style="font-size: 20px; font-weight: 200;"
         >
-          Body
+          {{ $t('common.body') }}
         </VLabel>
 
         <VDivider style="margin-bottom: 13px;"/>
@@ -496,7 +485,7 @@ onMounted(() => {
           class="card-title"
           style="font-size: 20px; font-weight: 200;"
         >
-          Document References
+          {{ $t('preview.documentReferences') }}
         </VLabel>
         <div class="file-list" v-for="(reference, index) in documentReferences"
           :key="index">
@@ -518,7 +507,7 @@ onMounted(() => {
           class="card-title"
           style="font-size: 20px; font-weight: 200;"
         >
-          Attachments
+          {{ $t('preview.attachments') }}
         </VLabel>
 
         <div class="file-list" v-for="(attachment, index) in attachments"
@@ -544,7 +533,7 @@ onMounted(() => {
           class="card-title"
           style="font-size: 20px; font-weight: 200;"
         >
-          Approval Activity
+          {{ $t('preview.approvalActivity') }}
         </VLabel>
 
         <VDivider />
@@ -594,16 +583,16 @@ onMounted(() => {
 
               <div class="app-timeline-text">
                 <div v-if="approver.approved == true">
-                  Accepted
+                  {{ $t('preview.accepted') }}
                 </div>
                 <div v-if="approver.approved == false">
-                  Rejected
+                  {{ $t('status.rejected') }}
                 </div>
               </div>
 
               <!-- Signature Image -->
               <div v-if="approver.signature && approver.signatureUrl" class="mt-3">
-                <div class="text-caption text-medium-emphasis mb-1">Digital Signature:</div>
+                <div class="text-caption text-medium-emphasis mb-1">{{ $t('preview.digitalSignature') }}:</div>
                 <img 
                   :src="approver.signatureUrl" 
                   alt="Digital Signature" 
@@ -630,7 +619,7 @@ onMounted(() => {
           class="card-title"
           style="font-size: 20px; font-weight: 200;"
         >
-          Approval History
+          {{ $t('preview.approvalHistory') }}
         </VLabel>
 
       <VDivider/>
@@ -700,7 +689,7 @@ onMounted(() => {
 
       <AppTextarea
         class="ml-6 mr-6"
-        placeholder="Placeholder Text"
+        :placeholder="$t('preview.commentPh')"
         v-model="authorizationComment"
       />
  
@@ -710,7 +699,7 @@ onMounted(() => {
           variant="tonal"
           @click="isConfirmationDialogVisible = false"
         >
-          Cancel
+          {{ $t('preview.cancel') }}
         </VBtn>
 
         <VBtn 

@@ -7,7 +7,6 @@ import { DocumentReference } from "@/models/document/reference.document";
 import { User } from '@/models/users/users';
 import { router } from '@/plugins/1.router';
 import { mapGroupedWithFormat } from "@/utils/model.mapper";
-import { documentPublicationNumberTypes } from "@/utils/static.value";
 import { VForm } from 'vuetify/components/VForm';
 
 const currentTab = ref(1)
@@ -68,9 +67,52 @@ const uploadingFiles = ref<File[]>([])
 const fileInput = ref<HTMLInputElement | null>(null)
 const totalTabs = documentTabs.length
 
+const { t } = useI18n()
+
 const selectedReferenceDocument = ref<DocumentReference[]>([])
 const loadingReferenceDocument = ref(false)
 const searchReferenceDocument = ref()
+
+const translatedDocumentTabs = computed(() => [
+  t('document.create.tabs.header'),
+  t('document.create.tabs.body'),
+  t('document.create.tabs.approver'),
+  t('document.create.tabs.attachment'),
+  t('document.create.tabs.letterhead'),
+])
+
+const translatedPriorityTypes = computed(() => [
+  { value: 1, title: t('common.high') },
+  { value: 2, title: t('common.medium') },
+  { value: 3, title: t('common.low') },
+])
+
+const translatedPubNumberTypes = computed(() => [
+  { value: 1, title: t('document.create.pubTypes.auto') },
+  { value: 2, title: t('document.create.pubTypes.booked') },
+  { value: 3, title: t('document.create.pubTypes.manual') },
+  { value: 4, title: t('document.create.pubTypes.na') },
+])
+
+const translatedDocumentType = computed(() => [
+  { title: t('common.internal'), value: '1', desc: t('document.create.internalDesc') },
+  { title: t('common.external'), value: '2', desc: t('document.create.externalDesc') },
+])
+
+const translatedLetterheadType = computed(() => [
+  {
+    title: t('document.create.noLetterhead'),
+    desc: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry',
+    value: '1',
+    icon: { icon: 'tabler-layout-navbar-inactive', size: '28' },
+  },
+  {
+    title: t('document.create.withLetterhead'),
+    desc: 'It is a long established fact that a reader will be distracted by the readable content',
+    value: '2',
+    icon: { icon: 'tabler-layout-navbar', size: '28' },
+  },
+])
 
 watch(searchReferenceDocument, query => {
   if (query && query.length >= 3) {
@@ -366,11 +408,11 @@ const onFileRemoved = (index: number) => {
   <VCard class="pt-4">
     <VTabs v-model="currentTab">
         <VTab
-        v-for="item in documentTabs.length"
+        v-for="item in translatedDocumentTabs.length"
         :key="item"
         :value="item"
       >
-        {{ documentTabs[item - 1] }}
+        {{ translatedDocumentTabs[item - 1] }}
       </VTab>
     </VTabs>
 
@@ -385,21 +427,21 @@ const onFileRemoved = (index: number) => {
             <AppTextField
               :rules="[requiredValidator, maxLengthValidator(200)]"
               v-model="document.subject"
-              label="Subject *"
-              placeholder="Example: Official Announcement"
+              :label="$t('document.create.subject')"
+              :placeholder="$t('document.create.subjectPh')"
               class="me-3"
             />
           </VCol>
 
             <VCol
             cols="12">
-            <VLabel>Reference</VLabel>
+            <VLabel>{{ $t('document.create.reference') }}</VLabel>
             <VAutocomplete
               v-model="selectedReferenceDocument"
               v-model:search="searchReferenceDocument"
               :loading="loadingReferenceDocument"
               :items="references"
-              placeholder="Search for Reference"
+              :placeholder="$t('document.create.referencePh')"
               :menu-props="{ maxHeight: '200px' }"
               multiple
               chips
@@ -410,9 +452,9 @@ const onFileRemoved = (index: number) => {
             cols="12">
             <AppSelect
                 v-model="publicationNumberTypeInput"
-                label="Publication Number *"
-                placeholder="Select Priority Type"
-                :items="documentPublicationNumberTypes"
+                :label="$t('document.create.publicationNumber')"
+                :placeholder="$t('common.select')"
+                :items="translatedPubNumberTypes"
                 item-title="title"
                 item-value="value"
                 clearable
@@ -423,8 +465,8 @@ const onFileRemoved = (index: number) => {
           <VCol cols="12" sm="6" v-if="publicationNumberTypeInput === 1">
                 <AppSelect
                         v-model="selectedGroupName"
-                        label="Group of Format"
-                        placeholder="Select Group Format"
+                        :label="$t('document.create.groupFormat')"
+                        :placeholder="$t('document.create.selectGroup')"
                         :items="groupedWithFormat"
                         item-value="group"
                         item-title="group"
@@ -434,8 +476,8 @@ const onFileRemoved = (index: number) => {
             <VCol cols="12" sm="6" v-if="publicationNumberTypeInput === 1">
                 <AppSelect
                         v-model="selectedFormatId"
-                        label="Format Name"
-                        placeholder="Select Format Name"
+                        :label="$t('document.create.formatName')"
+                        :placeholder="$t('document.create.selectFormat')"
                         :items="formatsForSelectedGroup"
                         item-value="id"
                         item-title="name"
@@ -446,8 +488,8 @@ const onFileRemoved = (index: number) => {
             <VCol cols="12" v-if="publicationNumberTypeInput === 2">
                 <AppSelect
                         v-model="selectedBookedNumber"
-                        label="Booked Number"
-                        placeholder="Select Your Booked Number"
+                        :label="$t('document.create.bookedNumber')"
+                        :placeholder="$t('document.create.selectBooked')"
                         :items="bookedNumbers"
                         item-value="id"
                         item-title="DocumentNumber"
@@ -459,19 +501,19 @@ const onFileRemoved = (index: number) => {
               <AppTextField
                 :rules="[requiredValidator]"
                 v-model="customInputNumber"
-                label="Custom Number *"
-                placeholder="Example: 01/Gov/R/2/2025"
+                :label="$t('document.create.customNumber')"
+                :placeholder="$t('document.create.customNumberPh')"
                 class="me-3"
               />
             </VCol>
 
-          <VCol 
+          <VCol
             cols="12">
             <AppSelect
                 v-model="document.priority"
-                label="Priority *"
-                placeholder="Select Priority Type"
-                :items="documentPriorityType"
+                :label="$t('document.create.priority')"
+                :placeholder="$t('document.create.selectPriority')"
+                :items="translatedPriorityTypes"
                 item-title="title"
                 item-value="value"
                 clearable
@@ -482,10 +524,10 @@ const onFileRemoved = (index: number) => {
           <VCol
             cols="12"
           >
-            <VLabel>Document Type *</VLabel>
+            <VLabel>{{ $t('document.create.documentType') }}</VLabel>
             <CustomRadios
                 v-model:selected-radio="document.type"
-                :radio-content="documentType"
+                :radio-content="translatedDocumentType"
                 :grid-column="{ sm: '6', cols: '12' }"
                 :rules="[requiredValidator]"
             />
@@ -497,10 +539,10 @@ const onFileRemoved = (index: number) => {
                 :disabled="!isInternalRecipientsEnable"
                 v-model="selectedInternalRecipients"
                 :items="usersList"
-                placeholder="Select Internal Approver"
+                :placeholder="$t('common.select')"
                 item-title="title"
                 item-value="id"
-                label="Internal Recipients"
+                :label="$t('document.create.internalRecipients')"
                 multiple
                 chips
             />
@@ -509,10 +551,10 @@ const onFileRemoved = (index: number) => {
           <VCol
             cols="12">
             <AppTextField
-              label="External Recipients (Add a comma ',' if multiple items)"
+              :label="$t('document.create.externalRecipients')"
               :disabled="!isExternalRecipientsEnable"
               v-model="document.externalRecipient"
-              placeholder="Input your external recipient name"
+              :placeholder="$t('document.create.externalRecipientsPh')"
               :rules="isExternalRecipientsEnable ? [requiredValidator, emailValidator, maxLengthValidator(500)] : []"
             />
           </VCol>
@@ -521,7 +563,7 @@ const onFileRemoved = (index: number) => {
             cols="12">
             <VCheckbox
                 v-model="isCarbonCopyEnable"
-                label="CC (Carbon Copy)"
+                :label="$t('document.create.cc')"
                 density="compact"
                 @change="onToggle(3)"
             />
@@ -529,7 +571,7 @@ const onFileRemoved = (index: number) => {
                 :disabled="!isCarbonCopyEnable"
                 v-model="selectedCarbonCopy"
                 :items="usersList"
-                placeholder="Select Carbon Copy"
+                :placeholder="$t('document.create.selectCc')"
                 item-title="title"
                 item-value="id"
                 multiple
@@ -547,7 +589,7 @@ const onFileRemoved = (index: number) => {
                 style="width: 105px;"
                 @click="nextTab"
               >
-                Next
+                {{ $t('document.create.next') }}
               </VBtn>
           </VCol>
           </VRow>
@@ -558,7 +600,7 @@ const onFileRemoved = (index: number) => {
                 <VCol
                 cols="12"
                 >
-                <VLabel class="mb-3">Write your message body in this field. *</VLabel>
+                <VLabel class="mb-3">{{ $t('document.create.writeBody') }}</VLabel>
                 <TiptapEditor
                     v-model="document.body"
                     class="border rounded basic-editor"
@@ -576,7 +618,7 @@ const onFileRemoved = (index: number) => {
                     variant="outlined"
                     @click="preTab"
                 >
-                Previous
+                {{ $t('document.create.previous') }}
                 </VBtn>
                 <VBtn
                     color="primary"
@@ -584,7 +626,7 @@ const onFileRemoved = (index: number) => {
                     style="width: 105px;"
                     @click="nextTab"
                 >
-                Next
+                {{ $t('document.create.next') }}
               </VBtn>
             </VCol>
             </VRow>
@@ -594,9 +636,9 @@ const onFileRemoved = (index: number) => {
             <div class="d-flex gap-24 align-start flex-wrap mb-3">
                 <!-- Title + Subtitle -->
                 <div>
-                    <VLabel style="font-size: 16px;">Select Approvers *</VLabel>
+                    <VLabel style="font-size: 16px;">{{ $t('document.create.selectApprovers') }}</VLabel>
                     <div class="text-body-2" style="font-size: 14px">
-                        Please choose at least one person to approve.
+                        {{ $t('document.create.chooseOne') }}
                     </div>
                 </div>
 
@@ -607,7 +649,7 @@ const onFileRemoved = (index: number) => {
                 @click="addApprover"
                 >
                 <VIcon icon="tabler-user-plus" size="18" class="me-1" />
-                Add Approver
+                {{ $t('document.create.addApprover') }}
                 </VBtn>
             </div>
 
@@ -620,8 +662,8 @@ const onFileRemoved = (index: number) => {
             <VCol cols="8" md="6" lg="4">
                 <AppSelect
                     v-model="approvers[0].userID"
-                    label="Approver 1"
-                    placeholder="Select Approver"
+                    :label="$t('document.create.approverLabel', { n: 1 })"
+                    :placeholder="$t('document.create.selectApprover')"
                     :items="usersList"
                     item-title="title"
                     item-value="id"
@@ -633,7 +675,7 @@ const onFileRemoved = (index: number) => {
               <VCol cols="auto" class="d-flex align-center">
                 <VCheckbox
                     v-model="approvers[0].signature"
-                    label="Print Signature"
+                    :label="$t('document.create.printSignature')"
                     density="compact"
                     hide-details
                     class="mt-5"
@@ -653,8 +695,8 @@ const onFileRemoved = (index: number) => {
                     <AppSelect
                       class="tight-select"
                       v-model="approvers[index].userID"
-                      :label="'Approver ' + (index + 1)"
-                      :placeholder="'Select For Approver ' + (index + 1)"
+                      :label="$t('document.create.approverLabel', { n: index + 1 })"
+                      :placeholder="$t('document.create.selectForApprover', { n: index + 1 })"
                       :items="usersList"
                       item-title="title"
                       item-value="id"
@@ -668,7 +710,7 @@ const onFileRemoved = (index: number) => {
                     <VCheckbox
                       class="tight-checkbox mt-5"
                       v-model="approver.signature"
-                      label="Print Signature"
+                      :label="$t('document.create.printSignature')"
                       density="compact"
                       hide-details
                     />
@@ -696,7 +738,7 @@ const onFileRemoved = (index: number) => {
                 variant="outlined"
                 @click="preTab"
               >
-                Previous
+                {{ $t('document.create.previous') }}
                 </VBtn>
                 <VBtn
                     :disabled="currentTab === totalTabs"
@@ -705,7 +747,7 @@ const onFileRemoved = (index: number) => {
                     style="width: 105px;"
                     @click="nextTab"
                 >
-                Next
+                {{ $t('document.create.next') }}
               </VBtn>
             </VCol>
         </VWindowItem>
@@ -714,7 +756,7 @@ const onFileRemoved = (index: number) => {
           <!-- Attachments Section -->
           <VCard class="mb-6" elevation="1">
             <VCardTitle class="text-h6 pa-4 bg-grey-lighten-5">
-              Upload Supporting Documents
+              {{ $t('document.create.uploadDocs') }}
             </VCardTitle>
               <VCol cols="12">
                 <div
@@ -725,15 +767,15 @@ const onFileRemoved = (index: number) => {
                   @drop.prevent="onFileDrop"
                 >
                   <VLabel class="text-body-1 font-weight-medium mb-2">
-                    Select files to upload
+                    {{ $t('document.create.selectFiles') }}
                   </VLabel>
                   <div class="text-body-2 text-medium-emphasis mb-3">
-                    Maximum file size: 2MB per file. Supported formats: PDF, JPG, PNG. You can select multiple files at once.
+                    {{ $t('document.create.maxFileSize') }}
                   </div>
 
                   <VIcon size="48" color="primary">tabler-upload</VIcon>
                   <div class="text-body-2 text-medium-emphasis mt-2">
-                    Click or drag files here to upload
+                    {{ $t('document.create.clickOrDrag') }}
                   </div>
 
                   <input
@@ -773,10 +815,10 @@ const onFileRemoved = (index: number) => {
                       class="mb-4"
                     />
                     <div class="text-body-1 text-medium-emphasis mb-2">
-                      Uploading {{ uploadingFiles.length }} file{{ uploadingFiles.length > 1 ? 's' : '' }}...
+                      {{ $t('document.create.uploading', { count: uploadingFiles.length }) }}
                     </div>
                     <div class="text-body-2 text-medium-emphasis">
-                      Please wait while we process your files
+                      {{ $t('document.create.pleaseWait') }}
                     </div>
                   </div>
                 </VCol>
@@ -791,7 +833,7 @@ const onFileRemoved = (index: number) => {
                 variant="outlined"
                 @click="preTab"
               >
-                Previous
+                {{ $t('document.create.previous') }}
               </VBtn>
               <VBtn
                 :disabled="currentTab === totalTabs"
@@ -800,7 +842,7 @@ const onFileRemoved = (index: number) => {
                 style="width: 105px;"
                 @click="nextTab"
               >
-                Next
+                {{ $t('document.create.next') }}
               </VBtn>
             </VCol>
           </VRow>
@@ -814,18 +856,18 @@ const onFileRemoved = (index: number) => {
           class="mb-5"
           v-if="isInvalidFormVisible"
           >
-          Please review and complete all required fields in the form.
+          {{ $t('document.create.reviewFields') }}
           </VAlert>
           <div>
-              <VLabel style="font-size: 16px;font-weight: 500;">Select Preferred Letterhead. *</VLabel>
+              <VLabel style="font-size: 16px;font-weight: 500;">{{ $t('document.create.selectLetterhead') }}</VLabel>
               <div class="text-body-2" style="font-size: 14px;">
-                The letterhead will be displayed at the top of your letter.
+                {{ $t('document.create.letterheadDesc') }}
               </div>
           </div>
 
           <CustomRadiosWithIcon
             v-model:selected-radio="selectedLetterheadType"
-            :radio-content="documentLetterHeadType"
+            :radio-content="translatedLetterheadType"
             :grid-column="{ sm: '6', cols: '12' }"
           />
 
@@ -839,7 +881,7 @@ const onFileRemoved = (index: number) => {
                     variant="outlined"
                     @click="preTab"
                 >
-                Previous
+                {{ $t('document.create.previous') }}
                 </VBtn>
 
                 <VSpacer/>
@@ -850,13 +892,13 @@ const onFileRemoved = (index: number) => {
                     variant="outlined"
                     @click="saveAsDraft"
                 >
-                Save as a draft
+                {{ $t('document.create.saveAsDraft') }}
                 </VBtn>
                 <VBtn
                   color="primary"
                   @click="showSubmitDialog"
                 >
-                Finish & send Letter
+                {{ $t('document.create.sendLetter') }}
               </VBtn>
             </VCol>
         </VWindowItem>
@@ -870,11 +912,11 @@ const onFileRemoved = (index: number) => {
     class="expansion-panels-width-border mt-5"
   >
     <VExpansionPanel>
-      <VExpansionPanelTitle 
+      <VExpansionPanelTitle
       collapse-icon="tabler-minus"
       expand-icon="tabler-plus"
       >
-      <p style="font-size: larger;">Document Preview</p>
+      <p style="font-size: larger;">{{ $t('document.create.previewTitle') }}</p>
       </VExpansionPanelTitle>
       <VExpansionPanelText>
           <A4PaperView 
@@ -899,9 +941,9 @@ const onFileRemoved = (index: number) => {
   <DialogCloseBtn @click="isDialogVisible = !isDialogVisible" />
 
     <!-- Dialog Content -->
-    <VCard title="Confirm Submission Approval">
+    <VCard :title="$t('document.create.confirmSubmit')">
       <VCardText>
-        Are you sure all the inputted data are correct?
+        {{ $t('document.create.areYouSure') }}
       </VCardText>
 
       <VCardText class="d-flex justify-end gap-3 flex-wrap">
@@ -910,10 +952,10 @@ const onFileRemoved = (index: number) => {
           variant="outlined"
           @click="isDialogVisible = false"
         >
-          Cancel
+          {{ $t('common.cancel') }}
         </VBtn>
         <VBtn @click="sendDocument">
-          Yes, Send Letter
+          {{ $t('document.create.yesSend') }}
         </VBtn>
       </VCardText>
     </VCard>
@@ -929,7 +971,7 @@ const onFileRemoved = (index: number) => {
       width="300"
     >
       <VCardText class="pt-3" style="text-align: center;">
-        In Progress Generating Your Document...
+        {{ $t('document.create.generating') }}
         <VProgressLinear
           indeterminate
           bg-color="rgba(var(--v-theme-surface), 0.1)"
@@ -956,7 +998,7 @@ const onFileRemoved = (index: number) => {
           style="width: 100px; height: 100px;"
       />
       <VCardText style="font-weight: bold; text-align: center; font-size: 20px;">
-        Your Document Successfully Distributed.
+        {{ $t('document.create.successSent') }}
       </VCardText>
     </VCard>
   </VDialog>
@@ -976,7 +1018,7 @@ const onFileRemoved = (index: number) => {
           style="width: 100px; height: 100px;"
       />
       <VCardText style="font-weight: bold; text-align: center; font-size: 20px;">
-        Your Document Successfully Saved as a Draft.
+        {{ $t('document.create.successDraft') }}
       </VCardText>
     </VCard>
   </VDialog>
@@ -989,27 +1031,27 @@ const onFileRemoved = (index: number) => {
     <VCard>
       <VCardTitle class="text-h6">
         <VIcon icon="tabler-alert-triangle" color="warning" class="me-2" />
-        Confirm Delete
+        {{ $t('document.create.confirmDelete') }}
       </VCardTitle>
-      
+
       <VCardText>
-        Are you sure you want to delete this file? This action cannot be undone.
+        {{ $t('document.create.confirmDeleteDesc') }}
       </VCardText>
-      
+
       <VCardActions class="justify-end">
         <VBtn
           color="grey"
           variant="text"
           @click="deleteDialogVisible = false"
         >
-          Cancel
+          {{ $t('common.cancel') }}
         </VBtn>
         <VBtn
           color="error"
           variant="flat"
           @click="deleteFile"
         >
-          Delete
+          {{ $t('document.create.deleteFile') }}
         </VBtn>
       </VCardActions>
     </VCard>

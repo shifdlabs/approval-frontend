@@ -3,6 +3,7 @@ import { useRecipientController } from '@/controllers/reguler/recipient-controll
 import { computed, onMounted, ref, watch } from 'vue';
 
 const { inboxList, isLoading, fetchInbox } = useRecipientController();
+const { t } = useI18n()
 
 const searchValue = ref('');
 const startDate = ref<string | null>(null);
@@ -224,7 +225,7 @@ onMounted(async () => {
           <div class="d-flex align-center flex-wrap">
             <AppTextField
               v-model="searchValue"
-              placeholder="Search Subject"
+              :placeholder="t('inbox.search')"
               style="inline-size: 200px; width: 500px;"
               class="me-3"
               clearable
@@ -251,8 +252,8 @@ onMounted(async () => {
             <div class="flex-grow-1">
               <AppDateTimePicker
                 v-model="startDate"
-                label="Start Date"
-                placeholder="Select start date"
+                :label="t('inbox.startDate')"
+                :placeholder="t('inbox.selectStart')"
                 :config="{ dateFormat: 'F j, Y' }"
                 clearable
               />
@@ -260,8 +261,8 @@ onMounted(async () => {
             <div class="flex-grow-1">
               <AppDateTimePicker
                 v-model="endDate"
-                label="End Date"
-                placeholder="Select end date"
+                :label="t('inbox.endDate')"
+                :placeholder="t('inbox.selectEnd')"
                 :config="{ dateFormat: 'F j, Y' }"
                 clearable
               />
@@ -278,11 +279,9 @@ onMounted(async () => {
         <div v-else>
           <VDataTable
             :headers="[
-              { title: 'Subject', value: 'subject' },
-              { title: 'Body', value: 'body' },
-              // { title: 'Priority', value: 'priority' },
-              { title: 'Received At', value: 'receiveAt' },
-              // { title: 'Updated At', value: 'updatedAt' },
+              { title: t('inbox.subject'), value: 'subject' },
+              { title: t('inbox.body'), value: 'body' },
+              { title: t('inbox.receivedAt'), value: 'receiveAt' },
               { title: '', value: 'star' },
             ]"
             :items="filteredInbox"
