@@ -104,11 +104,9 @@ const filteredCellType = computed(() => {
     }
 
     if (item.key === FormatCellType.Static.key) {
-      // allow up to 2 Static
       return staticCount < 2;
     }
 
-    // for other types: remove if already selected
     return !selectedKeys.includes(item.key);
   });
 });
@@ -117,13 +115,10 @@ function removeCellFormat(index: number) {
   cellFormats.value.splice(index, 1);
 }
 
-
-// Watch the specific prop isDialogVisible
 watch(
   () => props.isDialogVisible,
   (isVisible) => {
     if (isVisible) {
-      // Reset formData every time the dialog becomes visible
       formData.value = { ...initialFormData };
       isAllInputtedValid.value = true;
       cellFormats.value = []
@@ -224,7 +219,7 @@ const dialogModelValueUpdate = (val: boolean) => {
 
 function buildFormatPath(): string {
   return cellFormats.value
-    .map(item => 
+    .map(item =>
       item.key === FormatCellType.Static.key
         ? item.originalValue
         : item.key
@@ -235,208 +230,192 @@ function buildFormatPath(): string {
 
 <template>
   <VDialog
-    :width="$vuetify.display.smAndDown ? 'auto' : 700"
+    :width="$vuetify.display.smAndDown ? 'auto' : 660"
     :model-value="props.isDialogVisible"
     @update:model-value="dialogModelValueUpdate"
   >
-    <!-- Dialog close btn -->
-    <DialogCloseBtn @click="dialogModelValueUpdate(false)" />
+    <VCard class="bm-dialog">
+      <div class="bmd-head">
+        <div class="bmd-mark">
+          <VIcon icon="tabler-file-plus" size="22" />
+        </div>
+        <div class="bmd-titles">
+          <h2>{{ $t('publicationFormat.createTitle') }}</h2>
+          <p>{{ $t('publicationFormat.createSubtitle') }}</p>
+        </div>
+        <button class="bmd-close" type="button" @click="dialogModelValueUpdate(false)">
+          <VIcon icon="tabler-x" size="18" />
+        </button>
+      </div>
 
-    <VCard class="pa-sm-10 pa-2">
-      <VCardText>
-        <!-- 👉 Title -->
-        <h4 class="text-h4 text-center mb-2">
-          {{ $t('publicationFormat.createTitle') }}
-        </h4>
-
+      <div class="bmd-body">
         <VForm ref="refMainForm">
-          <VAlert v-if="!isAllInputtedValid" color="error" class="mb-4">
+          <VAlert v-if="!isAllInputtedValid" color="error" class="mb-3">
             {{ $t('publicationFormat.alertFill') }}
           </VAlert>
           <VRow>
-                <!-- 👉 Format Name -->
-                <VCol cols="12">
-                  <AppTextField
-                    v-model="formData.name"
-                    :label="$t('publicationFormat.formatName')"
-                    :placeholder="$t('publicationFormat.formatNamePh')"
-                    :rules="[requiredValidator]"
-                  />
-                </VCol>
-                <VCol cols="12">
-                    <AppSelect
-                        v-model="formData.groupId"
-                        :label="$t('publicationFormat.groupFormat')"
-                        :placeholder="$t('publicationFormat.selectGroup')"
-                        :items="groupFormat"
-                        item-value="id"
-                        item-title="name"
-                        clearable
-                        :rules="[requiredValidator]"
-                    >
-                    <template #item="{ item, props }">
-                        <v-list-item v-bind="props">
-                          <v-list-item-subtitle>
-                            {{ item.raw.description }}
-                          </v-list-item-subtitle>
-                        </v-list-item>
-                      </template>
+            <VCol cols="12">
+              <AppTextField
+                v-model="formData.name"
+                :label="$t('publicationFormat.formatName')"
+                :placeholder="$t('publicationFormat.formatNamePh')"
+                :rules="[requiredValidator]"
+              />
+            </VCol>
+            <VCol cols="12">
+              <AppSelect
+                v-model="formData.groupId"
+                :label="$t('publicationFormat.groupFormat')"
+                :placeholder="$t('publicationFormat.selectGroup')"
+                :items="groupFormat"
+                item-value="id"
+                item-title="name"
+                clearable
+                :rules="[requiredValidator]"
+              >
+                <template #item="{ item, props: itemProps }">
+                  <v-list-item v-bind="itemProps">
+                    <v-list-item-subtitle>{{ item.raw.description }}</v-list-item-subtitle>
+                  </v-list-item>
+                </template>
+                <template #selection="{ item }">
+                  <span>{{ item.raw.name }}</span>
+                </template>
+              </AppSelect>
+            </VCol>
+            <VCol cols="12" sm="6">
+              <AppSelect
+                v-model="formData.separator"
+                :label="$t('publicationFormat.separator')"
+                :placeholder="$t('publicationFormat.selectSeparator')"
+                :items="separatorTypes"
+                item-title="name"
+                item-value="id"
+                clearable
+                :rules="[requiredValidator]"
+              />
+            </VCol>
+            <VCol cols="12" sm="6">
+              <AppSelect
+                v-model="formData.incrementByGroup"
+                :label="$t('publicationFormat.incrementByGroup')"
+                :placeholder="$t('publicationFormat.selectIncrement')"
+                :items="incrementedByGroup"
+                item-title="name"
+                item-value="id"
+                clearable
+              />
+            </VCol>
+          </VRow>
+        </VForm>
 
-                      <template #selection="{ item, index }">
-                        <span>{{ item.raw.name }}</span>
-                      </template>
-                    </AppSelect>
-                </VCol>
-
-                <VCol cols="12" sm="6">
-                    <AppSelect
-                        v-model="formData.separator"
-                        :label="$t('publicationFormat.separator')"
-                        :placeholder="$t('publicationFormat.selectSeparator')"
-                        :items="separatorTypes"
-                        item-title="name"
-                        item-value="id"
-                        clearable
-                        :rules="[requiredValidator]"
-                    />
-                </VCol>
-
-                <VCol cols="12" sm="6">
-                    <AppSelect
-                        v-model="formData.incrementByGroup"
-                        :label="$t('publicationFormat.incrementByGroup')"
-                        :placeholder="$t('publicationFormat.selectIncrement')"
-                        :items="incrementedByGroup"
-                        item-title="name"
-                        item-value="id"
-                        clearable
-                    />
-                </VCol>
-            </VRow>
-          </VForm>
-        </VCardText>
-
-        <VCardText>
-            <div class="d-flex align-center">
-          <!-- Left Column -->
+        <!-- Cell Builder Header -->
+        <div class="d-flex align-center mt-4 mb-2">
           <div class="d-flex flex-column">
-            <div class="text-subtitle-1">
-              {{ $t('publicationFormat.builderTitle') }}
-            </div>
-            <div class="text-subtitle-2">
-              {{ $t('publicationFormat.builderNote') }}
-            </div>
+            <div class="text-subtitle-1">{{ $t('publicationFormat.builderTitle') }}</div>
+            <div class="text-subtitle-2">{{ $t('publicationFormat.builderNote') }}</div>
           </div>
-
-          <!-- Spacer in the middle -->
           <VSpacer />
-
-          <!-- Right Button -->
-          <VBtn prepend-icon="tabler-code-plus" @click="onInputFormatCellClicked" :disabled="cellFormats.length == 5">
+          <VBtn
+            prepend-icon="tabler-code-plus"
+            variant="tonal"
+            color="primary"
+            size="small"
+            @click="onInputFormatCellClicked"
+            :disabled="cellFormats.length == 5"
+          >
             {{ $t('publicationFormat.addCell') }}
           </VBtn>
         </div>
-      </VCardText>
 
-      <VCardText>
+        <!-- Cell List -->
         <div class="format-cell-list">
           <div
             class="format-cell"
             v-for="(cell, index) in cellFormats"
             :key="index"
           >
-              <div class="format-cell__left">
-                <div class="format-cell__badge">{{ cell.short }}</div>
-                <div class="format-cell__text">
-                  <div class="format-cell__title" v-if="cell.name == FormatCellType.Static.name">{{ cell.name }}: {{ cell.originalValue }}</div>
-                  <div class="format-cell__title" v-else>{{ cell.name }}</div>
-                  <div class="format-cell__subtitle" v-if="cell.name != FormatCellType.Static.name">{{ cell.originalValue }}</div>
-                </div>
+            <div class="format-cell__left">
+              <div class="format-cell__badge">{{ cell.short }}</div>
+              <div class="format-cell__text">
+                <div class="format-cell__title" v-if="cell.name == FormatCellType.Static.name">{{ cell.name }}: {{ cell.originalValue }}</div>
+                <div class="format-cell__title" v-else>{{ cell.name }}</div>
+                <div class="format-cell__subtitle" v-if="cell.name != FormatCellType.Static.name">{{ cell.originalValue }}</div>
               </div>
-              <div class="format-cell__actions">
-                    <!-- <VBtn
-                      icon="tabler-edit"
-                      rounded
-                    /> -->
-                    <VBtn
-                    color="error"
-                      icon="tabler-trash-x"
-                      rounded
-                      @click="removeCellFormat(index)"
-                    />
-              </div>
+            </div>
+            <div class="format-cell__actions">
+              <VBtn color="error" icon="tabler-trash-x" rounded @click="removeCellFormat(index)" size="small" />
+            </div>
           </div>
         </div>
-      </VCardText>
+      </div>
 
-      <VCardText class="d-flex justify-end flex-wrap gap-3">
-        <VBtn
-          variant="outlined"
-          color="primary"
-          @click="onFormReset"
-        >
+      <div class="bmd-foot">
+        <button class="bmd-btn bmd-btn-ghost" type="button" @click="onFormReset">
           {{ $t('publicationFormat.close') }}
-        </VBtn>
-        <VBtn color="primary" @click="onFormSubmit">
+        </button>
+        <button class="bmd-btn bmd-btn-primary" type="button" @click="onFormSubmit">
           {{ $t('publicationFormat.createFormat') }}
-        </VBtn>
-      </VCardText>
+        </button>
+      </div>
     </VCard>
   </VDialog>
 
-  <VDialog
-    v-model="isInputFormatCellFormActive"
-    max-width="600"
-  >
+  <!-- Cell Builder Sub-dialog -->
+  <VDialog v-model="isInputFormatCellFormActive" max-width="500">
+    <VCard class="bm-dialog">
+      <div class="bmd-head">
+        <div class="bmd-mark">
+          <VIcon icon="tabler-code-plus" size="22" />
+        </div>
+        <div class="bmd-titles">
+          <h2>{{ $t('publicationFormat.cellBuilderTitle') }}</h2>
+        </div>
+        <button class="bmd-close" type="button" @click="isInputFormatCellFormActive = false">
+          <VIcon icon="tabler-x" size="18" />
+        </button>
+      </div>
 
-  <DialogCloseBtn @click="isInputFormatCellFormActive = !isInputFormatCellFormActive" />
-  
-  <VCard :title="$t('publicationFormat.cellBuilderTitle')">
-    <VForm ref="refVForm" v-model="isCellFromValid">
-      <VCardText>
-        <AppSelect
-        v-model="cellFormatKey"
-        :label="$t('publicationFormat.groupFormat')"
-        :placeholder="$t('publicationFormat.selectGroup')"
-        :items="filteredCellType"
-        item-title="name"
-        item-value="key"
-        :rules="[requiredValidator]"
-        clearable
-      ></AppSelect>
-    </VCardText>
+      <VForm ref="refVForm" v-model="isCellFromValid">
+        <div class="bmd-body">
+          <AppSelect
+            v-model="cellFormatKey"
+            :label="$t('publicationFormat.groupFormat')"
+            :placeholder="$t('publicationFormat.selectGroup')"
+            :items="filteredCellType"
+            item-title="name"
+            item-value="key"
+            :rules="[requiredValidator]"
+            clearable
+          />
+          <div class="mt-4">
+            <AppTextField
+              v-model="cellFormatValue"
+              :label="$t('publicationFormat.preferenceValue')"
+              :placeholder="$t('publicationFormat.preferenceValuePh')"
+              :disabled="cellFormatKey !== FormatCellType.Static.key"
+              :rules="cellFormatKey === FormatCellType.Static.key ? [requiredValidator] : []"
+            />
+          </div>
+        </div>
 
-    <VCardText>
-      <AppTextField
-        v-model="cellFormatValue"
-        :label="$t('publicationFormat.preferenceValue')"
-        :placeholder="$t('publicationFormat.preferenceValuePh')"
-        :disabled="cellFormatKey !== FormatCellType.Static.key"
-        :rules="cellFormatKey === FormatCellType.Static.key ? [requiredValidator] : []"
-      />
-    </VCardText>
-    </VForm>
-
-    <VCardText class="d-flex justify-end flex-wrap gap-3">
-        <VBtn
-          variant="tonal"
-          color="secondary"
-          @click="isInputFormatCellFormActive = false"
-        >
-          {{ $t('common.cancel') }}
-        </VBtn>
-        <VBtn color="primary" @click="onCellFormSubmitted">
-          {{ $t('common.add') }}
-        </VBtn>
-    </VCardText>
-  </VCard>
+        <div class="bmd-foot">
+          <button class="bmd-btn bmd-btn-ghost" type="button" @click="isInputFormatCellFormActive = false">
+            {{ $t('common.cancel') }}
+          </button>
+          <button class="bmd-btn bmd-btn-primary" type="button" @click="onCellFormSubmitted">
+            {{ $t('common.add') }}
+          </button>
+        </div>
+      </VForm>
+    </VCard>
   </VDialog>
 </template>
 
 <style lang="scss" scoped>
 .format-cell-list {
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border: 1px solid var(--bm-line, #e9eaf4);
+  border-radius: 10px;
   overflow: hidden;
 }
 
@@ -444,8 +423,8 @@ function buildFormatPath(): string {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
-  border-bottom: 1px solid #ddd;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--bm-line, #e9eaf4);
 
   &:last-child {
     border-bottom: none;
@@ -454,18 +433,20 @@ function buildFormatPath(): string {
   &__left {
     display: flex;
     align-items: center;
+    gap: 10px;
   }
 
   &__badge {
-    width: 32px;
-    height: 32px;
-    background: #ccc;
-    border-radius: 4px;
-    font-weight: bold;
+    width: 34px;
+    height: 34px;
+    background: var(--bm-navy-tint, #ecf1fb);
+    color: var(--bm-navy, #3b5dc6);
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 8px;
   }
 
   &__text {
@@ -474,36 +455,19 @@ function buildFormatPath(): string {
   }
 
   &__title {
-    font-weight: 500;
-    color: #333;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--bm-ink-strong, #1e2240);
   }
 
   &__subtitle {
     font-size: 12px;
-    color: #777;
+    color: var(--bm-muted, #7e82a4);
   }
 
   &__actions {
     display: flex;
     gap: 4px;
-  }
-
-  .edit-btn {
-    background: #7c3aed; // purple
-    border: none;
-    border-radius: 4px;
-    color: white;
-    padding: 4px 6px;
-    cursor: pointer;
-  }
-
-  .delete-btn {
-    background: #ef4444; // red
-    border: none;
-    border-radius: 4px;
-    color: white;
-    padding: 4px 6px;
-    cursor: pointer;
   }
 }
 </style>

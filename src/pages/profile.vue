@@ -614,32 +614,30 @@ const downloadSignature = (format: 'png' | 'jpg') => {
 
   <VDialog
     v-model="isDeleteAccountDialogVisible"
+    max-width="460"
     persistent
-    class="v-dialog-sm"
   >
-    <!-- Dialog close btn -->
-    <DialogCloseBtn @click="isDeleteAccountDialogVisible = !isDeleteAccountDialogVisible" />
-          <!-- Dialog Content -->
-    <VCard :title="$t('profile.deleteDialog.title')">
-      <VCardText>
-        {{ $t('profile.deleteDialog.description') }}
-      </VCardText>
-
-      <VCardText class="d-flex justify-end gap-3 flex-wrap">
-        <VBtn
-          color="primary"
-          @click="isDeleteAccountDialogVisible = false"
-        >
+    <VCard class="bm-dialog">
+      <div class="bmd-head">
+        <div class="bmd-mark" style="background: oklch(0.55 0.19 25);">
+          <VIcon icon="tabler-user-off" size="22" />
+        </div>
+        <div class="bmd-titles">
+          <h2>{{ $t('profile.deleteDialog.title') }}</h2>
+          <p>{{ $t('profile.deleteDialog.description') }}</p>
+        </div>
+        <button class="bmd-close" type="button" @click="isDeleteAccountDialogVisible = false">
+          <VIcon icon="tabler-x" size="18" />
+        </button>
+      </div>
+      <div class="bmd-foot">
+        <button class="bmd-btn bmd-btn-ghost" type="button" @click="isDeleteAccountDialogVisible = false">
           {{ $t('common.cancel') }}
-        </VBtn>
-
-        <VBtn
-        color="error"
-        variant="tonal"
-        @click="deleteAccount">
+        </button>
+        <button class="bmd-btn bmd-btn-primary" type="button" style="background: oklch(0.55 0.19 25); box-shadow: 0 12px 24px -10px rgba(180, 40, 20, 0.4);" @click="deleteAccount">
           {{ $t('profile.deleteDialog.confirm') }}
-        </VBtn>
-      </VCardText>
+        </button>
+      </div>
     </VCard>
   </VDialog>
 </template>

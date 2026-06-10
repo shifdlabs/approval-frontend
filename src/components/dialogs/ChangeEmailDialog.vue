@@ -20,12 +20,10 @@ const initialFormData = {
 
 const formData = ref({ ...initialFormData });
 
-// Watch the specific prop isDialogVisible
 watch(
   () => props.isDialogVisible,
   (isVisible) => {
     if (isVisible) {
-      // Reset formData every time the dialog becomes visible
       formData.value = { ...initialFormData }
       isAllInputtedValid.value = true
     }
@@ -86,34 +84,33 @@ const { t } = useI18n()
 
 <template>
   <VDialog
-    :width="$vuetify.display.smAndDown ? 'auto' : 700"
+    :width="$vuetify.display.smAndDown ? 'auto' : 560"
     :model-value="props.isDialogVisible"
     @update:model-value="dialogModelValueUpdate"
   >
-    <!-- Dialog close btn -->
-    <DialogCloseBtn @click="dialogModelValueUpdate(false)" />
+    <VCard class="bm-dialog">
+      <div class="bmd-head">
+        <div class="bmd-mark">
+          <VIcon icon="tabler-mail" size="22" />
+        </div>
+        <div class="bmd-titles">
+          <h2>{{ t('changeEmail.title') }}</h2>
+          <p>{{ t('changeEmail.subtitle') }}</p>
+        </div>
+        <button class="bmd-close" type="button" @click="dialogModelValueUpdate(false)">
+          <VIcon icon="tabler-x" size="18" />
+        </button>
+      </div>
 
-    <VCard class="pa-2">
-      <VCardText>
-        <!-- 👉 Title -->
-        <h4 class="text-h4 text-center mb-2">
-          {{ t('changeEmail.title') }}
-        </h4>
+      <VForm ref="refVForm" @submit.prevent="onFormSubmit">
+        <div class="bmd-body">
+          <VAlert v-if="isErrorUniqueEmail" color="error" class="mb-2">
+            {{ t('common.emailAlreadyRegistered') }}
+          </VAlert>
+          <VAlert v-if="!isAllInputtedValid" color="error" class="mb-2">
+            {{ t('common.errorFormInput') }}
+          </VAlert>
 
-        <VAlert v-if="isErrorUniqueEmail" color="error" class="mt-4">
-          {{ t('common.emailAlreadyRegistered') }}
-        </VAlert>
-
-        <VAlert v-if="!isAllInputtedValid" color="error" class="mt-6 mb-6">
-          {{ t('common.errorFormInput') }}
-        </VAlert>
-
-        <!-- 👉 Form -->
-        <VForm
-          class="mt-7"
-          ref="refVForm"
-          @submit.prevent="onFormSubmit"
-        >
           <VRow>
             <VCol cols="12" md="6">
               <AppTextField
@@ -124,7 +121,6 @@ const { t } = useI18n()
                 :rules="[requiredValidator, emailValidator]"
               />
             </VCol>
-
             <VCol cols="12" md="6" class="pl-5">
               <VRow>
                 <p style="font-size: 15px; font-weight: 500;">{{ t('changeEmail.requirement') }}</p>
@@ -132,30 +128,18 @@ const { t } = useI18n()
                 <p>{{ t('changeEmail.rule2') }}</p>
               </VRow>
             </VCol>
-
-            <!-- 👉 Cancel and Change -->
-            <VCol
-              cols="12"
-              class="d-flex flex-wrap gap-4"
-            >
-              <VSpacer/>
-              <VBtn
-                color="primary"
-                variant="outlined"
-                @click="onFormReset"
-              >
-                {{ t('changeEmail.cancel') }}
-              </VBtn>
-
-              <VBtn
-              type="submit"
-              >
-                {{ t('changeEmail.change') }}
-              </VBtn>
-            </VCol>
           </VRow>
-        </VForm>
-      </VCardText>
+        </div>
+
+        <div class="bmd-foot">
+          <button class="bmd-btn bmd-btn-ghost" type="button" @click="onFormReset">
+            {{ t('changeEmail.cancel') }}
+          </button>
+          <button class="bmd-btn bmd-btn-primary" type="submit">
+            {{ t('changeEmail.change') }}
+          </button>
+        </div>
+      </VForm>
     </VCard>
   </VDialog>
 </template>

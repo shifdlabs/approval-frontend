@@ -40,112 +40,77 @@ const onCancel = () => {
 <template>
   <!-- 👉 Confirm Dialog -->
   <VDialog
-    max-width="500"
+    max-width="480"
     :model-value="props.isDialogVisible"
     @update:model-value="updateModelValue"
   >
-    <VCard class="text-center px-10 py-6">
-      <VCardText>
-        <VBtn
-          icon
-          variant="outlined"
-          color="warning"
-          class="my-4"
-          style=" block-size: 88px;inline-size: 88px; pointer-events: none;"
-        >
-          <span class="text-5xl">!</span>
-        </VBtn>
+    <VCard class="bm-dialog">
+      <div class="bmd-head">
+        <div class="bmd-mark" style="background: oklch(0.72 0.14 60);">
+          <VIcon icon="tabler-alert-triangle" size="22" />
+        </div>
+        <div class="bmd-titles">
+          <h2>{{ props.confirmationQuestion }}</h2>
+        </div>
+        <button class="bmd-close" type="button" @click="updateModelValue(false)">
+          <VIcon icon="tabler-x" size="18" />
+        </button>
+      </div>
 
-        <h6 class="text-lg font-weight-medium">
-          {{ props.confirmationQuestion }}
-        </h6>
-      </VCardText>
-
-      <VCardText class="d-flex align-center justify-center gap-2">
-        <VBtn
-          variant="elevated"
-          @click="onConfirmation"
-        >
-          {{ $t('common.confirm') }}
-        </VBtn>
-
-        <VBtn
-          color="secondary"
-          variant="tonal"
-          @click="onCancel"
-        >
+      <div class="bmd-foot">
+        <button class="bmd-btn bmd-btn-ghost" type="button" @click="onCancel">
           {{ $t('common.cancel') }}
-        </VBtn>
-      </VCardText>
+        </button>
+        <button class="bmd-btn bmd-btn-primary" type="button" @click="onConfirmation">
+          {{ $t('common.confirm') }}
+        </button>
+      </div>
     </VCard>
   </VDialog>
 
   <!-- Unsubscribed -->
-  <VDialog
-    v-model="unsubscribed"
-    max-width="500"
-  >
-    <VCard>
-      <VCardText class="text-center px-10 py-6">
-        <VBtn
-          icon
-          variant="outlined"
-          color="success"
-          class="my-4"
-          style=" block-size: 88px;inline-size: 88px; pointer-events: none;"
-        >
-          <VIcon
-            icon="tabler-check"
-            size="38"
-          />
-        </VBtn>
-
-        <h1 class="text-h4 mb-4">
-          {{ props.confirmTitle }}
-        </h1>
-
-        <p>{{ props.confirmMsg }}</p>
-
-        <VBtn
-          color="success"
-          @click="unsubscribed = false"
-        >
+  <VDialog v-model="unsubscribed" max-width="420">
+    <VCard class="bm-dialog">
+      <div class="bmd-head">
+        <div class="bmd-mark" style="background: oklch(0.56 0.14 148);">
+          <VIcon icon="tabler-check" size="22" />
+        </div>
+        <div class="bmd-titles">
+          <h2>{{ props.confirmTitle }}</h2>
+          <p>{{ props.confirmMsg }}</p>
+        </div>
+        <button class="bmd-close" type="button" @click="unsubscribed = false">
+          <VIcon icon="tabler-x" size="18" />
+        </button>
+      </div>
+      <div class="bmd-foot">
+        <button class="bmd-btn bmd-btn-primary" type="button" @click="unsubscribed = false">
           Ok
-        </VBtn>
-      </VCardText>
+        </button>
+      </div>
     </VCard>
   </VDialog>
 
   <!-- Cancelled -->
-  <VDialog
-    v-model="cancelled"
-    max-width="500"
-  >
-    <VCard>
-      <VCardText class="text-center px-10 py-6">
-        <VBtn
-          icon
-          variant="outlined"
-          color="error"
-          class="my-4"
-          style=" block-size: 88px;inline-size: 88px; pointer-events: none;"
-        >
-          <span class="text-5xl font-weight-light">X</span>
-        </VBtn>
-
-        <h1 class="text-h4 mb-4">
-          {{ props.cancelTitle }}
-        </h1>
-
-        <p>{{ props.cancelMsg }}</p>
-
-        <VBtn
-          color="success"
-          @click="cancelled = false"
-        >
+  <VDialog v-model="cancelled" max-width="420">
+    <VCard class="bm-dialog">
+      <div class="bmd-head">
+        <div class="bmd-mark" style="background: oklch(0.55 0.19 25);">
+          <VIcon icon="tabler-x" size="22" />
+        </div>
+        <div class="bmd-titles">
+          <h2>{{ props.cancelTitle }}</h2>
+          <p>{{ props.cancelMsg }}</p>
+        </div>
+        <button class="bmd-close" type="button" @click="cancelled = false">
+          <VIcon icon="tabler-x" size="18" />
+        </button>
+      </div>
+      <div class="bmd-foot">
+        <button class="bmd-btn bmd-btn-primary" type="button" @click="cancelled = false">
           Ok
-        </VBtn>
-      </VCardText>
+        </button>
+      </div>
     </VCard>
   </VDialog>
 </template>

@@ -934,30 +934,30 @@ const onFileRemoved = (index: number) => {
   <!-- DIALOG -->
   <VDialog
     v-model="isDialogVisible"
+    max-width="460"
     persistent
-    class="v-dialog-sm"
   >
-    <!-- Dialog close btn -->
-  <DialogCloseBtn @click="isDialogVisible = !isDialogVisible" />
-
-    <!-- Dialog Content -->
-    <VCard :title="$t('document.create.confirmSubmit')">
-      <VCardText>
-        {{ $t('document.create.areYouSure') }}
-      </VCardText>
-
-      <VCardText class="d-flex justify-end gap-3 flex-wrap">
-        <VBtn
-          color="primary"
-          variant="outlined"
-          @click="isDialogVisible = false"
-        >
+    <VCard class="bm-dialog">
+      <div class="bmd-head">
+        <div class="bmd-mark">
+          <VIcon icon="tabler-send" size="22" />
+        </div>
+        <div class="bmd-titles">
+          <h2>{{ $t('document.create.confirmSubmit') }}</h2>
+          <p>{{ $t('document.create.areYouSure') }}</p>
+        </div>
+        <button class="bmd-close" type="button" @click="isDialogVisible = false">
+          <VIcon icon="tabler-x" size="18" />
+        </button>
+      </div>
+      <div class="bmd-foot">
+        <button class="bmd-btn bmd-btn-ghost" type="button" @click="isDialogVisible = false">
           {{ $t('common.cancel') }}
-        </VBtn>
-        <VBtn @click="sendDocument">
+        </button>
+        <button class="bmd-btn bmd-btn-primary" type="button" @click="sendDocument">
           {{ $t('document.create.yesSend') }}
-        </VBtn>
-      </VCardText>
+        </button>
+      </div>
     </VCard>
   </VDialog>
 
@@ -985,75 +985,62 @@ const onFileRemoved = (index: number) => {
     <!-- Dialog -->
     <VDialog
     v-model="isSuccessDialogVisible"
-    width="500"
+    max-width="420"
   >
-    <VCard
-      color="success"
-      width="500"
-      class="align-center"
-    >
-      <VIcon
-          icon="tabler-circle-dashed-check"
-          color="white"
-          style="width: 100px; height: 100px;"
-      />
-      <VCardText style="font-weight: bold; text-align: center; font-size: 20px;">
-        {{ $t('document.create.successSent') }}
-      </VCardText>
+    <VCard class="bm-dialog">
+      <div class="bmd-head">
+        <div class="bmd-mark" style="background: oklch(0.56 0.14 148);">
+          <VIcon icon="tabler-circle-dashed-check" size="22" />
+        </div>
+        <div class="bmd-titles">
+          <h2>{{ $t('document.create.successSent') }}</h2>
+        </div>
+      </div>
     </VCard>
   </VDialog>
 
   <VDialog
     v-model="isSuccessSaveAsDraftDialogVisible"
-    width="500"
+    max-width="420"
   >
-    <VCard
-      color="success"
-      width="500"
-      class="align-center"
-    >
-      <VIcon
-          icon="tabler-circle-dashed-check"
-          color="white"
-          style="width: 100px; height: 100px;"
-      />
-      <VCardText style="font-weight: bold; text-align: center; font-size: 20px;">
-        {{ $t('document.create.successDraft') }}
-      </VCardText>
+    <VCard class="bm-dialog">
+      <div class="bmd-head">
+        <div class="bmd-mark" style="background: oklch(0.56 0.14 148);">
+          <VIcon icon="tabler-circle-dashed-check" size="22" />
+        </div>
+        <div class="bmd-titles">
+          <h2>{{ $t('document.create.successDraft') }}</h2>
+        </div>
+      </div>
     </VCard>
   </VDialog>
 
   <!-- Delete Confirmation Dialog -->
   <VDialog
     v-model="deleteDialogVisible"
-    max-width="400"
+    max-width="440"
   >
-    <VCard>
-      <VCardTitle class="text-h6">
-        <VIcon icon="tabler-alert-triangle" color="warning" class="me-2" />
-        {{ $t('document.create.confirmDelete') }}
-      </VCardTitle>
-
-      <VCardText>
-        {{ $t('document.create.confirmDeleteDesc') }}
-      </VCardText>
-
-      <VCardActions class="justify-end">
-        <VBtn
-          color="grey"
-          variant="text"
-          @click="deleteDialogVisible = false"
-        >
+    <VCard class="bm-dialog">
+      <div class="bmd-head">
+        <div class="bmd-mark" style="background: oklch(0.72 0.14 60);">
+          <VIcon icon="tabler-trash" size="22" />
+        </div>
+        <div class="bmd-titles">
+          <h2>{{ $t('document.create.confirmDelete') }}</h2>
+          <p>{{ $t('document.create.confirmDeleteDesc') }}</p>
+        </div>
+        <button class="bmd-close" type="button" @click="deleteDialogVisible = false">
+          <VIcon icon="tabler-x" size="18" />
+        </button>
+      </div>
+      <div class="bmd-foot">
+        <button class="bmd-btn bmd-btn-ghost" type="button" @click="deleteDialogVisible = false">
           {{ $t('common.cancel') }}
-        </VBtn>
-        <VBtn
-          color="error"
-          variant="flat"
-          @click="deleteFile"
-        >
+        </button>
+        <button class="bmd-btn bmd-btn-primary" type="button" style="background: oklch(0.55 0.19 25); box-shadow: 0 12px 24px -10px rgba(180, 40, 20, 0.4);" @click="deleteFile">
           {{ $t('document.create.deleteFile') }}
-        </VBtn>
-      </VCardActions>
+        </button>
+      </div>
     </VCard>
   </VDialog>
 </template>

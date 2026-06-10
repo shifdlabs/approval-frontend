@@ -1,1 +1,182 @@
-// Write your overrides
+// BM Dialog Design System
+// ========================
+
+:root {
+  --bm-navy: oklch(0.44 0.115 264);
+  --bm-navy-deep: oklch(0.36 0.10 264);
+  --bm-navy-tint: oklch(0.955 0.028 264);
+  --bm-ink-strong: oklch(0.27 0.018 262);
+  --bm-ink: oklch(0.46 0.015 262);
+  --bm-muted: oklch(0.62 0.012 262);
+  --bm-line: oklch(0.925 0.005 262);
+  --bm-line-soft: oklch(0.95 0.004 262);
+  --bm-shadow-card: 0 1px 2px rgba(20, 24, 40, 0.05), 0 30px 60px -30px rgba(20, 24, 40, 0.45);
+}
+
+// Dialog backdrop
+.v-dialog .v-overlay__scrim {
+  background: color-mix(in oklab, var(--bm-navy-deep) 30%, rgba(15, 18, 32, 0.42)) !important;
+  backdrop-filter: blur(3px);
+}
+
+// Card
+.bm-dialog.v-card {
+  border-radius: 22px !important;
+  border: 1px solid var(--bm-line);
+  box-shadow: var(--bm-shadow-card) !important;
+  overflow: hidden;
+  padding: 0 !important;
+}
+
+// Head
+.bmd-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 26px 26px 22px;
+  border-bottom: 1px solid var(--bm-line-soft);
+}
+
+.bmd-mark {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  background: var(--bm-navy);
+  box-shadow: 0 10px 22px -10px color-mix(in oklab, var(--bm-navy) 70%, transparent);
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+
+.bmd-titles {
+  flex: 1;
+  min-width: 0;
+  padding-top: 1px;
+
+  h2 {
+    margin: 0;
+    font-size: 1.1875rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--bm-ink-strong);
+    line-height: 1.25;
+  }
+
+  p {
+    margin: 5px 0 0;
+    font-size: 0.84375rem;
+    line-height: 1.5;
+    color: var(--bm-muted);
+    font-weight: 500;
+  }
+}
+
+.bmd-close {
+  flex-shrink: 0;
+  margin-left: auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--bm-line);
+  background: #fff;
+  color: var(--bm-muted);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+
+  &:hover {
+    background: var(--bm-navy-tint);
+    border-color: var(--bm-navy);
+    color: var(--bm-navy);
+  }
+}
+
+// Body
+.bmd-body {
+  padding: 22px 24px 8px;
+}
+
+// Footer
+.bmd-foot {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 26px 22px;
+}
+
+// Buttons
+.bmd-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 50px;
+  padding: 0 24px;
+  border-radius: 13px;
+  font-size: 0.90625rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s, transform 0.12s, border-color 0.18s;
+  white-space: nowrap;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+
+.bmd-btn-ghost {
+  background: #fff;
+  color: var(--bm-navy);
+  border: 1.5px solid oklch(0.88 0.025 264);
+
+  &:hover:not(:disabled) {
+    background: var(--bm-navy-tint);
+    border-color: var(--bm-navy);
+  }
+}
+
+.bmd-btn-primary {
+  background: var(--bm-navy);
+  color: #fff;
+  border: none;
+  box-shadow: 0 12px 24px -10px color-mix(in oklab, var(--bm-navy) 70%, transparent);
+
+  &:hover:not(:disabled) {
+    background: var(--bm-navy-deep);
+    transform: translateY(-1px);
+  }
+}
+
+// VBtn overrides when VBtn is used in bmd-foot (e.g. loading state needed)
+.bmd-foot .v-btn {
+  border-radius: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+
+  &.bmd-btn-ghost {
+    background-color: #ffffff !important;
+    color: var(--bm-navy) !important;
+    border: 1.5px solid oklch(0.88 0.025 264) !important;
+    box-shadow: none !important;
+
+    .v-btn__content { color: var(--bm-navy) !important; }
+  }
+
+  &.bmd-btn-primary {
+    background-color: var(--bm-navy) !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 12px 24px -10px color-mix(in oklab, var(--bm-navy) 70%, transparent) !important;
+
+    .v-btn__content { color: #ffffff !important; }
+
+    &:hover { background-color: var(--bm-navy-deep) !important; }
+  }
+}

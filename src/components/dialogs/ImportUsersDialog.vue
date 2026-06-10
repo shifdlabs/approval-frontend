@@ -330,12 +330,19 @@ const getPositionName = (positionID: string) => {
     persistent
     @update:model-value="(val) => emit('update:isDialogVisible', val)"
   >
-    <VCard>
-      <DialogCloseBtn @click="emit('update:isDialogVisible', false)" />
-
-      <VCardTitle class="text-h5 pa-4">
-        Import Users from Excel
-      </VCardTitle>
+    <VCard class="bm-dialog" style="border-radius: 16px !important;">
+      <div class="bmd-head">
+        <div class="bmd-mark">
+          <VIcon icon="tabler-file-upload" size="22" />
+        </div>
+        <div class="bmd-titles">
+          <h2>Import Users from Excel</h2>
+          <p>Upload an Excel file and map columns to user fields</p>
+        </div>
+        <button class="bmd-close" type="button" @click="emit('update:isDialogVisible', false)">
+          <VIcon icon="tabler-x" size="18" />
+        </button>
+      </div>
 
       <VDivider />
 
@@ -577,10 +584,12 @@ const getPositionName = (positionID: string) => {
 
       <VDivider />
 
-      <VCardText class="d-flex justify-space-between pa-4">
+      <div class="bmd-foot" style="border-top: 1px solid var(--bm-line-soft);">
         <VBtn
           v-if="currentStep > 1"
-          variant="outlined"
+          class="bmd-btn-ghost"
+          variant="text"
+          style="height:50px; border-radius:13px; font-weight:700; border: 1.5px solid oklch(0.88 0.025 264); color: var(--bm-navy);"
           @click="goToPreviousStep"
         >
           Previous
@@ -591,7 +600,8 @@ const getPositionName = (positionID: string) => {
           v-if="currentStep < totalSteps"
           :disabled="!canProceedToNextStep || isLoadingPreview"
           :loading="isLoadingPreview"
-          color="primary"
+          class="bmd-btn-primary"
+          style="height:50px; border-radius:13px; font-weight:700; background: var(--bm-navy); color:#fff;"
           @click="goToNextStep"
         >
           Next
@@ -601,23 +611,28 @@ const getPositionName = (positionID: string) => {
           v-if="currentStep === totalSteps"
           :disabled="previewData.length === 0 || isImporting"
           :loading="isImporting"
-          color="#7166e8"
+          class="bmd-btn-primary"
+          style="height:50px; border-radius:13px; font-weight:700; background: var(--bm-navy); color:#fff;"
           @click="performBulkImport"
         >
           Bulk Insert ({{ previewData.length }} users)
         </VBtn>
-      </VCardText>
+      </div>
     </VCard>
   </VDialog>
 
   <!-- Success Dialog -->
   <VDialog v-model="showSuccessDialog" max-width="400">
-    <VCard>
-      <VCardText class="text-center pa-6">
-        <VIcon icon="tabler-circle-check" size="64" color="success" class="mb-4" />
-        <div class="text-h6 mb-2">Import Successful!</div>
-        <div class="text-body-1">{{ successMessage }}</div>
-      </VCardText>
+    <VCard class="bm-dialog">
+      <div class="bmd-head">
+        <div class="bmd-mark" style="background: oklch(0.56 0.14 148);">
+          <VIcon icon="tabler-circle-check" size="22" />
+        </div>
+        <div class="bmd-titles">
+          <h2>Import Successful!</h2>
+          <p>{{ successMessage }}</p>
+        </div>
+      </div>
     </VCard>
   </VDialog>
 </template>

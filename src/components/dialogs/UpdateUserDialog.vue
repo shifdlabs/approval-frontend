@@ -31,12 +31,10 @@ const initialFormData = {
 
 const formData = ref({ ...initialFormData });
 
-// Watch the specific prop isDialogVisible
 watch(
   () => props.isDialogVisible,
   (isVisible) => {
     if (isVisible) {
-      // Reset formData every time the dialog becomes visible
       formData.value = { ...initialFormData };
       isAllInputtedValid.value = true;
 
@@ -119,37 +117,35 @@ const { t } = useI18n()
 
 <template>
   <VDialog
-    :width="$vuetify.display.smAndDown ? 'auto' : 700"
+    :width="$vuetify.display.smAndDown ? 'auto' : 620"
     :model-value="props.isDialogVisible"
     @update:model-value="dialogModelValueUpdate"
   >
-    <!-- Dialog close btn -->
-    <DialogCloseBtn @click="dialogModelValueUpdate(false)" />
+    <VCard class="bm-dialog">
+      <div class="bmd-head">
+        <div class="bmd-mark">
+          <VIcon icon="tabler-user-edit" size="22" />
+        </div>
+        <div class="bmd-titles">
+          <h2>{{ t('users.update.title').replace('{email}', formData.email) }}</h2>
+          <p>{{ t('users.update.subtitle') }}</p>
+        </div>
+        <button class="bmd-close" type="button" @click="dialogModelValueUpdate(false)">
+          <VIcon icon="tabler-x" size="18" />
+        </button>
+      </div>
 
-    <VCard class="pa-sm-10 pa-2">
-      <VCardText>
-        <!-- 👉 Title -->
-        <h4 class="text-h4 text-center mb-2">
-          {{ t('users.update.title').replace('{email}', formData.email) }}
-        </h4>
+      <VForm ref="refVForm" @submit.prevent="onFormSubmit">
+        <div class="bmd-body">
+          <VAlert v-if="isErrorUniqueEmail" color="error" class="mb-2">
+            {{ t('common.emailAlreadyRegistered') }}
+          </VAlert>
+          <VAlert v-if="!isAllInputtedValid" color="error" class="mb-2">
+            {{ t('common.errorFormInput') }}
+          </VAlert>
 
-        <VAlert v-if="isErrorUniqueEmail" color="error" class="mt-4">
-          {{ t('common.emailAlreadyRegistered') }}
-        </VAlert>
-
-        <VAlert v-if="!isAllInputtedValid" color="error" class="mt-6 mb-6">
-          {{ t('common.errorFormInput') }}
-        </VAlert>
-
-        <!-- 👉 Form -->
-        <VForm
-          class="mt-0"
-          ref="refVForm"
-          @submit.prevent="onFormSubmit"
-        >
           <VRow>
-            <!-- 👉 First Name -->
-            <VCol cols="12">
+            <VCol cols="12" md="6">
               <AppTextField
                 v-model="formData.firstName"
                 :label="t('common.firstName')"
@@ -157,9 +153,7 @@ const { t } = useI18n()
                 :rules="[requiredValidator, maxLengthValidator(100)]"
               />
             </VCol>
-
-            <!-- 👉 Last Name -->
-            <VCol cols="12">
+            <VCol cols="12" md="6">
               <AppTextField
                 v-model="formData.lastName"
                 :label="t('common.lastName')"
@@ -167,9 +161,7 @@ const { t } = useI18n()
                 :rules="[requiredValidator, maxLengthValidator(100)]"
               />
             </VCol>
-
-            <!-- 👉 Email -->
-            <VCol cols="12">
+            <VCol cols="12" md="6">
               <AppTextField
                 v-model="formData.email"
                 :label="t('common.email')"
@@ -178,9 +170,7 @@ const { t } = useI18n()
                 :rules="[requiredValidator, emailValidator]"
               />
             </VCol>
-
-            <!-- 👉 Phone number -->
-            <VCol cols="12">
+            <VCol cols="12" md="6">
               <AppTextField
                 v-model="formData.phone"
                 :label="t('common.phone')"
@@ -189,81 +179,36 @@ const { t } = useI18n()
                 :rules="[requiredValidator, phoneValidator]"
               />
             </VCol>
-
-            <!-- 👉 Role -->
-            <VCol cols="12">
-              <div
-                class="app-text-field flex-grow-1"
-              >
-                <VLabel
-                  class="mb-1 text-body-2 text-wrap"
-                  style="line-height: 15px;"
-                  :text="t('common.role')"
-                />
-                <VRadioGroup
-                  v-model="formData.role"
-                  inline
-                >
-                  <VRadio
-                    label="Reguler"
-                    :value=1
-                  />
-                  <VRadio
-                    label="Admin"
-                    :value=99
-                  />
+            <VCol cols="12" md="6">
+              <div class="app-text-field flex-grow-1">
+                <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;" :text="t('common.role')" />
+                <VRadioGroup v-model="formData.role" inline>
+                  <VRadio label="Reguler" :value="1" />
+                  <VRadio label="Admin" :value="99" />
                 </VRadioGroup>
               </div>
             </VCol>
-
-            <!-- 👉 Access to system -->
-            <VCol cols="12">
-              <div
-                class="app-text-field flex-grow-1"
-              >
-                <VLabel
-                  class="mb-1 text-body-2 text-wrap"
-                  style="line-height: 15px;"
-                  :text="t('common.access')"
-                />
-                <VRadioGroup
-                  v-model="formData.access"
-                  inline
-                >
-                  <VRadio
-                    :label="t('common.active')"
-                    :value=true
-                  />
-                  <VRadio
-                    :label="t('common.disabled')"
-                    :value=false
-                  />
+            <VCol cols="12" md="6">
+              <div class="app-text-field flex-grow-1">
+                <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;" :text="t('common.access')" />
+                <VRadioGroup v-model="formData.access" inline>
+                  <VRadio :label="t('common.active')" :value="true" />
+                  <VRadio :label="t('common.disabled')" :value="false" />
                 </VRadioGroup>
               </div>
-            </VCol>
-
-            <!-- 👉 Register and Cancel -->
-            <VCol
-              cols="12"
-              class="d-flex flex-wrap gap-4"
-            >
-              <VBtn
-                color="secondary"
-                variant="tonal"
-                @click="onFormReset"
-              >
-                {{ t('common.cancel') }}
-              </VBtn>
-
-              <VBtn
-              type="submit"
-              >
-                {{ t('common.update') }}
-              </VBtn>
             </VCol>
           </VRow>
-        </VForm>
-      </VCardText>
+        </div>
+
+        <div class="bmd-foot">
+          <button class="bmd-btn bmd-btn-ghost" type="button" @click="onFormReset">
+            {{ t('common.cancel') }}
+          </button>
+          <button class="bmd-btn bmd-btn-primary" type="submit">
+            {{ t('common.update') }}
+          </button>
+        </div>
+      </VForm>
     </VCard>
   </VDialog>
 </template>

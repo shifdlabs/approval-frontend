@@ -34,117 +34,105 @@ const accessType = (hasAccess?: boolean) => {
   else
     return { color: 'error', text: t('common.disabled') }
 }
-
 </script>
 
 <template>
   <VDialog
-    :width="$vuetify.display.smAndDown ? 'auto' : 700"
+    :width="$vuetify.display.smAndDown ? 'auto' : 560"
     :model-value="props.isDialogVisible"
     @update:model-value="dialogModelValueUpdate"
   >
-    <!-- Dialog close btn -->
-    <DialogCloseBtn @click="dialogModelValueUpdate(false)" />
+    <VCard class="bm-dialog">
+      <div class="bmd-head">
+        <div class="bmd-mark">
+          <VIcon icon="tabler-user-search" size="22" />
+        </div>
+        <div class="bmd-titles">
+          <h2>{{ t('detailUser.title') }}</h2>
+          <p>{{ props.user?.email }}</p>
+        </div>
+        <button class="bmd-close" type="button" @click="dialogModelValueUpdate(false)">
+          <VIcon icon="tabler-x" size="18" />
+        </button>
+      </div>
 
-    <VCard class="pa-sm-10 pa-2">
-      <VCardText>
-        <!-- 👉 Title -->
-        <h4 class="text-h4 text-center mb-2">
-          {{ t('detailUser.title') }}
-        </h4>
-
-        <!-- 👉 Form -->
+      <div class="bmd-body">
         <VRow>
-        <VCol cols="6">
+          <VCol cols="6">
             <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;">
-            {{ t('detailUser.employeeId') }}
+              {{ t('detailUser.employeeId') }}
             </VLabel>
             <h6 class="text-h6" style="max-width: 200px;">
-            {{ props.user?.id }}
+              {{ props.user?.id }}
             </h6>
-        </VCol>
-
-        <VCol cols="6">
+          </VCol>
+          <VCol cols="6">
             <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;">
-            {{ t('detailUser.email') }}
+              {{ t('detailUser.email') }}
             </VLabel>
-            <h6 class="text-h6">
-            {{ props.user?.email }}
-            </h6>
-        </VCol>
+            <h6 class="text-h6">{{ props.user?.email }}</h6>
+          </VCol>
         </VRow>
 
         <VRow>
-        <VCol cols="6">
+          <VCol cols="6">
             <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;">
-            {{ t('detailUser.firstName') }}
+              {{ t('detailUser.firstName') }}
             </VLabel>
-            <h6 class="text-h6">
-            {{ props.user?.firstName }}
-            </h6>
-        </VCol>
-
-        <VCol cols="6">
+            <h6 class="text-h6">{{ props.user?.firstName }}</h6>
+          </VCol>
+          <VCol cols="6">
             <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;">
-            {{ t('detailUser.lastName') }}
+              {{ t('detailUser.lastName') }}
             </VLabel>
-            <h6 class="text-h6">
-            {{ props.user?.lastName }}
-            </h6>
-        </VCol>
+            <h6 class="text-h6">{{ props.user?.lastName }}</h6>
+          </VCol>
         </VRow>
 
         <VRow>
-        <VCol cols="6">
+          <VCol cols="6">
             <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;">
-            {{ t('detailUser.position') }}
+              {{ t('detailUser.position') }}
             </VLabel>
-            <h6 class="text-h6">
-            {{ props.user?.position.name }}
-            </h6>
-        </VCol>
-
-        <VCol cols="6">
+            <h6 class="text-h6">{{ props.user?.position.name }}</h6>
+          </VCol>
+          <VCol cols="6">
             <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;">
-            {{ t('common.phone') }}
+              {{ t('common.phone') }}
             </VLabel>
-            <h6 class="text-h6">
-            {{ props.user?.phone }}
-            </h6>
-        </VCol>
+            <h6 class="text-h6">{{ props.user?.phone }}</h6>
+          </VCol>
         </VRow>
 
         <VRow>
-        <VCol cols="6">
+          <VCol cols="6">
             <div class="d-flex flex-column align-items-start">
-            <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;">
-            {{ t('common.role') }}
-            </VLabel>
-            <VChip
-            :color="userRole(props.user?.role).color"
-            size="small"
-            style="max-width: 80px;"
-            >
-            {{ userRole(props.user?.role).text }}
-            </VChip>
+              <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;">
+                {{ t('common.role') }}
+              </VLabel>
+              <VChip :color="userRole(props.user?.role).color" size="small" style="max-width: 80px;">
+                {{ userRole(props.user?.role).text }}
+              </VChip>
             </div>
-        </VCol>
-        <VCol cols="6">
+          </VCol>
+          <VCol cols="6">
             <div class="d-flex flex-column align-items-start">
-                <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;">
+              <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;">
                 {{ t('common.access') }}
-                </VLabel>
-                <VChip
-                :color="accessType(props.user?.access).color"
-                size="small"
-                style="max-width: 80px;"
-                >
+              </VLabel>
+              <VChip :color="accessType(props.user?.access).color" size="small" style="max-width: 80px;">
                 {{ accessType(props.user?.access).text }}
-                </VChip>
+              </VChip>
             </div>
-        </VCol>
+          </VCol>
         </VRow>
-      </VCardText>
+      </div>
+
+      <div class="bmd-foot">
+        <button class="bmd-btn bmd-btn-primary" type="button" @click="dialogModelValueUpdate(false)">
+          {{ t('common.close') }}
+        </button>
+      </div>
     </VCard>
   </VDialog>
 </template>

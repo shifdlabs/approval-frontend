@@ -342,14 +342,17 @@ const id = {
     },
     create: {
       title: 'Daftarkan Pengguna Baru',
+      subtitle: 'Isi informasi pengguna baru yang akan didaftarkan',
     },
     update: {
       title: 'Perbarui Pengguna {email}',
+      subtitle: 'Perbarui informasi pengguna yang sudah terdaftar',
     },
   },
 
   changeEmail: {
     title: 'Perbarui Alamat Email',
+    subtitle: 'Masukkan alamat email baru Anda di bawah ini',
     newEmail: 'Email Baru',
     newEmailPh: 'Masukkan email baru Anda',
     requirement: 'Persyaratan:',
@@ -361,6 +364,7 @@ const id = {
 
   changePassword: {
     title: 'Ubah Kata Sandi untuk {email}',
+    subtitle: 'Buat kata sandi baru yang kuat untuk akun ini',
     newPassword: 'Kata Sandi Baru',
     confirmPassword: 'Konfirmasi Kata Sandi',
     cancel: 'Batal',
@@ -425,6 +429,10 @@ const id = {
     create: 'Buat Booking Baru',
     dialog: {
       title: 'Buat Booking Nomor',
+      subtitle: 'Pilih grup dan nama format untuk memesan nomor dokumen baru.',
+      grupFormat: 'Grup Format',
+      namaFormat: 'Nama Format',
+      hintNamaFormat: 'Pilih grup format terlebih dahulu untuk melihat daftar nama.',
       bookingBtn: 'Booking Nomor',
     },
     filters: {
@@ -705,6 +713,7 @@ const id = {
 
   publicationFormat: {
     createTitle: 'Buat Format Publikasi',
+    createSubtitle: 'Tentukan format penomoran dokumen baru',
     groupFormat: 'Grup Format',
     selectGroup: 'Pilih Grup Format',
     formatName: 'Nama Format',

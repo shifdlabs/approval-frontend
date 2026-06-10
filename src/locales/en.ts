@@ -342,14 +342,17 @@ const en = {
     },
     create: {
       title: 'Register New User',
+      subtitle: 'Fill in the details for the new user account',
     },
     update: {
       title: 'Update User {email}',
+      subtitle: 'Update information for this registered user',
     },
   },
 
   changeEmail: {
     title: 'Update Email Address',
+    subtitle: 'Enter your new email address below',
     newEmail: 'New Email',
     newEmailPh: 'Enter your new email',
     requirement: 'Requirement:',
@@ -361,6 +364,7 @@ const en = {
 
   changePassword: {
     title: 'Change Password For {email}',
+    subtitle: 'Set a new strong password for this account',
     newPassword: 'New Password',
     confirmPassword: 'Confirm Password',
     cancel: 'Cancel',
@@ -425,6 +429,10 @@ const en = {
     create: 'Create New Booking',
     dialog: {
       title: 'Create Booking Number',
+      subtitle: 'Select a group and format name to reserve a new document number.',
+      grupFormat: 'Format Group',
+      namaFormat: 'Format Name',
+      hintNamaFormat: 'Select a format group first to see the list of format names.',
       bookingBtn: 'Booking Number',
     },
     filters: {
@@ -705,6 +713,7 @@ const en = {
 
   publicationFormat: {
     createTitle: 'Create Publication Format',
+    createSubtitle: 'Define a new document numbering format',
     groupFormat: 'Group of Format',
     selectGroup: 'Select Group Format',
     formatName: 'Format Name',
