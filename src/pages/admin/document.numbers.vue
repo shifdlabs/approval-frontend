@@ -224,51 +224,64 @@ const getIcon = (props: Record<string, unknown>) => props.icon as any
       @update:is-refetch-list="refetchList"
     />
 
-    <VDialog 
-      v-model="isCreateGroupFormatDialogVisible" 
-      persistent 
-      class="v-dialog-sm"
+    <VDialog
+      v-model="isCreateGroupFormatDialogVisible"
+      persistent
+      :width="$vuetify.display.smAndDown ? 'auto' : 560"
     >
-    <VCard :title="t('documentNumbers.createGroupDialog.title')">
-      <VCardText>
-        <VAlert
-          v-if="isSuccessCreateGroupFormat"
-          density="default"
-          color="success"
-          variant="tonal"
-        >
-          Successfully created '{{ newGroupData.name }}' group format.
-        </VAlert>
-        <VForm ref="form" v-model="isFormValid">
-          <VCol cols="12">
-            <VTextField
-              v-model="newGroupData.name"
-              :label="t('documentNumbers.createGroupDialog.groupName')"
-              :rules="[formRules.required]"
-              required
-            />
-          </VCol>
+      <VCard class="bm-dialog">
+        <div class="bmd-head">
+          <div class="bmd-mark">
+            <VIcon icon="tabler-affiliate" size="22" />
+          </div>
+          <div class="bmd-titles">
+            <h2>{{ t('documentNumbers.createGroupDialog.title') }}</h2>
+            <p>{{ t('documentNumbers.createGroupDialog.subtitle') }}</p>
+          </div>
+          <button class="bmd-close" type="button" @click="isCreateGroupFormatDialogVisible = false">
+            <VIcon icon="tabler-x" size="18" />
+          </button>
+        </div>
 
-          <VCol cols="12">
-            <VTextarea
-              v-model="newGroupData.description"
-              :label="t('documentNumbers.createGroupDialog.description')"
-              rows="2"
-              :placeholder="t('documentNumbers.createGroupDialog.descPh')"
-            />
-          </VCol>
+        <VForm ref="refGroupForm" v-model="isFormValid">
+          <div class="bmd-body">
+            <VAlert
+              v-if="isSuccessCreateGroupFormat"
+              density="compact"
+              color="success"
+              variant="tonal"
+              class="mb-4"
+            >
+              {{ t('documentNumbers.createGroupDialog.groupName') }} '{{ newGroupData.name }}' berhasil dibuat.
+            </VAlert>
+            <VRow>
+              <VCol cols="12">
+                <AppTextField
+                  v-model="newGroupData.name"
+                  :label="t('documentNumbers.createGroupDialog.groupName')"
+                  :rules="[formRules.required]"
+                />
+              </VCol>
+              <VCol cols="12">
+                <AppTextarea
+                  v-model="newGroupData.description"
+                  :label="t('documentNumbers.createGroupDialog.description')"
+                  rows="3"
+                  :placeholder="t('documentNumbers.createGroupDialog.descPh')"
+                />
+              </VCol>
+            </VRow>
+          </div>
+          <div class="bmd-foot">
+            <button class="bmd-btn bmd-btn-ghost" type="button" @click="isCreateGroupFormatDialogVisible = false">
+              {{ t('common.cancel') }}
+            </button>
+            <button class="bmd-btn bmd-btn-primary" type="button" :disabled="!isFormValid" @click="submitNewGroupForm">
+              {{ t('documentNumbers.createGroupDialog.create') }}
+            </button>
+          </div>
         </VForm>
-      </VCardText>
-
-      <VCardText class="d-flex justify-end gap-3 flex-wrap">
-        <VBtn color="primary" variant="outlined" @click="isCreateGroupFormatDialogVisible = false">
-          {{ t('common.cancel') }}
-        </VBtn>
-        <VBtn color="primary" :disabled="!isFormValid" @click="submitNewGroupForm">
-          {{ t('documentNumbers.createGroupDialog.create') }}
-        </VBtn>
-      </VCardText>
-    </VCard>
-  </VDialog>
+      </VCard>
+    </VDialog>
   </template>
   

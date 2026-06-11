@@ -97,56 +97,74 @@ const { t } = useI18n()
   </div>
 
   <!-- 👉 Create position dialog -->
-  <VDialog v-model="isCreatePositionDialogVisible" persistent class="v-dialog-sm">
-    <VCard>
-      <VCardTitle>
-        Add New Position
-      </VCardTitle>
-      <VCardText>
-        <VForm ref="form" v-model="isFormValid">
-          <VTextField
+  <VDialog v-model="isCreatePositionDialogVisible" persistent :width="$vuetify.display.smAndDown ? 'auto' : 520">
+    <VCard class="bm-dialog">
+      <div class="bmd-head">
+        <div class="bmd-mark">
+          <VIcon icon="tabler-briefcase" size="22" />
+        </div>
+        <div class="bmd-titles">
+          <h2>{{ t('positions.addNewTitle') }}</h2>
+          <p>{{ t('positions.addNewSubtitle') }}</p>
+        </div>
+        <button class="bmd-close" type="button" @click="closeCreatePositionDialog">
+          <VIcon icon="tabler-x" size="18" />
+        </button>
+      </div>
+      <VForm ref="refCreateForm" v-model="isFormValid">
+        <div class="bmd-body">
+          <AppTextField
             v-model="newPosition.name"
-            label="Position Name"
+            :label="t('positions.name')"
+            :placeholder="t('positions.namePh')"
             :rules="[formRules.required]"
-            required
           />
-        </VForm>
-      </VCardText>
-      <VCardActions class="d-flex justify-end gap-3 flex-wrap">
-        <VBtn color="secondary" variant="tonal" @click="closeCreatePositionDialog">
-          Cancel
-        </VBtn>
-        <VBtn color="primary" :disabled="!isFormValid" @click="submitNewPositionForm">
-          Add
-        </VBtn>
-      </VCardActions>
+        </div>
+        <div class="bmd-foot">
+          <button class="bmd-btn bmd-btn-ghost" type="button" @click="closeCreatePositionDialog">
+            {{ t('positions.cancel') }}
+          </button>
+          <button class="bmd-btn bmd-btn-primary" type="button" :disabled="!isFormValid" @click="submitNewPositionForm">
+            {{ t('positions.add') }}
+          </button>
+        </div>
+      </VForm>
     </VCard>
   </VDialog>
 
   <!-- 👉 Edit position info dialog -->
-  <VDialog v-model="isUpdatePositionDialogVisible" persistent class="v-dialog-sm">
-    <VCard>
-      <VCardTitle>
-        Edit Position
-      </VCardTitle>
-      <VCardText>
-        <VForm ref="form" v-model="isFormValid">
-          <VTextField
+  <VDialog v-model="isUpdatePositionDialogVisible" persistent :width="$vuetify.display.smAndDown ? 'auto' : 520">
+    <VCard class="bm-dialog">
+      <div class="bmd-head">
+        <div class="bmd-mark">
+          <VIcon icon="tabler-pencil" size="22" />
+        </div>
+        <div class="bmd-titles">
+          <h2>{{ t('positions.editTitle') }}</h2>
+          <p>{{ t('positions.editSubtitle') }}</p>
+        </div>
+        <button class="bmd-close" type="button" @click="isUpdatePositionDialogVisible = false">
+          <VIcon icon="tabler-x" size="18" />
+        </button>
+      </div>
+      <VForm ref="refEditForm" v-model="isFormValid">
+        <div class="bmd-body">
+          <AppTextField
             v-model="selectedPositionName"
-            label="Position Name"
+            :label="t('positions.name')"
+            :placeholder="t('positions.namePh')"
             :rules="[formRules.required]"
-            required
           />
-        </VForm>
-      </VCardText>
-      <VCardActions class="d-flex justify-end gap-3 flex-wrap">
-        <VBtn color="secondary" variant="tonal" @click="isUpdatePositionDialogVisible = false">
-          Cancel
-        </VBtn>
-        <VBtn color="primary" :disabled="!isFormValid" @click="submitEditPositionForm">
-          Save
-        </VBtn>
-      </VCardActions>
+        </div>
+        <div class="bmd-foot">
+          <button class="bmd-btn bmd-btn-ghost" type="button" @click="isUpdatePositionDialogVisible = false">
+            {{ t('positions.cancel') }}
+          </button>
+          <button class="bmd-btn bmd-btn-primary" type="button" :disabled="!isFormValid" @click="submitEditPositionForm">
+            {{ t('positions.save') }}
+          </button>
+        </div>
+      </VForm>
     </VCard>
   </VDialog>
 
@@ -181,19 +199,3 @@ const { t } = useI18n()
     </VCard>
   </VDialog>
 </template>
-
-<style scoped>
-.custom-size {
-  width: 20rem; /* Adjust the size as needed */
-}
-.mt-4 {
-  margin-top: 1rem;
-}
-.purple-btn {
-  background-color: #7367F0;
-  color: white;
-}
-.ml-auto {
-  margin-left: auto;
-}
-</style>

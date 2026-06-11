@@ -122,12 +122,13 @@ const login = async () => {
       const onSubmit = () => {
         refVForm.value?.validate()
           .then(({ valid: isValid }) => {
-            if (isValid)
+            if (isValid) {
               isInProgress.value = true
               setTimeout(() => {
                 isLoginError.value = false
                 login()
               }, 1500)
+            }
           })
       }
 

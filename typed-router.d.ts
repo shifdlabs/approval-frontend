@@ -29,6 +29,7 @@ declare module 'vue-router/auto-routes' {
     'admin-users': RouteRecordInfo<'admin-users', '/admin/users', Record<never, never>, Record<never, never>>,
     'document-id': RouteRecordInfo<'document-id', '/document/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     'document-create': RouteRecordInfo<'document-create', '/document/create', Record<never, never>, Record<never, never>>,
+    'forgot-password': RouteRecordInfo<'forgot-password', '/forgot-password', Record<never, never>, Record<never, never>>,
     'login': RouteRecordInfo<'login', '/login', Record<never, never>, Record<never, never>>,
     'preview-id': RouteRecordInfo<'preview-id', '/preview/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     'preview-pdf-view': RouteRecordInfo<'preview-pdf-view', '/preview/pdf-view', Record<never, never>, Record<never, never>>,
@@ -43,6 +44,7 @@ declare module 'vue-router/auto-routes' {
     'reguler-preview': RouteRecordInfo<'reguler-preview', '/reguler/preview', Record<never, never>, Record<never, never>>,
     'reguler-progress': RouteRecordInfo<'reguler-progress', '/reguler/progress', Record<never, never>, Record<never, never>>,
     'reguler-rejected': RouteRecordInfo<'reguler-rejected', '/reguler/rejected', Record<never, never>, Record<never, never>>,
+    'reset-password': RouteRecordInfo<'reset-password', '/reset-password', Record<never, never>, Record<never, never>>,
     'second-page': RouteRecordInfo<'second-page', '/second-page', Record<never, never>, Record<never, never>>,
   }
 }
