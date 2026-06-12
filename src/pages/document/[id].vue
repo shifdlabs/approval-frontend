@@ -32,6 +32,7 @@ const document = ref<Document>({
   status: 0,
   updatedAt: '',
   isApprover: false,
+  canRecall: false,
   currentApprovalName: '',
   lastRejector: null,
   attachments: null
@@ -251,6 +252,7 @@ const fetchData = async () => {
             type: `${payload.data.type}`,
             updatedAt: payload.data.updatedAt,
             isApprover: payload.data.isApprover,
+            canRecall: false,
             currentApprovalName: '',
             lastRejector: null,
             attachments: mapToAttachments(payload.data.documentAttachment)

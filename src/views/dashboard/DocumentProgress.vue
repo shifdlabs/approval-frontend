@@ -76,7 +76,7 @@ const tabsData = ['In Progress', 'Rejected', 'Completed']
                       />
                   </template>
 
-                  <template #icon v-else">
+                  <template #icon v-else>
                     <img
                       :src="inActiveDotPath"
                       alt="check"

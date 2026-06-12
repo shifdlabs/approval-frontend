@@ -51,3 +51,37 @@ export interface RecentDocumentResponse {
 	type: number
 	updated_at: string
 }
+
+export interface ApproverState {
+  name: string
+  title: string
+  approved: boolean | null
+  date: string | null
+  signature: boolean
+  signatureUrl: string | null
+  delegateName: string | null
+  onBehalfOf: string | null
+}
+
+export interface InProgressOverview {
+  subject: string
+  approvers: ApproverState[]
+}
+
+export interface RejectedOverview {
+  name: string
+  title: string
+  date: string
+  subject: string
+  reason: string
+}
+
+export interface CompletedOverview {
+  isFinished: boolean
+  name: string
+  title: string
+  date: string
+  subject: string
+  internalApprover: Array<{ name: string; title: string }> | null
+  externalApprover: string | null
+}

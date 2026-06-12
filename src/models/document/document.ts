@@ -11,6 +11,7 @@ export interface Document {
     status: number
     updatedAt: string
     isApprover: boolean
+    canRecall: boolean
     currentApprovalName: string
     lastRejector: LastRejector | null
     attachments: Attachments[] | null

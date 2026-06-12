@@ -98,6 +98,7 @@ const id = {
     documentNumbers: 'Nomor Dokumen',
     letterhead: 'Kop Surat',
     appLogs: 'Log Aplikasi',
+    generalSettings: 'Pengaturan Umum',
     contactUs: 'Hubungi Kami',
     delegation: 'Delegasi',
     bookingNumber: 'Booking Nomor',
@@ -499,6 +500,21 @@ const id = {
     },
   },
 
+  generalSettings: {
+    title: 'Pengaturan Umum',
+    subtitle: 'Konfigurasi pengaturan umum aplikasi seperti durasi SLA untuk otomatisasi persetujuan.',
+    slaTitle: 'SLA Persetujuan',
+    slaSubtitle: 'Jika approver tidak merespons dalam jumlah hari yang dikonfigurasi, sistem akan otomatis menyetujui dokumen tersebut pukul 06:00 pada hari berikutnya.',
+    slaMaxDays: 'Durasi Maksimal (hari)',
+    slaHint: 'Antara 1 hingga 30 hari',
+    slaValidation: 'Durasi harus antara 1 hingga 30 hari.',
+    save: 'Simpan Pengaturan',
+    confirmTitle: 'Simpan Pengaturan',
+    confirmBody: 'Apakah kamu yakin ingin menerapkan pengaturan ini? Perubahan akan langsung berlaku.',
+    confirmBtn: 'Ya, Simpan',
+    cancelBtn: 'Batal',
+  },
+
   letterhead: {
     title: 'Kelola Kop Surat',
     subtitle: 'Semua informasi yang Anda masukkan di bawah akan dikompilasi menjadi kop surat untuk surat Anda.',
@@ -526,7 +542,11 @@ const id = {
 
   appLog: {
     searchUserId: 'Cari ID Pengguna',
+    searchUserName: 'Cari Nama Pengguna',
     filterByDate: 'Filter Berdasarkan Tanggal',
+    filterByModule: 'Filter Berdasarkan Modul',
+    filterByAction: 'Filter Berdasarkan Aksi',
+    export: 'Ekspor Excel',
   },
 
   contactUs: {
@@ -730,6 +750,11 @@ const id = {
     accepted: 'Disetujui',
     commentPh: 'Masukkan komentar Anda',
     cancel: 'Batal',
+    recall: 'Tarik Surat',
+    recallConfirmTitle: 'Tarik Surat Ini?',
+    recallConfirmBody: 'Surat ini akan dikembalikan ke status Draft dan dapat diedit kembali. Tindakan ini tidak dapat dibatalkan.',
+    recallConfirmBtn: 'Ya, Tarik Surat',
+    recallCancelBtn: 'Batal',
   },
 
   importUsers: {
@@ -807,6 +832,19 @@ const id = {
     saveBtn: 'Simpan',
     cancelBtn: 'Batal',
     deleteBtn: 'Hapus',
+  },
+
+  verification: {
+    issuedBy: 'Diterbitkan oleh',
+    documentNumber: 'Nomor Surat',
+    approvalDate: 'Tanggal Persetujuan',
+    approvedBy: 'Disetujui oleh',
+    viewDocument: 'Isi Dokumen',
+    notFound: 'Dokumen Tidak Ditemukan',
+    notFoundDesc: 'ID dokumen yang Anda cari tidak ada atau belum diverifikasi.',
+    verifiedBadge: 'Terverifikasi',
+    pageTitle: 'Verifikasi Dokumen',
+    pageSubtitle: 'Dokumen ini telah diverifikasi secara digital oleh organisasi penerbit.',
   },
 
   language: {

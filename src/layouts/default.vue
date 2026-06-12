@@ -8,19 +8,19 @@ const DefaultLayoutWithVerticalNav = defineAsyncComponent(() => import('./compon
 
 const configStore = useConfigStore()
 
-// ℹ️ This will switch to vertical nav when define breakpoint is reached when in horizontal nav layout
-// Remove below composable usage if you are not using horizontal nav layout in your app
 switchToVerticalNavOnLtOverlayNavBreakpoint()
 
 const { layoutAttrs, injectSkinClasses } = useSkins()
 
 injectSkinClasses()
 
+const route = useRoute()
+const isPublicPage = computed(() => route.path.startsWith('/verification'))
+
 // SECTION: Loading Indicator
 const isFallbackStateActive = ref(false)
 const refLoadingIndicator = ref<any>(null)
 
-// watching if the fallback state is active and the refLoadingIndicator component is available
 watch([isFallbackStateActive, refLoadingIndicator], () => {
   if (isFallbackStateActive.value && refLoadingIndicator.value)
     refLoadingIndicator.value.fallbackHandle()
@@ -32,7 +32,22 @@ watch([isFallbackStateActive, refLoadingIndicator], () => {
 </script>
 
 <template>
+  <!-- Public pages: no sidenav, no navbar -->
+  <div v-if="isPublicPage" class="layout-wrapper layout-blank">
+    <RouterView v-slot="{ Component }">
+      <Suspense
+        :timeout="0"
+        @fallback="isFallbackStateActive = true"
+        @resolve="isFallbackStateActive = false"
+      >
+        <Component :is="Component" />
+      </Suspense>
+    </RouterView>
+  </div>
+
+  <!-- Normal pages: with sidenav -->
   <Component
+    v-else
     v-bind="layoutAttrs"
     :is="configStore.appContentLayoutNav === AppContentLayoutNav.Vertical ? DefaultLayoutWithVerticalNav : DefaultLayoutWithHorizontalNav"
   >

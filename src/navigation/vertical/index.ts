@@ -92,6 +92,11 @@ export default [
           icon: { icon: 'tabler-mail-code' },
         },
         {
+          title: 'nav.generalSettings',
+          to: { name: 'admin-general-settings' },
+          icon: { icon: 'tabler-settings' },
+        },
+        {
           title: 'nav.appLogs',
           to: { name: 'admin-app-log' },
           icon: { icon: 'tabler-history-toggle' },

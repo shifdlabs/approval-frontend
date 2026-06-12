@@ -23,6 +23,7 @@ declare module 'vue-router/auto-routes' {
     'admin-approvals': RouteRecordInfo<'admin-approvals', '/admin/approvals', Record<never, never>, Record<never, never>>,
     'admin-contactus': RouteRecordInfo<'admin-contactus', '/admin/contactus', Record<never, never>, Record<never, never>>,
     'admin-document-numbers': RouteRecordInfo<'admin-document-numbers', '/admin/document/numbers', Record<never, never>, Record<never, never>>,
+    'admin-general-settings': RouteRecordInfo<'admin-general-settings', '/admin/general/settings', Record<never, never>, Record<never, never>>,
     'admin-histories': RouteRecordInfo<'admin-histories', '/admin/histories', Record<never, never>, Record<never, never>>,
     'admin-letterhead': RouteRecordInfo<'admin-letterhead', '/admin/letterhead', Record<never, never>, Record<never, never>>,
     'admin-positions': RouteRecordInfo<'admin-positions', '/admin/positions', Record<never, never>, Record<never, never>>,
@@ -47,5 +48,6 @@ declare module 'vue-router/auto-routes' {
     'reguler-rejected': RouteRecordInfo<'reguler-rejected', '/reguler/rejected', Record<never, never>, Record<never, never>>,
     'reset-password': RouteRecordInfo<'reset-password', '/reset-password', Record<never, never>, Record<never, never>>,
     'second-page': RouteRecordInfo<'second-page', '/second-page', Record<never, never>, Record<never, never>>,
+    'verification-id': RouteRecordInfo<'verification-id', '/verification/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
   }
 }

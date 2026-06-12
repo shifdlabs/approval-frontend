@@ -28,6 +28,7 @@ const document = ref<Document>({
   status: 0,
   updatedAt: '',
   isApprover: false,
+  canRecall: false,
   currentApprovalName: '',
   lastRejector: null,
   attachments: null

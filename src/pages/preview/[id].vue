@@ -48,6 +48,7 @@ const internalRecipient = ref<InternalRecipient[]>([])
 const documentReferences = ref<DocumentReference[]>([])
 const isConfirmationDialogVisible = ref(false)
 const isAllowToUpdate = ref(false)
+const isRecallDialogVisible = ref(false)
 
 // PDF viewer states
 const selectedTab = ref(0)
@@ -183,6 +184,24 @@ const authorization = async (isApproved: boolean) => {
   }
 }
 
+const recallDocument = async () => {
+  try {
+    const { error } = await useApi(`/document/${document.value?.id}/recall`, {
+      method: 'POST',
+      credentials: 'include',
+    })
+    if (error.value) {
+      console.error('Recall error:', error.value)
+      return
+    }
+    isRecallDialogVisible.value = false
+    router.replace('/reguler/draft')
+  } catch (e) {
+    console.error(e)
+    isRecallDialogVisible.value = false
+  }
+}
+
 const fetchData = async () => {
   try {
     const res = await useApi(`/document/detail/${route.params.id}`, {
@@ -205,6 +224,7 @@ const fetchData = async () => {
       type: payload.data.type,
       updatedAt: payload.data.updatedAt,
       isApprover: payload.data.isApprover,
+      canRecall: payload.data.canRecall ?? false,
       currentApprovalName: '',
       lastRejector: null,
       attachments: []
@@ -216,7 +236,9 @@ const fetchData = async () => {
       date: approver.date,
       approved: approver.approved,
       signature: approver.signature,
-      signatureUrl: approver.signatureUrl
+      signatureUrl: approver.signatureUrl,
+      delegateName: approver.delegateName ?? null,
+      onBehalfOf: approver.onBehalfOf ?? null,
     })) || []
 
     attachments.value = mapToAttachments(payload.data.documentAttachment)
@@ -432,6 +454,18 @@ onMounted(() => {
             </VBtn>
           </VCol>
         </VRow>
+
+        <VBtn
+          v-if="document?.canRecall"
+          block
+          color="warning"
+          variant="tonal"
+          class="mt-2"
+          prepend-icon="tabler-rotate-counterclockwise"
+          @click="isRecallDialogVisible = true"
+        >
+          {{ $t('preview.recall') }}
+        </VBtn>
     </VCol>
 
   <VCol
@@ -562,7 +596,7 @@ onMounted(() => {
               />
             </template>
 
-            <template #icon v-else">
+            <template #icon v-else>
               <img
                 :src="inActiveDotPath"
                 alt="check"
@@ -590,22 +624,35 @@ onMounted(() => {
                 </div>
               </div>
 
+              <!-- Delegation badge: approved by a delegate -->
+              <div v-if="approver.onBehalfOf" class="mt-1">
+                <VChip size="x-small" color="info" variant="tonal" prepend-icon="tabler-transfer">
+                  via {{ approver.onBehalfOf }}
+                </VChip>
+              </div>
+
               <!-- Signature Image -->
               <div v-if="approver.signature && approver.signatureUrl" class="mt-3">
                 <div class="text-caption text-medium-emphasis mb-1">{{ $t('preview.digitalSignature') }}:</div>
-                <img 
-                  :src="approver.signatureUrl" 
-                  alt="Digital Signature" 
+                <img
+                  :src="approver.signatureUrl"
+                  alt="Digital Signature"
                   style="max-width: 200px; max-height: 100px; object-fit: contain; border: 1px solid #e0e0e0; padding: 8px; border-radius: 4px;"
                 />
               </div>
             </div>
 
             <div v-if="approver.approved == null">
-                    <div class="app-timeline-title">
-                      {{ approver.name }} - {{ approver.title }}
-                    </div>
-                  </div>
+              <div class="app-timeline-title">
+                {{ approver.name }} - {{ approver.title }}
+              </div>
+              <!-- Delegation badge: pending step has active delegation -->
+              <div v-if="approver.delegateName" class="mt-1">
+                <VChip size="x-small" color="warning" variant="tonal" prepend-icon="tabler-transfer">
+                  Delegasi ke {{ approver.delegateName }}
+                </VChip>
+              </div>
+            </div>
           </VTimelineItem>
         </VTimeline>
       </VRow>
@@ -714,6 +761,24 @@ onMounted(() => {
         v-if="confirmationDialogData.type == 2" @click="authorization(false)">
           {{ confirmationDialogData.buttonTitle }}
         </VBtn>
+      </VCardText>
+    </VCard>
+  </VDialog>
+
+  <!-- Recall Confirmation Dialog -->
+  <VDialog v-model="isRecallDialogVisible" max-width="480">
+    <VCard>
+      <VCardText class="pa-6">
+        <h5 class="text-h5 mb-2">{{ $t('preview.recallConfirmTitle') }}</h5>
+        <p class="text-body-1 mb-4">{{ $t('preview.recallConfirmBody') }}</p>
+        <div class="d-flex justify-end gap-3">
+          <VBtn variant="tonal" @click="isRecallDialogVisible = false">
+            {{ $t('preview.recallCancelBtn') }}
+          </VBtn>
+          <VBtn color="warning" @click="recallDocument">
+            {{ $t('preview.recallConfirmBtn') }}
+          </VBtn>
+        </div>
       </VCardText>
     </VCard>
   </VDialog>
