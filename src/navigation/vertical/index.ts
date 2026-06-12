@@ -49,6 +49,12 @@ export default [
           title: 'nav.complete',
           to: { name: 'reguler-complete' },
           icon: { icon: 'tabler-mail-check' },
+        },
+        { heading: "nav.delegation" },
+        {
+          title: 'nav.delegation',
+          to: { name: 'reguler-delegation' },
+          icon: { icon: 'tabler-user-share' },
         }
       ]
     : role === 99

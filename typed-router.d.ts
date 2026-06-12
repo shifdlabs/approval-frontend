@@ -39,6 +39,7 @@ declare module 'vue-router/auto-routes' {
     'reguler-bookmark': RouteRecordInfo<'reguler-bookmark', '/reguler/bookmark', Record<never, never>, Record<never, never>>,
     'reguler-complete': RouteRecordInfo<'reguler-complete', '/reguler/complete', Record<never, never>, Record<never, never>>,
     'reguler-dashboard': RouteRecordInfo<'reguler-dashboard', '/reguler/dashboard', Record<never, never>, Record<never, never>>,
+    'reguler-delegation': RouteRecordInfo<'reguler-delegation', '/reguler/delegation', Record<never, never>, Record<never, never>>,
     'reguler-draft': RouteRecordInfo<'reguler-draft', '/reguler/draft', Record<never, never>, Record<never, never>>,
     'reguler-inbox': RouteRecordInfo<'reguler-inbox', '/reguler/inbox', Record<never, never>, Record<never, never>>,
     'reguler-preview': RouteRecordInfo<'reguler-preview', '/reguler/preview', Record<never, never>, Record<never, never>>,
