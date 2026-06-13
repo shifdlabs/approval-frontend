@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import DOMPurify from 'dompurify'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
@@ -48,6 +49,8 @@ const fetchVerification = async () => {
     isLoading.value = false
   }
 }
+
+const sanitizedBody = computed(() => data.value?.body ? DOMPurify.sanitize(data.value.body) : '')
 
 onMounted(() => {
   fetchVerification()
@@ -167,7 +170,7 @@ onMounted(() => {
             <div class="divider-thin" />
 
             <!-- Body -->
-            <div class="letter-body" v-html="data.body" />
+            <div class="letter-body" v-html="sanitizedBody" />
 
             <!-- Closing / footer note -->
             <div class="letter-closing">

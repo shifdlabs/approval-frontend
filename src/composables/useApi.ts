@@ -18,9 +18,7 @@ export const useApi = createFetch({
       let accessToken = useCookie('accessToken').value
 
       if (accessToken) {
-        console.log("Access Token Valid")
         if (isJwtExpired(accessToken)) {
-          console.log("Access Token Expired", accessToken)
           try {
             await refreshingToken()
             accessToken = useCookie('accessToken').value
@@ -34,7 +32,6 @@ export const useApi = createFetch({
             throw err // Let the caller handle the failure (e.g. redirect to login)
           }
         }
-        console.log("Access Token Active", accessToken)
 
         // Attach access token to headers
         options.headers = {
@@ -90,12 +87,8 @@ const refreshingToken = async () => {
     })
 
     const payload = response?.data
-    // If your refresh API returns { accessToken, refreshToken }
-    console.log('Refresh response:', payload.accessToken)
     if (payload?.accessToken) {
       useCookie('accessToken').value = payload.accessToken
-      // useCookie('refreshToken').value = data.refreshToken
-      console.log('✅ Token refreshed successfully')
     } else {
       throw new Error('No tokens in refresh response.')
     }

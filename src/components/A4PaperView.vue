@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import DOMPurify from 'dompurify'
 import { Document } from '@/models/document/document';
 import { User } from '@/models/users/users';
 import companyLogoDummy1 from '@images/custom/dummy-company-logo-1.png';
@@ -13,6 +14,8 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const sanitizedBody = computed(() => DOMPurify.sanitize(props.document.body || ''))
 
 const currentDate = computed(() => {
   const now = new Date()
@@ -59,7 +62,7 @@ const currentDate = computed(() => {
               <span class="title">Subject: </span>{{ props.document.subject }}
             </div>
 
-            <div class="body" v-html="props.document.body"></div>
+            <div class="body" v-html="sanitizedBody"></div>
 
             <div class="closing">
               <p>Sincerely,</p>
