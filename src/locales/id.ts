@@ -97,6 +97,7 @@ const id = {
     actionHistories: 'Riwayat Aksi',
     documentNumbers: 'Nomor Dokumen',
     letterhead: 'Kop Surat',
+    letterTemplate: 'Template Surat',
     appLogs: 'Log Aplikasi',
     generalSettings: 'Pengaturan Umum',
     contactUs: 'Hubungi Kami',

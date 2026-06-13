@@ -97,6 +97,7 @@ const en = {
     actionHistories: 'Action Histories',
     documentNumbers: 'Document Numbers',
     letterhead: 'Letterhead',
+    letterTemplate: 'Letter Templates',
     appLogs: 'App Logs',
     generalSettings: 'General Settings',
     contactUs: 'Contact Us',

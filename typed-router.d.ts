@@ -25,6 +25,7 @@ declare module 'vue-router/auto-routes' {
     'admin-document-numbers': RouteRecordInfo<'admin-document-numbers', '/admin/document/numbers', Record<never, never>, Record<never, never>>,
     'admin-general-settings': RouteRecordInfo<'admin-general-settings', '/admin/general/settings', Record<never, never>, Record<never, never>>,
     'admin-histories': RouteRecordInfo<'admin-histories', '/admin/histories', Record<never, never>, Record<never, never>>,
+    'admin-letter-template': RouteRecordInfo<'admin-letter-template', '/admin/letter-template', Record<never, never>, Record<never, never>>,
     'admin-letterhead': RouteRecordInfo<'admin-letterhead', '/admin/letterhead', Record<never, never>, Record<never, never>>,
     'admin-positions': RouteRecordInfo<'admin-positions', '/admin/positions', Record<never, never>, Record<never, never>>,
     'admin-users': RouteRecordInfo<'admin-users', '/admin/users', Record<never, never>, Record<never, never>>,

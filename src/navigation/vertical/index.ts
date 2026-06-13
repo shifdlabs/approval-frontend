@@ -92,6 +92,11 @@ export default [
           icon: { icon: 'tabler-mail-code' },
         },
         {
+          title: 'nav.letterTemplate',
+          to: { name: 'admin-letter-template' },
+          icon: { icon: 'tabler-file-text' },
+        },
+        {
           title: 'nav.generalSettings',
           to: { name: 'admin-general-settings' },
           icon: { icon: 'tabler-settings' },
