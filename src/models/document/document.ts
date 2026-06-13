@@ -10,6 +10,7 @@ export interface Document {
     step: number
     status: number
     updatedAt: string
+    dueDate: string | null
     isApprover: boolean
     canRecall: boolean
     currentApprovalName: string
