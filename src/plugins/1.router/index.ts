@@ -23,19 +23,24 @@ const router = createRouter({
     return { top: 0 };
   },
   extendRoutes: pages => {
-    let routes = [...pages].map(route => recursiveLayouts(route));
+    // Set layout meta BEFORE recursiveLayouts so setupLayouts picks it up correctly
+    const pagesWithMeta = [...pages].map(route => {
+      if (route.path.startsWith('/verification')) {
+        route.meta = { ...route.meta, layout: 'blank', public: true };
+      }
+      return route;
+    });
 
+    let routes = pagesWithMeta.map(route => recursiveLayouts(route));
 
     routes = routes.filter(route => route.path !== '/');
-
 
     routes.push({
       path: '/',
       name: 'root',
       component: () => import('@/pages/login.vue'),
-      meta: { public: true }, 
+      meta: { public: true },
     });
-
 
     routes = routes.map(route => {
       if (

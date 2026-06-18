@@ -6,6 +6,7 @@ import companyLogoDummy1 from '@images/custom/dummy-company-logo-1.png';
 import { useApi } from '@/composables/useApi';
 // @ts-ignore
 import html2pdf from 'html2pdf.js';
+import QRCode from 'qrcode';
 
 interface Props {
   document: Document;
@@ -19,45 +20,6 @@ interface Props {
 
 const props = defineProps<Props>();
 
-// Function to strip HTML tags and decode entities
-const stripHtml = (html: string): string => {
-  if (!html) return ''
-  
-  let text = html
-  
-  // Decode numeric entities (e.g., &#39; &#x27;)
-  text = text.replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec))
-  text = text.replace(/&#x([0-9A-Fa-f]+);/g, (match, hex) => String.fromCharCode(parseInt(hex, 16)))
-  
-  // Manual entity replacement multiple times for nested encoding
-  for (let iteration = 0; iteration < 5; iteration++) {
-    let hasChanged = false
-    
-    const entityReplacements: Array<[RegExp, string]> = [
-      [/&amp;/gi, '&'],
-      [/&lt;/gi, '<'],
-      [/&gt;/gi, '>'],
-      [/&quot;/gi, '"'],
-      [/&#0*39;/gi, "'"],
-      [/&apos;/gi, "'"],
-      [/&#x0*27;/gi, "'"],
-      [/&nbsp;/gi, ' '],
-    ]
-    
-    for (const [pattern, replacement] of entityReplacements) {
-      const before = text
-      text = text.replace(pattern, replacement as string)
-      if (text !== before) hasChanged = true
-    }
-    
-    if (!hasChanged) break
-  }
-  
-  // Remove HTML tags
-  const tmp = document.createElement('div')
-  tmp.innerHTML = text
-  return tmp.textContent || tmp.innerText || ''
-}
 
 const currentDate = computed(() => {
   const now = new Date()
@@ -210,6 +172,13 @@ const generateDocumentHTMLTemplate = async () => {
     }
   }
 
+  // Generate QR code if document is finished (status == 2)
+  let qrCodeDataUrl = ''
+  if (props.document.status === 2) {
+    const verificationUrl = `${window.location.origin}/verification/${props.document.id}`
+    qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, { width: 140, margin: 1 })
+  }
+
   // Use DB letterhead data if available, otherwise use hardcoded defaults
   const companyName = letterheadData.value.companyName || 'Pacific Innovations Corporation'
   const companyAddress = letterheadData.value.address || '55 Montgomery Street, Suite 2100, Financial District, San Francisco, CA 94104'
@@ -221,246 +190,323 @@ const generateDocumentHTMLTemplate = async () => {
   return `
     <div class="pdf-document">
       <div class="letter">
-        <!-- Letterhead Section (Dynamic from Database) -->
+
+        <!-- ── Letterhead ── -->
         <div class="letterhead">
           <div class="letterhead-logo">
             <img src="${letterheadLogo}" alt="Company Logo" class="logo" />
           </div>
           <div class="letterhead-info">
             <h1 class="company-name">${companyName}</h1>
-            <p class="company-details">${companyAddress}<br>${companyCity}</p>
-            <p class="company-contact">Phone: ${companyPhone} | Email: ${companyEmail}</p>
+            <p class="company-details">${companyAddress} &nbsp;|&nbsp; ${companyCity}</p>
+            <p class="company-contact">Telp: ${companyPhone} &nbsp;|&nbsp; Email: ${companyEmail}</p>
             ${companyDescription ? `<p class="company-description">${companyDescription}</p>` : ''}
           </div>
         </div>
 
-        <!-- Empty title space -->
-        <h1 class="title"></h1>
-        
-        <!-- Document Info Section -->
-        <div class="sub-title-right">
-          <p class="text">${currentDate.value}</p>
-          ${props.bookingNumber ? `<p class="text">Ref: ${props.bookingNumber}</p>` : ''}
-          <p class="text">${props.document.type == '1' ? 'Internal' : 'External'}</p>
+        <!-- ── Date / Ref / Type ── -->
+        <div class="doc-meta">
+          <p>${currentDate.value}</p>
+          ${props.bookingNumber ? `<p>No: <strong>${props.bookingNumber}</strong></p>` : ''}
+          <p>${props.document.type == '1' ? 'Sifat: Internal' : 'Sifat: External'}</p>
         </div>
 
-        <!-- Recipients Section -->
+        <!-- ── Recipients ── -->
+        ${recipientsHTML ? `
         <div class="dear">
-          <p class="title">Dear,</p>
+          <p class="dear-label">Kepada Yth.,</p>
           ${recipientsHTML}
-        </div>
-
-        <!-- Subject Section -->
-        ${props.document.subject && props.document.subject !== '' ? `
-        <div class="subject">
-          <span class="title">Subject: </span>${stripHtml(props.document.subject)}
         </div>` : ''}
 
-        <!-- Body Content -->
+        <!-- ── Subject ── -->
+        ${props.document.subject ? `
+        <div class="subject-line">
+          <span class="subject-label">Perihal&nbsp;:</span>
+          <span class="subject-value">${props.document.subject}</span>
+        </div>` : ''}
+
+        <div class="divider-thin"></div>
+
+        <!-- ── Body ── -->
         <div class="${bodyClass}">
-          ${stripHtml(props.document.body || '')}
+          ${props.document.body || ''}
         </div>
 
-        <!-- Closing -->
+        <!-- ── Closing ── -->
         <div class="closing">
-          <p>Sincerely,</p>
+          <p>Hormat kami,</p>
         </div>
 
-        <!-- Signature Section -->
+        <!-- ── Signatures ── -->
         ${signersHTML ? `
         <div class="signature">
           <div class="signers">
             ${signersHTML}
           </div>
         </div>` : ''}
+
+        <!-- ── QR Code (dokumen selesai) ── -->
+        ${qrCodeDataUrl ? `
+        <div class="qr-verification-wrapper">
+          <div class="qr-verification">
+            <img src="${qrCodeDataUrl}" alt="QR Verifikasi" class="qr-img" />
+            <p class="qr-label">Verifikasi Dokumen</p>
+          </div>
+        </div>` : ''}
+
       </div>
-      </div>
-      <style>
-        .pdf-document {
-          width: 100%;
-          max-width: 900px;
-          margin: 0 auto;
-          padding: 2rem;
-          background: white;
-          box-sizing: border-box;
-          font-size: 1rem;
-        }
-        
-        .letter {
-          display: flex;
-          flex-direction: column;
-          font-family: 'Times New Roman', Times, serif;
-        }
-        
-        .letterhead {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          padding: 1rem 1rem 0.75rem 1rem;
-          border-bottom: 4px solid #000;
-        }
-        
-        .letterhead-logo {
-          flex-shrink: 0;
-          width: 140px;
-        }
-        
-        .logo {
-          width: 100%;
-          height: auto;
-          max-height: 140px;
-          object-fit: contain;
-          display: block;
-        }
-        
-        .letterhead-info {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 0.15rem;
-          text-align: center;
-        }
-        
-        .company-name {
-          font-size: 1.75rem;
-          font-weight: bold;
-          color: #2c3e50;
-          margin: 0 0 0.4rem 0;
-          line-height: 1.2;
-        }
-        
-        .company-details {
-          font-size: 0.95rem;
-          color: #7f8c8d;
-          line-height: 1.6;
-          margin: 0 0 0.2rem 0;
-        }
-        
-        .company-contact {
-          font-size: 0.9rem;
-          color: #7f8c8d;
-          line-height: 1.4;
-          margin: 0;
-        }
-        
-        .company-description {
-          font-size: 0.9rem;
-          color: #95a5a6;
-          font-style: italic;
-          margin: 0;
-          line-height: 1.3;
-        }
-        
-        .sub-title-right {
-          display: inline-block;
-          text-align: right;
-          margin-left: auto;
-          margin-top: 50px;
-        }
-        
-        .sub-title-right .text {
-          text-align: left;
-          font-weight: 600;
-          font-size: 1rem;
-          margin-bottom: -2px;
-        }
-        
-        .subject {
-          display: flex;
-          align-items: center;
-          margin-top: 1rem;
-          margin-bottom: 1rem;
-        }
-        
-        .subject .title {
-          font-weight: 700;
-          margin-right: 0.25rem;
-        }
-        
-        .dear {
-          font-size: 1rem;
-          margin-bottom: 1rem;
-        }
-        
-        .dear .title {
-          font-style: italic;
-          margin-bottom: 0.5rem;
-        }
-        
-        .dear > p {
-          margin-bottom: 0rem;
-        }
-        
-        .dear .name {
-          margin-bottom: 0.25rem;
-          font-weight: 600;
-        }
-        
-        .dear .name:last-child {
-          margin-bottom: 0;
-        }
-        
-        .body {
-          flex: 1;
-          font-size: 1rem;
-          line-height: 1.6;
-          text-align: justify;
-          margin-bottom: 2rem;
-          margin-top: 1rem;
-        }
-        
-        .body.very-long-content {
-          page-break-before: always;
-          margin-top: 2rem;
-        }
-        
-        .body p {
-          margin-bottom: 1rem;
-        }
-        
-        .closing {
-          margin-top: auto;
-          font-size: 1rem;
-        }
-        
-        .closing p {
-          margin-bottom: 0.5rem;
-        }
-        
-        .signature {
-          margin-top: 5rem;
-        }
-        
-        .signers {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 2rem;
-        }
-        
-        .signer {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          min-width: 250px;
-        }
-        
-        .signer .signature-img {
-          width: 150px;
-          height: 150px;
-          object-fit: contain;
-          margin-bottom: 0.5rem;
-        }
-        
-        .signer .name {
-          font-weight: 700;
-          margin-bottom: 0rem;
-        }
-        
-        .signer .position {
-          font-style: normal;
-        }
-      </style>
     </div>
+
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      .pdf-document {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0 auto;
+        padding: 18mm 20mm 18mm 20mm;
+        background: #ffffff;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 11pt;
+        color: #1a1a1a;
+      }
+
+      .letter {
+        display: flex;
+        flex-direction: column;
+        min-height: calc(297mm - 36mm);
+      }
+
+      /* ── Letterhead ── */
+      .letterhead {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #1a1a1a;
+        margin-bottom: 0;
+      }
+
+      .letterhead-logo {
+        flex-shrink: 0;
+        width: 72px;
+      }
+
+      .logo {
+        width: 72px;
+        height: 72px;
+        object-fit: contain;
+        display: block;
+      }
+
+      .letterhead-info {
+        flex: 1;
+        text-align: center;
+        line-height: 1.35;
+      }
+
+      .company-name {
+        font-size: 18pt;
+        font-weight: 700;
+        color: #1a1a1a;
+        letter-spacing: 0.5px;
+        margin-bottom: 3px;
+      }
+
+      .company-details {
+        font-size: 9pt;
+        color: #555;
+        margin-bottom: 2px;
+      }
+
+      .company-contact {
+        font-size: 9pt;
+        color: #555;
+      }
+
+      .company-description {
+        font-size: 8.5pt;
+        color: #888;
+        font-style: italic;
+        margin-top: 3px;
+      }
+
+      /* ── Doc meta (date/no/sifat) ── */
+      .doc-meta {
+        margin-top: 22px;
+        margin-left: auto;
+        text-align: right;
+        line-height: 1.6;
+        font-size: 10.5pt;
+      }
+
+      .doc-meta p {
+        margin: 0;
+      }
+
+      /* ── Recipients ── */
+      .dear {
+        margin-top: 20px;
+        font-size: 11pt;
+        line-height: 1.5;
+      }
+
+      .dear-label {
+        font-style: italic;
+        margin-bottom: 2px;
+      }
+
+      .dear .name {
+        font-weight: 600;
+        margin: 1px 0;
+      }
+
+      /* ── Subject ── */
+      .subject-line {
+        display: flex;
+        gap: 8px;
+        margin-top: 14px;
+        font-size: 11pt;
+        line-height: 1.5;
+        align-items: baseline;
+      }
+
+      .subject-label {
+        font-weight: 700;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .subject-value {
+        font-weight: 700;
+        text-decoration: underline;
+      }
+
+      /* ── Thin divider ── */
+      .divider-thin {
+        border: none;
+        border-top: 1px solid #ccc;
+        margin: 14px 0;
+      }
+
+      /* ── Body ── */
+      .body {
+        font-size: 11pt;
+        line-height: 1.75;
+        text-align: justify;
+        margin-bottom: 24px;
+        word-break: break-word;
+      }
+
+      .body p {
+        margin-bottom: 10px;
+      }
+
+      .body p:last-child {
+        margin-bottom: 0;
+      }
+
+      .body strong, .body b { font-weight: 700; }
+      .body em, .body i    { font-style: italic; }
+      .body u              { text-decoration: underline; }
+
+      .body ul, .body ol {
+        padding-left: 20px;
+        margin-bottom: 10px;
+      }
+
+      .body ul li, .body ol li {
+        margin-bottom: 4px;
+      }
+
+      .body h1 { font-size: 14pt; font-weight: 700; margin-bottom: 8px; }
+      .body h2 { font-size: 13pt; font-weight: 700; margin-bottom: 7px; }
+      .body h3 { font-size: 12pt; font-weight: 700; margin-bottom: 6px; }
+
+      .body.very-long-content {
+        page-break-before: always;
+      }
+
+      /* ── Closing ── */
+      .closing {
+        margin-top: 28px;
+        font-size: 11pt;
+      }
+
+      .closing p {
+        margin-bottom: 4px;
+      }
+
+      /* ── Signatures ── */
+      .signature {
+        margin-top: 56px;
+      }
+
+      .signers {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 40px;
+      }
+
+      .signer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 160px;
+        text-align: center;
+      }
+
+      .signer .signature-img {
+        width: 110px;
+        height: 80px;
+        object-fit: contain;
+        margin-bottom: 4px;
+      }
+
+      .signer .name {
+        font-weight: 700;
+        font-size: 10.5pt;
+        border-top: 1px solid #333;
+        padding-top: 4px;
+        min-width: 160px;
+        text-align: center;
+      }
+
+      .signer .position {
+        font-size: 10pt;
+        color: #555;
+        margin-top: 1px;
+      }
+
+      /* ── QR Code ── */
+      .qr-verification-wrapper {
+        display: flex;
+        justify-content: flex-end;
+        padding-right: 4px;
+        padding-bottom: 4px;
+        margin-top: 28px;
+      }
+
+      .qr-verification {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .qr-img {
+        width: 90px;
+        height: 90px;
+      }
+
+      .qr-label {
+        font-size: 7pt;
+        color: #888;
+        margin: 0;
+        text-align: center;
+        letter-spacing: 0.3px;
+      }
+    </style>
   `
 }
 
@@ -484,7 +530,6 @@ const generateDocumentPDF = async () => {
     wrapper.style.left = '-9999px'
     wrapper.style.top = '0'
     wrapper.style.width = '210mm'
-    wrapper.style.fontFamily = 'Arial, sans-serif'
     window.document.body.appendChild(wrapper)
     
     // Get the pdf-document element
@@ -516,13 +561,13 @@ const generateDocumentPDF = async () => {
     
     // PDF generation options
     const opt = {
-      margin: [15, 15, 15, 15],
+      margin: 0,
       filename: `${props.bookingNumber || 'document'}_${new Date().toISOString().split('T')[0]}.pdf`,
-      image: { 
-        type: 'jpeg', 
-        quality: 0.98 
+      image: {
+        type: 'jpeg',
+        quality: 0.98
       },
-      html2canvas: { 
+      html2canvas: {
         scale: 2,
         useCORS: true,
         allowTaint: true,
@@ -530,20 +575,19 @@ const generateDocumentPDF = async () => {
         scrollX: 0,
         scrollY: 0,
         backgroundColor: '#ffffff',
-        height: null,
-        width: null
+        windowWidth: 794, // 210mm at 96dpi
       },
-      jsPDF: { 
-        unit: 'mm', 
-        format: 'a4', 
+      jsPDF: {
+        unit: 'mm',
+        format: 'a4',
         orientation: 'portrait',
         compress: true,
         putOnlyUsedFonts: true
       },
-      pagebreak: { 
+      pagebreak: {
         mode: ['css', 'legacy'],
         before: ['.very-long-content'],
-        avoid: ['div.signature', 'div.signer', 'div.letterhead', 'div.subject', 'div.dear']
+        avoid: ['div.signature', 'div.signer', 'div.letterhead', 'div.subject-line', 'div.dear']
       }
     }
     

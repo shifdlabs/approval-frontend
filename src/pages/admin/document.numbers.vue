@@ -14,7 +14,8 @@ const isSuccessCreateGroupFormat = ref(false)
 const isCreateGroupFormatDialogVisible = ref(false)
 const isCreateFormatDialogVisible = ref(false)
 const numberingFormats = ref<NumberingFormat[]>([])
-const isFormValid = ref(false);
+const refGroupForm = ref()
+const isFormReady = computed(() => !!newGroupData.value.name.trim())
 const isRefetchList = ref(false)
 const formRules = {
   required: (value: string) => !!value || 'Required.',
@@ -74,41 +75,42 @@ const fetchNumberingFormats = async () => {
       }
 
 const submitNewGroupForm = async () => {
-  if (isFormValid.value) {
-    try {
-      const { data, error } = await useApi('/numbering/group',
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            name: newGroupData.value.name,
-            description: newGroupData.value.description,
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include', // opsional jika diperlukan
-        }
-      )
+  const { valid: isValid } = await refGroupForm.value?.validate()
+  if (!isValid) return
 
-      if (error.value) {
-        console.error('API Error:', error.value)
-        isSuccessCreateGroupFormat.value = false
-        return
+  try {
+    const { data, error } = await useApi('/numbering/group',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          name: newGroupData.value.name,
+          description: newGroupData.value.description,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
       }
+    )
 
-      if (data.value && (data.value as any).success) {
-        isSuccessCreateGroupFormat.value = true
-        setTimeout(() => {
-          isSuccessCreateGroupFormat.value = false
-          isCreateGroupFormatDialogVisible.value = false
-          fetchNumberingFormats()
-          fetchNumberingGroups()
-        }, 1000)
-      }
-    } catch (e) {
+    if (error.value) {
+      console.error('API Error:', error.value)
       isSuccessCreateGroupFormat.value = false
-      console.error('Unexpected error:', e)
+      return
     }
+
+    if (data.value && (data.value as any).success) {
+      isSuccessCreateGroupFormat.value = true
+      setTimeout(() => {
+        isSuccessCreateGroupFormat.value = false
+        isCreateGroupFormatDialogVisible.value = false
+        fetchNumberingFormats()
+        fetchNumberingGroups()
+      }, 1000)
+    }
+  } catch (e) {
+    isSuccessCreateGroupFormat.value = false
+    console.error('Unexpected error:', e)
   }
 }
 
@@ -243,7 +245,7 @@ const getIcon = (props: Record<string, unknown>) => props.icon as any
           </button>
         </div>
 
-        <VForm ref="refGroupForm" v-model="isFormValid">
+        <VForm ref="refGroupForm">
           <div class="bmd-body">
             <VAlert
               v-if="isSuccessCreateGroupFormat"
@@ -276,7 +278,7 @@ const getIcon = (props: Record<string, unknown>) => props.icon as any
             <button class="bmd-btn bmd-btn-ghost" type="button" @click="isCreateGroupFormatDialogVisible = false">
               {{ t('common.cancel') }}
             </button>
-            <button class="bmd-btn bmd-btn-primary" type="button" :disabled="!isFormValid" @click="submitNewGroupForm">
+            <button class="bmd-btn bmd-btn-primary" type="button" :disabled="!isFormReady" @click="submitNewGroupForm">
               {{ t('documentNumbers.createGroupDialog.create') }}
             </button>
           </div>

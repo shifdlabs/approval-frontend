@@ -59,8 +59,7 @@ const changeUserPassword = async () => {
       console.warn('Password update failed or success field missing.')
     }
   } catch (e) {
-    console.log(e)
-    emit('update:isDialogVisible', true)
+    console.error(e)
     isAllInputtedValid.value = false
   }
 }

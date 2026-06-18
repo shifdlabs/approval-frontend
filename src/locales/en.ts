@@ -97,8 +97,11 @@ const en = {
     actionHistories: 'Action Histories',
     documentNumbers: 'Document Numbers',
     letterhead: 'Letterhead',
+    letterTemplate: 'Letter Templates',
     appLogs: 'App Logs',
+    generalSettings: 'General Settings',
     contactUs: 'Contact Us',
+    delegation: 'Delegation',
     bookingNumber: 'Booking Number',
     profileMenuItem: 'Profile',
     logoutMenuItem: 'Logout',
@@ -498,6 +501,21 @@ const en = {
     },
   },
 
+  generalSettings: {
+    title: 'General Settings',
+    subtitle: 'Configure application-wide settings such as SLA duration for approval automation.',
+    slaTitle: 'Approval SLA',
+    slaSubtitle: 'If an approver does not respond within the configured number of days, the system will automatically approve the document at 06:00 on the following day.',
+    slaMaxDays: 'Maximum Duration (days)',
+    slaHint: 'Between 1 and 30 days',
+    slaValidation: 'Duration must be between 1 and 30 days.',
+    save: 'Save Settings',
+    confirmTitle: 'Save Settings',
+    confirmBody: 'Are you sure you want to apply these settings? Changes will take effect immediately.',
+    confirmBtn: 'Yes, Save',
+    cancelBtn: 'Cancel',
+  },
+
   letterhead: {
     title: 'Manage Letterhead',
     subtitle: 'All the information you\'ve entered below will be compiled into a letterhead for your letter.',
@@ -525,7 +543,11 @@ const en = {
 
   appLog: {
     searchUserId: 'Search User ID',
+    searchUserName: 'Search User Name',
     filterByDate: 'Filter By Date',
+    filterByModule: 'Filter By Module',
+    filterByAction: 'Filter By Action',
+    export: 'Export Excel',
   },
 
   contactUs: {
@@ -729,6 +751,11 @@ const en = {
     accepted: 'Accepted',
     commentPh: 'Enter your comment',
     cancel: 'Cancel',
+    recall: 'Recall Letter',
+    recallConfirmTitle: 'Recall This Letter?',
+    recallConfirmBody: 'This letter will be moved back to Draft status and can be edited again. This action cannot be undone.',
+    recallConfirmBtn: 'Yes, Recall',
+    recallCancelBtn: 'Cancel',
   },
 
   importUsers: {
@@ -781,6 +808,44 @@ const en = {
     cellBuilderTitle: 'Format Cell Builder',
     preferenceValue: 'Preference Value',
     preferenceValuePh: 'Input Your Preference Value',
+  },
+
+  delegation: {
+    title: 'Delegation',
+    subtitle: 'Manage your approval delegations',
+    addNew: 'Add Delegation',
+    addNewTitle: 'Add Delegation',
+    addNewSubtitle: 'Delegate your approval authority to another user for a specific date range.',
+    editTitle: 'Edit Delegation',
+    editSubtitle: 'Update the delegation details.',
+    deleteTitle: 'Delete Delegation',
+    deleteBody: 'Are you sure you want to delete this delegation? This action cannot be undone.',
+    delegate: 'Delegate To',
+    delegatePh: 'Select a user',
+    startDate: 'Start Date',
+    startDatePh: 'YYYY-MM-DD',
+    endDate: 'End Date',
+    endDatePh: 'YYYY-MM-DD',
+    status: 'Status',
+    active: 'Active',
+    inactive: 'Inactive',
+    noDelegations: 'No delegations found.',
+    saveBtn: 'Save',
+    cancelBtn: 'Cancel',
+    deleteBtn: 'Delete',
+  },
+
+  verification: {
+    issuedBy: 'Issued by',
+    documentNumber: 'Document Number',
+    approvalDate: 'Approval Date',
+    approvedBy: 'Approved by',
+    viewDocument: 'Document Content',
+    notFound: 'Document Not Found',
+    notFoundDesc: 'The document ID you are looking for does not exist or has not been verified yet.',
+    verifiedBadge: 'Verified',
+    pageTitle: 'Document Verification',
+    pageSubtitle: 'This document has been digitally verified by the issuing organization.',
   },
 
   language: {

@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import A4PaperView from "@/components/A4PaperView.vue";
+import TiptapEditor from '@/@core/components/TiptapEditor.vue'
 import { BookedDocumentNumber } from '@/models/document-number/document-number';
 import { Format, GroupWithFormats } from '@/models/document-number/group.with.format';
 import { Document } from '@/models/document/document';
 import { DocumentReference } from "@/models/document/reference.document";
+import { LetterTemplate } from '@/models/document/letter-template';
 import { User } from '@/models/users/users';
 import { router } from '@/plugins/1.router';
 import { mapGroupedWithFormat } from "@/utils/model.mapper";
@@ -28,6 +30,7 @@ const document = ref<Document>({
   status: 0,
   updatedAt: '',
   isApprover: false,
+  canRecall: false,
   currentApprovalName: '',
   lastRejector: null,
   attachments: null
@@ -59,6 +62,33 @@ const selectedFormatId = ref<string | null>(null);  // store selected format id
 const selectedBookedNumber = ref<string | null>(null); // store selected group name
 const customInputNumber = ref<string>(''); // store custom input number
 const refForm = ref<VForm>()
+
+// Template feature
+const templates = ref<LetterTemplate[]>([])
+const selectedTemplateId = ref<string | null>(null)
+const isTemplatePreviewOpen = ref(false)
+const previewingTemplate = ref<LetterTemplate | null>(null)
+
+const fetchTemplates = async () => {
+  try {
+    const res = await useApi('/template', { method: 'GET' })
+    const json = res.data.value as any
+    if (json?.success && json.data?.length > 0) {
+      templates.value = json.data
+    }
+  } catch { /* ignore */ }
+}
+
+const openTemplatePreview = (tpl: LetterTemplate) => {
+  previewingTemplate.value = tpl
+  isTemplatePreviewOpen.value = true
+}
+
+const applyTemplate = (tpl: LetterTemplate) => {
+  document.value.body = tpl.body
+  selectedTemplateId.value = tpl.id
+  isTemplatePreviewOpen.value = false
+}
 
 const isLoaderVisible = ref(false)
 const isUploading = ref(false)
@@ -126,6 +156,7 @@ onMounted(() => {
     fetchUsers()
     fetchBookedNumbers()
     fetchNumberingFormat()
+    fetchTemplates()
 })
 
 watch(
@@ -350,6 +381,7 @@ const createDocument = async (isDraft: boolean) => {
           sequences,
           attachments,
           references,
+          templateId: selectedTemplateId.value,
         }),
         headers: {
           'Content-Type': 'application/json',
@@ -597,6 +629,58 @@ const onFileRemoved = (index: number) => {
 
         <VWindowItem :value="2">
             <VRow>
+                <!-- Template Selector — only shown when templates exist -->
+                <VCol v-if="templates.length > 0" cols="12">
+                  <div class="mb-2">
+                    <VLabel class="mb-1 d-block">Gunakan Template</VLabel>
+                    <div class="text-body-2 text-secondary mb-3">Pilih template untuk mengisi body surat secara otomatis.</div>
+                  </div>
+                  <div class="d-flex flex-wrap gap-3">
+                    <VCard
+                      v-for="tpl in templates"
+                      :key="tpl.id"
+                      :variant="selectedTemplateId === tpl.id ? 'tonal' : 'outlined'"
+                      :color="selectedTemplateId === tpl.id ? 'primary' : undefined"
+                      class="template-selector-card"
+                      style="min-width: 180px; max-width: 240px; cursor: pointer;"
+                      @click="applyTemplate(tpl)"
+                    >
+                      <VCardText class="pa-3">
+                        <div class="d-flex align-center justify-space-between gap-2 mb-1">
+                          <span class="text-subtitle-2 font-weight-bold text-truncate">{{ tpl.name }}</span>
+                          <VIcon v-if="selectedTemplateId === tpl.id" icon="tabler-check" size="16" color="primary" />
+                        </div>
+                        <div v-if="tpl.description" class="text-caption text-secondary text-truncate">{{ tpl.description }}</div>
+                        <VBtn
+                          size="x-small"
+                          variant="text"
+                          color="info"
+                          class="mt-2 px-0"
+                          prepend-icon="tabler-eye"
+                          @click.stop="openTemplatePreview(tpl)"
+                        >
+                          Preview
+                        </VBtn>
+                      </VCardText>
+                    </VCard>
+
+                    <!-- Clear selection -->
+                    <VCard
+                      v-if="selectedTemplateId"
+                      variant="outlined"
+                      class="template-selector-card d-flex align-center justify-center"
+                      style="min-width: 120px; cursor: pointer;"
+                      @click="selectedTemplateId = null"
+                    >
+                      <VCardText class="pa-3 text-center">
+                        <VIcon icon="tabler-x" size="18" color="secondary" class="mb-1" />
+                        <div class="text-caption text-secondary">Hapus pilihan</div>
+                      </VCardText>
+                    </VCard>
+                  </div>
+                  <VDivider class="mt-4 mb-2" />
+                </VCol>
+
                 <VCol
                 cols="12"
                 >
@@ -1015,6 +1099,55 @@ const onFileRemoved = (index: number) => {
     </VCard>
   </VDialog>
 
+  <!-- Template Preview Dialog -->
+  <VDialog v-model="isTemplatePreviewOpen" max-width="860" scrollable>
+    <VCard>
+      <VCardTitle class="pa-5 pb-3 d-flex align-center justify-space-between">
+        <span>Preview: {{ previewingTemplate?.name }}</span>
+        <VBtn icon="tabler-x" variant="text" size="small" @click="isTemplatePreviewOpen = false" />
+      </VCardTitle>
+      <VDivider />
+      <VCardText class="pa-4" style="background: #e8e8e8; overflow-y: auto;">
+        <div class="tpl-preview-paper">
+          <div class="tpl-preview-lh">
+            <div class="tpl-preview-lh-logo" />
+            <div class="tpl-preview-lh-info">
+              <div class="tpl-preview-company-name">Nama Perusahaan Anda</div>
+              <div class="tpl-preview-company-sub">Alamat Perusahaan | Kota</div>
+              <div class="tpl-preview-company-sub">Telp: (021) 000-0000 | Email: info@perusahaan.com</div>
+            </div>
+          </div>
+          <div class="tpl-preview-meta">
+            <div>Jakarta, 12 Juni 2026</div>
+            <div>No: <strong>001/SK/VI/2026</strong></div>
+            <div>Sifat: Internal</div>
+          </div>
+          <div class="tpl-preview-subject">
+            <span class="tpl-preview-subject-label">Perihal&nbsp;:</span>
+            <span class="tpl-preview-subject-value">{{ previewingTemplate?.name || 'Perihal Surat' }}</span>
+          </div>
+          <div class="tpl-preview-divider" />
+          <div
+            class="tpl-preview-body"
+            v-html="previewingTemplate?.body || '<p>Sehubungan dengan keperluan yang ada, bersama surat ini kami sampaikan bahwa <strong>Lorem Ipsum</strong> adalah contoh teks yang digunakan dalam industri percetakan dan penataan huruf.</p><p>Adapun hal-hal yang perlu diperhatikan adalah sebagai berikut:</p><ul><li>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</li><li>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</li><li>Ut enim ad minim veniam, quis nostrud exercitation.</li></ul><p>Demikian surat ini kami sampaikan, atas perhatian dan kerja samanya kami ucapkan terima kasih.</p>'"
+          />
+          <div class="tpl-preview-closing">
+            <p>Hormat kami,</p>
+            <p class="tpl-preview-approver">Nama Penanda Tangan</p>
+          </div>
+        </div>
+      </VCardText>
+      <VDivider />
+      <VCardActions class="pa-4 gap-3">
+        <VBtn variant="outlined" @click="isTemplatePreviewOpen = false">Tutup</VBtn>
+        <VSpacer />
+        <VBtn color="primary" prepend-icon="tabler-check" @click="applyTemplate(previewingTemplate!)">
+          Gunakan Template Ini
+        </VBtn>
+      </VCardActions>
+    </VCard>
+  </VDialog>
+
   <!-- Delete Confirmation Dialog -->
   <VDialog
     v-model="deleteDialogVisible"
@@ -1221,5 +1354,121 @@ const onFileRemoved = (index: number) => {
   .file-title {
     font-size: 0.95rem;
   }
+}
+
+/* Template selector card */
+.template-selector-card {
+  transition: box-shadow 0.2s, border-color 0.2s;
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+  }
+}
+
+/* Template preview paper (A4 inside dialog) */
+.tpl-preview-paper {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 18mm 20mm;
+  background: #ffffff;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.22);
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 11pt;
+  color: #1a1a1a;
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+.tpl-preview-lh {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 12px;
+  border-bottom: 3px solid #1a1a1a;
+}
+
+.tpl-preview-lh-logo {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  background: #e0e0e0;
+  border-radius: 4px;
+}
+
+.tpl-preview-lh-info {
+  flex: 1;
+  text-align: center;
+}
+
+.tpl-preview-company-name {
+  font-size: 16pt;
+  font-weight: 700;
+}
+
+.tpl-preview-company-sub {
+  font-size: 9pt;
+  color: #666;
+}
+
+.tpl-preview-meta {
+  margin-top: 22px;
+  margin-left: auto;
+  text-align: right;
+  font-size: 10.5pt;
+  line-height: 1.65;
+  width: fit-content;
+}
+
+.tpl-preview-subject {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 11pt;
+}
+
+.tpl-preview-subject-label {
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tpl-preview-subject-value {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.tpl-preview-divider {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 14px 0;
+}
+
+.tpl-preview-body {
+  font-size: 11pt;
+  line-height: 1.75;
+  text-align: justify;
+  margin-bottom: 24px;
+
+  p      { margin-bottom: 10px; }
+  strong { font-weight: 700; }
+  em     { font-style: italic; }
+  u      { text-decoration: underline; }
+  ul, ol { padding-left: 20px; margin-bottom: 10px; }
+  li     { margin-bottom: 4px; }
+}
+
+.tpl-preview-closing {
+  margin-top: 28px;
+  font-size: 11pt;
+  p { margin: 0; }
+}
+
+.tpl-preview-approver {
+  margin-top: 48px;
+  font-weight: 700;
+  border-top: 1px solid #333;
+  display: inline-block;
+  padding-top: 4px;
+  min-width: 180px;
 }
 </style>

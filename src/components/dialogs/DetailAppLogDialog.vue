@@ -46,10 +46,10 @@ const formattedLog = computed(() => {
         <VRow>
         <VCol cols="6">
             <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px;">
-            User ID
+            User Name
             </VLabel>
             <h6 class="text-h6" style="max-width: 200px;">
-            {{ props.appLog?.userId }}
+            {{ props.appLog?.userName || props.appLog?.userId || '-' }}
             </h6>
         </VCol>
 

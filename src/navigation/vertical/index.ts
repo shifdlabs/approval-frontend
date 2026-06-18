@@ -49,6 +49,12 @@ export default [
           title: 'nav.complete',
           to: { name: 'reguler-complete' },
           icon: { icon: 'tabler-mail-check' },
+        },
+        { heading: "nav.delegation" },
+        {
+          title: 'nav.delegation',
+          to: { name: 'reguler-delegation' },
+          icon: { icon: 'tabler-user-share' },
         }
       ]
     : role === 99
@@ -84,6 +90,16 @@ export default [
           title: 'nav.letterhead',
           to: { name: 'admin-letterhead' },
           icon: { icon: 'tabler-mail-code' },
+        },
+        {
+          title: 'nav.letterTemplate',
+          to: { name: 'admin-letter-template' },
+          icon: { icon: 'tabler-file-text' },
+        },
+        {
+          title: 'nav.generalSettings',
+          to: { name: 'admin-general-settings' },
+          icon: { icon: 'tabler-settings' },
         },
         {
           title: 'nav.appLogs',

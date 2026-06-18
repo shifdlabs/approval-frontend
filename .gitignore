@@ -23,6 +23,7 @@ CLAUDE.md
 BACKEND_PROMPT.md
 HANDOFF_FE_BUGFIX.md
 *.xlsx
+.claude/
 
 # Editor directories and files
 .vscode/*

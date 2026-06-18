@@ -7,9 +7,15 @@ const {
   filteredDocument,
   searchQuery,
   filteredDate,
+  filteredModule,
+  filteredAction,
+  moduleOptions,
+  actionOptions,
   headers,
   onRowClicked,
   onTapFilter,
+  exportLogs,
+  formatDate,
 } = appLogController();
 
 const { t } = useI18n()
@@ -20,25 +26,29 @@ const { t } = useI18n()
     <VCard>
       <VCardText>
         <div class="d-flex justify-end flex-wrap gap-y-4 gap-x-6">
-          <div class="d-flex align-center flex-wrap">
+          <div class="d-flex align-center flex-wrap gap-3">
             <AppTextField
               v-model="searchQuery"
-              :placeholder="t('appLog.searchUserId')"
-              style="inline-size: 200px; width: 500px;"
-              class="me-3"
+              :placeholder="t('appLog.searchUserName')"
+              style="inline-size: 200px; width: 300px;"
             />
             <VBtn
-             
               density="comfortable"
               icon=""
               class="rounded"
               @click="onTapFilter"
             >
-            <VIcon :icon="isFilterSectionVisible ? 'tabler-filter-x' : 'tabler-filter-plus'">
-            </VIcon>
-          </VBtn>
+              <VIcon :icon="isFilterSectionVisible ? 'tabler-filter-x' : 'tabler-filter-plus'" />
+            </VBtn>
+            <VBtn
+              color="success"
+              prepend-icon="tabler-file-spreadsheet"
+              @click="exportLogs"
+            >
+              {{ t('appLog.export') }}
+            </VBtn>
           </div>
-            
+
           <VSpacer />
         </div>
       </VCardText>
@@ -46,15 +56,31 @@ const { t } = useI18n()
       <VDivider />
 
       <div v-if="isFilterSectionVisible">
-        <div class="d-flex justify-start flex-wrap gap-y-4 gap-x-6">
-            <VCol cols="12" md="6">
-                <AppDateTimePicker
-                v-model="filteredDate"
-                :label="t('appLog.filterByDate')"
-                placeholder="Select date"
-                clearable
+        <div class="d-flex justify-start flex-wrap gap-y-4 gap-x-6 pa-4">
+          <VCol cols="12" md="4">
+            <AppDateTimePicker
+              v-model="filteredDate"
+              :label="t('appLog.filterByDate')"
+              placeholder="Select date"
+              clearable
             />
-            </VCol>
+          </VCol>
+          <VCol cols="12" md="3">
+            <VSelect
+              v-model="filteredModule"
+              :items="moduleOptions"
+              :label="t('appLog.filterByModule')"
+              clearable
+            />
+          </VCol>
+          <VCol cols="12" md="3">
+            <VSelect
+              v-model="filteredAction"
+              :items="actionOptions"
+              :label="t('appLog.filterByAction')"
+              clearable
+            />
+          </VCol>
         </div>
         <VDivider />
       </div>
@@ -65,36 +91,35 @@ const { t } = useI18n()
           :items="filteredDocument"
           :items-per-page="10"
         >
-        
-        <template #item.userId="{ item }">
-          <VLabel>
-              {{ item.userId  }}
-          </VLabel>
-        </template>
+          <template #item.userName="{ item }">
+            <VLabel>
+              {{ item.userName || '-' }}
+            </VLabel>
+          </template>
 
-        <template #item.actionType="{ item }">
-          <VLabel style="max-width: 300px;">
+          <template #item.actionType="{ item }">
+            <VLabel style="max-width: 300px;">
               {{ item.action }}
-          </VLabel>
-        </template>
+            </VLabel>
+          </template>
 
-        <template #item.module="{ item }">
-          <VLabel>
+          <template #item.module="{ item }">
+            <VLabel>
               {{ item.module }}
-          </VLabel>
-        </template>
+            </VLabel>
+          </template>
 
-        <template #item.logDate="{ item }">
-          <VLabel>
+          <template #item.logDate="{ item }">
+            <VLabel>
               {{ formatDate(item.logDate) }}
-          </VLabel>
-        </template>
-        
-        <template #item.action="{ item }">
+            </VLabel>
+          </template>
+
+          <template #item.action="{ item }">
             <IconBtn @click="onRowClicked(item)">
-            <VIcon icon="tabler-eye" />
+              <VIcon icon="tabler-eye" />
             </IconBtn>
-        </template>
+          </template>
         </VDataTable>
       </div>
     </VCard>
@@ -105,4 +130,3 @@ const { t } = useI18n()
     v-model:is-dialog-visible="isDetailLogDialogVisible"
   />
 </template>
-  
