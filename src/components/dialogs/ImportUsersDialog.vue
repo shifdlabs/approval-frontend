@@ -33,7 +33,6 @@ const columnMapping = ref({
   lastName: '',
   phone: '',
   role: '',
-  position: '',
   positionID: '',
   password: '',
 });
@@ -83,7 +82,6 @@ const resetDialog = () => {
     lastName: '',
     phone: '',
     role: '',
-    position: '',
     positionID: '',
     password: '',
   };
@@ -441,19 +439,9 @@ const getPositionName = (positionID: string) => {
 
                 <VCol cols="12" md="6">
                   <AppSelect
-                    v-model="columnMapping.position"
-                    label="Position Name Column (e.g., Manager, Staff)"
-                    placeholder="Select column"
-                    :items="excelColumns"
-                    clearable
-                  />
-                </VCol>
-
-                <VCol cols="12" md="6">
-                  <AppSelect
                     v-model="columnMapping.positionID"
-                    label="Position ID Column (alternative)"
-                    placeholder="Select column"
+                    label="Position Column (Name or ID)"
+                    placeholder="Select column (e.g., Manager, Staff, or UUID)"
                     :items="excelColumns"
                     clearable
                   />
