@@ -6,7 +6,7 @@
     ════════════════════════════════════════ -->
     <header class="dashboard-header">
       <div class="header-left">
-        <h1 class="header-title">Dashboard Persuratan</h1>
+        <h1 class="header-title">{{ t('dashboard.title') }}</h1>
         <p class="header-subtitle">
           <span>{{ formattedDate }}</span>
           <span class="sep">·</span>
@@ -16,18 +16,11 @@
         </p>
       </div>
       <div class="header-right">
-        <!-- <button class="btn-icon" @click="showNotifications = !showNotifications" :class="{ active: showNotifications }" aria-label="Notifikasi">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-          <span v-if="notifCount > 0" class="notif-badge">{{ notifCount }}</span>
-        </button> -->
         <button class="btn-primary" @click="buatSuratBaru">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
-          <span class="btn-label">Buat Surat Baru</span>
+          <span class="btn-label">{{ t('dashboard.createNew') }}</span>
         </button>
       </div>
     </header>
@@ -38,10 +31,10 @@
     <div class="alert-banner" v-if="showAlert">
       <div class="alert-dot"></div>
       <span class="alert-text">
-        <strong>{{ alertCount }} surat</strong> belum diperiksa lebih dari 3 hari — perlu tindakan segera
+        <strong>{{ alertCount }} {{ t('dashboard.alertLetterWord') }}</strong> {{ t('dashboard.alertRestSuffix') }}
       </span>
       <button class="alert-link" @click="lihatSemua">
-        Lihat Semua
+        {{ t('dashboard.viewAll') }}
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
         </svg>
@@ -69,7 +62,7 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
-            <input v-model="searchQuery" type="text" placeholder="Cari nomor atau perihal..." class="search-input"/>
+            <input v-model="searchQuery" type="text" :placeholder="t('dashboard.searchPlaceholder')" class="search-input"/>
             <svg v-if="isSearching" class="search-spinner" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
               <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/>
             </svg>
@@ -79,14 +72,14 @@
           <div v-if="searchQuery.trim().length > 0" class="search-dropdown">
             <div v-if="isSearching" class="search-state">
               <div class="search-loading-spinner"></div>
-              <span>Sedang mencari...</span>
+              <span>{{ t('dashboard.searching') }}</span>
             </div>
             <template v-else>
               <div v-if="searchResults.length === 0" class="search-state">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:#d1d5db">
                   <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
-                <span>Data Tidak Ditemukan</span>
+                <span>{{ t('dashboard.noData') }}</span>
               </div>
               <div
                 v-for="item in searchResults"
@@ -149,20 +142,20 @@
       <section class="left-col">
         <div class="table-card">
 
-          <!-- Table header: title + Semua/Masuk/Keluar tabs -->
+          <!-- Table header: title + tabs -->
           <div class="table-card-header">
             <div>
-              <h2 class="section-title">Surat Terbaru</h2>
-              <p class="section-sub">{{ filteredSurat.length }} surat ditampilkan</p>
+              <h2 class="section-title">{{ t('dashboard.latestLetters') }}</h2>
+              <p class="section-sub">{{ t('dashboard.showing', { count: filteredSurat.length }) }}</p>
             </div>
             <div class="tab-group">
               <button
-                v-for="t in suratTabs"
-                :key="t"
+                v-for="tab in suratTabs"
+                :key="tab.value"
                 class="tab-btn"
-                :class="{ active: activeSuratTab === t }"
-                @click="activeSuratTab = t"
-              >{{ t }}</button>
+                :class="{ active: activeSuratTab === tab.value }"
+                @click="activeSuratTab = tab.value"
+              >{{ tab.label }}</button>
             </div>
           </div>
 
@@ -171,12 +164,12 @@
             <table class="surat-table">
               <thead>
                 <tr>
-                  <th>No. Surat</th>
-                  <th>Perihal</th>
-                  <th>Dari / Kepada</th>
-                  <th>Tgl Masuk</th>
-                  <th>Status</th>
-                  <th>Aksi</th>
+                  <th>{{ t('dashboard.columns.number') }}</th>
+                  <th>{{ t('dashboard.columns.subject') }}</th>
+                  <th>{{ t('dashboard.columns.fromTo') }}</th>
+                  <th>{{ t('dashboard.columns.receivedAt') }}</th>
+                  <th>{{ t('dashboard.columns.status') }}</th>
+                  <th>{{ t('dashboard.columns.actions') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -192,7 +185,7 @@
                     <span class="perihal-sub">{{ s.from_to }}</span>
                   </td>
                   <td class="cell-dari">{{ s.from_to }}</td>
-                  <td class="cell-tanggal">{{ new Date(s.updated_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) }}</td>
+                  <td class="cell-tanggal">{{ new Date(s.updated_at).toLocaleDateString(dateLocale, { day: 'numeric', month: 'short', year: 'numeric' }) }}</td>
                   <td>
                     <span class="status-badge" :class="statusClass(s.status)">
                       <span class="status-dot"></span>{{ s.status }}
@@ -200,11 +193,10 @@
                   </td>
                   <td>
                     <div class="action-group">
-                      <!-- Conditional action buttons based on status -->
-                      <button v-if="s.status === 'Perlu Diperiksa'" class="btn-action primary" @click="lihatDocument(s.id)">Periksa</button>
-                      <button v-if="s.status === 'Ditolak'"         class="btn-action warning" @click="lihatDocument(s.id)">Revisi</button>
-                      <button v-if="s.status === 'Perlu Diperiksa' || s.status === 'Ditolak'" class="btn-action ghost">Detail</button>
-                      <button v-if="s.status === 'In Progress' || s.status === 'Selesai'"     class="btn-action ghost" @click="lihatDocument(s.id)">Lihat</button>
+                      <button v-if="s.status === 'Perlu Diperiksa'" class="btn-action primary" @click="lihatDocument(s.id)">{{ t('dashboard.actions.review') }}</button>
+                      <button v-if="s.status === 'Ditolak'"         class="btn-action warning" @click="lihatDocument(s.id)">{{ t('dashboard.actions.revise') }}</button>
+                      <button v-if="s.status === 'Perlu Diperiksa' || s.status === 'Ditolak'" class="btn-action ghost">{{ t('dashboard.actions.detail') }}</button>
+                      <button v-if="s.status === 'In Progress' || s.status === 'Selesai'"     class="btn-action ghost" @click="lihatDocument(s.id)">{{ t('dashboard.actions.view') }}</button>
                     </div>
                   </td>
                 </tr>
@@ -232,10 +224,10 @@
                 <span class="cell-tanggal">{{ s.tanggal }}</span>
               </div>
               <div class="smc-actions">
-                <button v-if="s.status === 'Perlu Diperiksa'" class="btn-action primary">Periksa</button>
-                <button v-if="s.status === 'Ditolak'"         class="btn-action warning">Revisi</button>
-                <button v-if="s.status === 'Perlu Diperiksa' || s.status === 'Ditolak'" class="btn-action ghost">Detail</button>
-                <button v-if="s.status === 'In Progress' || s.status === 'Selesai'" @click="lihatDocument(s.id)" class="btn-action ghost">Lihat</button>
+                <button v-if="s.status === 'Perlu Diperiksa'" class="btn-action primary">{{ t('dashboard.actions.review') }}</button>
+                <button v-if="s.status === 'Ditolak'"         class="btn-action warning">{{ t('dashboard.actions.revise') }}</button>
+                <button v-if="s.status === 'Perlu Diperiksa' || s.status === 'Ditolak'" class="btn-action ghost">{{ t('dashboard.actions.detail') }}</button>
+                <button v-if="s.status === 'In Progress' || s.status === 'Selesai'" @click="lihatDocument(s.id)" class="btn-action ghost">{{ t('dashboard.actions.view') }}</button>
               </div>
             </div>
           </div>
@@ -245,7 +237,7 @@
               <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
               <polyline points="22,6 12,13 2,6"/>
             </svg>
-            <p v-if="filteredSurat.length === 0">Belum ada surat</p>
+            <p v-if="filteredSurat.length === 0">{{ t('dashboard.noLetters') }}</p>
           </div>
 
         </div>
@@ -254,19 +246,13 @@
       <!-- ── Right: Widgets ── -->
       <aside class="right-col">
 
-        <!-- Widget 1: Donut Chart — Distribusi Status -->
+        <!-- Widget 1: Donut Chart — Status Distribution -->
         <div class="widget-card">
-          <h3 class="widget-title">Distribusi Status</h3>
-          <p class="widget-sub">Total {{ totalSurat }} surat {{ activeStatTab === 'semua' ? 'keseluruhan' : activeStatTab === 'hari' ? 'hari ini' : activeStatTab === 'minggu' ? 'minggu ini' : 'bulan ini' }}</p>
+          <h3 class="widget-title">{{ t('dashboard.statusDist') }}</h3>
+          <p class="widget-sub">{{ widgetDistribusiSub }}</p>
           <div class="donut-section">
             <div class="donut-wrap">
               <svg viewBox="0 0 120 120" class="donut-svg">
-                <!--
-                  Pure SVG donut using stroke-dasharray trick.
-                  Circumference = 2π × r (r=45) ≈ 282.74
-                  Each segment: dash = (count / total) × circumference
-                  Offset shifts the arc start position clockwise.
-                -->
                 <circle
                   v-for="(seg, i) in donutSegments"
                   :key="i"
@@ -279,7 +265,7 @@
                   :stroke-dashoffset="seg.offset"
                 />
                 <text x="60" y="56" text-anchor="middle" class="donut-center-num">{{ totalSurat }}</text>
-                <text x="60" y="70" text-anchor="middle" class="donut-center-label">surat</text>
+                <text x="60" y="70" text-anchor="middle" class="donut-center-label">{{ t('dashboard.alertLetterWord') }}</text>
               </svg>
             </div>
             <ul class="donut-legend">
@@ -292,15 +278,14 @@
           </div>
         </div>
 
-        <!-- Widget 2: Deadline Tracker — Mendekati Batas Waktu -->
+        <!-- Widget 2: Deadline Tracker -->
         <div class="widget-card">
-          <h3 class="widget-title">Mendekati Batas Waktu</h3>
-          <p class="widget-sub">Surat yang perlu segera ditindak</p>
+          <h3 class="widget-title">{{ t('dashboard.nearDeadline') }}</h3>
+          <p class="widget-sub">{{ t('dashboard.needsAction') }}</p>
           <div class="deadline-list">
             <div v-for="dl in mappedDeadlines" :key="dl.id" class="deadline-item">
               <div class="deadline-top">
                 <span class="deadline-name">{{ dl.name }}</span>
-                <!-- Bar width = urgency progress, color = urgency level -->
                 <span class="deadline-label" :class="dl.urgencyClass">{{ dl.urgency }}</span>
               </div>
               <div class="deadline-bar-track">
@@ -310,10 +295,10 @@
           </div>
         </div>
 
-        <!-- Widget 3: Activity Feed — Aktivitas Terkini -->
+        <!-- Widget 3: Activity Feed -->
         <div class="widget-card">
-          <h3 class="widget-title">Aktivitas Terkini</h3>
-          <p class="widget-sub">Current Time Log</p>
+          <h3 class="widget-title">{{ t('dashboard.recentActivity') }}</h3>
+          <p class="widget-sub">{{ t('dashboard.timeLog') }}</p>
           <div class="activity-list">
             <div v-for="act in mappedActivities" :key="act.id" class="activity-item">
               <div class="activity-icon" :style="{ background: act.iconBg, color: act.iconColor }">
@@ -337,50 +322,55 @@
 import { useDashboardController } from '@/controllers/reguler/document-dashboard-controller'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
+const { t, locale } = useI18n({ useScope: 'global' })
 
 // ════════════════════════════════════════
 // SECTION 1 & 2 — Header & Alert
 // ════════════════════════════════════════
 
-const userName = useCookie('name')
-const notifCount        = ref(3)
-const showNotifications = ref(false)
-const showAlert         = ref(false)
-const alertCount        = ref(0)
-const activeSuratTab = ref('Semua')
-const suratTabs = ['Semua', 'Internal', 'External']
-const tabTypeMap = { 'Semua': 0, 'Internal': 1, 'External': 2 }
-const lihatDocument = (id) => {
-  console.log('fungsi dipanggil, id:', id)
-  console.log('router:', router)
-  router.push(`/preview/${id}`)
-}
+const userName   = useCookie('name')
+const showAlert  = ref(false)
+const alertCount = ref(0)
+
+const activeSuratTab = ref('semua')
+
+const suratTabs = computed(() => [
+  { value: 'semua',    label: t('dashboard.tabs.all') },
+  { value: 'internal', label: t('common.internal') },
+  { value: 'external', label: t('common.external') },
+])
+
+const tabTypeMap = { semua: 0, internal: 1, external: 2 }
+
+const lihatDocument = id => router.push(`/preview/${id}`)
+
+const dateLocale = computed(() => locale.value === 'id' ? 'id-ID' : 'en-US')
 
 const now = new Date()
 
 const formattedDate = computed(() =>
-  now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  now.toLocaleDateString(dateLocale.value, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 )
 
 const greeting = computed(() => {
   const h = now.getHours()
-  if (h < 11) return 'Selamat Pagi'
-  if (h < 15) return 'Selamat Siang'
-  if (h < 18) return 'Selamat Sore'
-  return 'Selamat Malam'
+  if (h < 11) return t('dashboard.greeting.morning')
+  if (h < 15) return t('dashboard.greeting.afternoon')
+  if (h < 18) return t('dashboard.greeting.evening')
+  return t('dashboard.greeting.night')
 })
 
 const buatSuratBaru = () => router.push('/document/create')
-const lihatSemua    = () => alert('Navigasi ke daftar surat belum diperiksa')
+const lihatSemua    = () => router.push('/reguler/authorization')
 
-// Mapping action per card
 const cardActions = {
-  0: () => router.push('/reguler/authorization'), // Periksa
-  1: () => router.push('/reguler/progress'),      // Lihat (In Progress)
-  2: () => router.push('/reguler/rejected'),      // Tinjau
-  3: () => router.push('/reguler/complete'),      // Lihat (Selesai)
+  0: () => router.push('/reguler/authorization'),
+  1: () => router.push('/reguler/progress'),
+  2: () => router.push('/reguler/rejected'),
+  3: () => router.push('/reguler/complete'),
 }
 
 // ════════════════════════════════════════
@@ -388,20 +378,33 @@ const cardActions = {
 // ════════════════════════════════════════
 
 const {
-	summary, deadlines, activities, recentDocuments,
-	isLoading, fetchSummary, fetchDeadlines, fetchActivities, fetchRecentDocuments,
+  summary, deadlines, activities, recentDocuments,
+  isLoading, fetchSummary, fetchDeadlines, fetchActivities, fetchRecentDocuments,
   searchResults, isSearching, searchDocuments,
 } = useDashboardController()
 
 const activeStatTab = ref('semua')
 const searchQuery   = ref('')
 
-const statTabs = [
-  { label: 'Semua',      value: 'semua'  },
-  { label: 'Hari Ini',   value: 'hari'   },
-  { label: 'Minggu Ini', value: 'minggu' },
-  { label: 'Bulan Ini',  value: 'bulan'  },
-]
+const statTabs = computed(() => [
+  { label: t('dashboard.tabs.all'),      value: 'semua'  },
+  { label: t('dashboard.tabs.today'),    value: 'hari'   },
+  { label: t('dashboard.tabs.thisWeek'), value: 'minggu' },
+  { label: t('dashboard.tabs.thisMonth'),value: 'bulan'  },
+])
+
+const widgetDistribusiSub = computed(() => {
+  const periods = {
+    semua:  t('dashboard.period.all'),
+    hari:   t('dashboard.period.today'),
+    minggu: t('dashboard.period.week'),
+    bulan:  t('dashboard.period.month'),
+  }
+  return t('dashboard.totalLetters', {
+    count: totalSurat.value,
+    period: periods[activeStatTab.value] ?? t('dashboard.period.all'),
+  })
+})
 
 const warnIcon = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
 const okIcon   = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
@@ -411,35 +414,34 @@ const statCards = ref([
     id: 1, topColor: '#f59e0b', iconBg: 'rgba(245,158,11,.15)', iconColor: '#f59e0b',
     icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`,
     badgeType: 'badge-warn', badgeIcon: warnIcon, badge: '-',
-    count: '-', numberColor: '#d97706', label: 'Perlu Diperiksa',
-    note: '-', action: 'Periksa', actionColor: '#d97706',
+    count: '-', numberColor: '#d97706', label: t('status.needsReview'),
+    note: '-', action: t('dashboard.actions.review'), actionColor: '#d97706',
   },
   {
     id: 2, topColor: '#2563eb', iconBg: 'rgba(37,99,235,.15)', iconColor: '#3b82f6',
     icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/><line x1="12" y1="13" x2="12" y2="21"/></svg>`,
     badgeType: 'badge-ok', badgeIcon: okIcon, badge: '-',
-    count: '-', numberColor: '#2563eb', label: 'Sedang Diproses',
-    note: '-', action: 'Lihat', actionColor: '#2563eb',
+    count: '-', numberColor: '#2563eb', label: t('status.inProgress'),
+    note: '-', action: t('dashboard.actions.view'), actionColor: '#2563eb',
   },
   {
     id: 3, topColor: '#ef4444', iconBg: 'rgba(239,68,68,.15)', iconColor: '#ef4444',
     icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>`,
     badgeType: 'badge-warn', badgeIcon: warnIcon, badge: '-',
-    count: '-', numberColor: '#dc2626', label: 'Ditolak',
-    note: '-', action: 'Tinjau', actionColor: '#dc2626',
+    count: '-', numberColor: '#dc2626', label: t('status.rejected'),
+    note: '-', action: t('dashboard.actions.tinjau'), actionColor: '#dc2626',
   },
   {
     id: 4, topColor: '#10b981', iconBg: 'rgba(16,185,129,.15)', iconColor: '#10b981',
     icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="9 11 12 14 22 4"/></svg>`,
     badgeType: 'badge-ok', badgeIcon: okIcon, badge: '-',
-    count: '-', numberColor: '#059669', label: 'Selesai Bulan Ini',
-    note: '-', action: 'Lihat', actionColor: '#059669',
+    count: '-', numberColor: '#059669', label: t('dashboard.cardCompletedLabel'),
+    note: '-', action: t('dashboard.actions.view'), actionColor: '#059669',
   },
 ])
 
-// Mapping response API → statCards
 const animateCount = (index, targetValue) => {
-  const delay    = 1000 // shimmer terlihat selama 1 detik
+  const delay    = 1000
   const duration = 1500
   const steps    = 60
   const stepTime = duration / steps
@@ -447,7 +449,6 @@ const animateCount = (index, targetValue) => {
   let current    = 0
 
   setTimeout(() => {
-    // Matikan shimmer tepat saat angka mulai counting
     if (index === 0) isLoading.value = false
 
     const timer = setInterval(() => {
@@ -466,60 +467,96 @@ const updateCardsFromSummary = () => {
 
   const s = summary.value
 
-  // Animate counts
   animateCount(0, s.need_approval.total)
   animateCount(1, s.in_progress.total)
   animateCount(2, s.rejected.total)
   animateCount(3, s.completed.total)
 
-  // Card 1 — Perlu Diperiksa
-  statCards.value[0].badge     = s.need_approval.alert_label
-  statCards.value[0].badgeType = s.need_approval.alert_type === 'warning' ? 'badge-warn' : 'badge-ok'
-  statCards.value[0].badgeIcon = s.need_approval.alert_type === 'warning' ? warnIcon : okIcon
-  statCards.value[0].note      = `${s.need_approval.urgent} mendesak · ${s.need_approval.normal} normal`
+  statCards.value[0].label  = t('status.needsReview')
+  statCards.value[0].action = t('dashboard.actions.review')
+  statCards.value[1].label  = t('status.inProgress')
+  statCards.value[1].action = t('dashboard.actions.view')
+  statCards.value[2].label  = t('status.rejected')
+  statCards.value[2].action = t('dashboard.actions.tinjau')
+  statCards.value[3].label  = t('dashboard.cardCompletedLabel')
+  statCards.value[3].action = t('dashboard.actions.view')
 
-  // Card 2 — Sedang Diproses
-  statCards.value[1].badge     = s.in_progress.alert_label
-  statCards.value[1].badgeType = s.in_progress.alert_type === 'warning' ? 'badge-warn' : 'badge-ok'
-  statCards.value[1].badgeIcon = s.in_progress.alert_type === 'warning' ? warnIcon : okIcon
-  statCards.value[1].note      = `Paling lama: ${s.in_progress.longest_processing_days} hari belum selesai`
+  const isWarn0 = s.need_approval.alert_type === 'warning'
+  statCards.value[0].badge     = isWarn0
+    ? t('dashboard.badge.oldestPending', { days: s.need_approval.oldest_pending_days })
+    : t('dashboard.badge.onTrack')
+  statCards.value[0].badgeType = isWarn0 ? 'badge-warn' : 'badge-ok'
+  statCards.value[0].badgeIcon = isWarn0 ? warnIcon : okIcon
+  statCards.value[0].note      = t('dashboard.noteNeedApproval', { urgent: s.need_approval.urgent, normal: s.need_approval.normal })
 
-  // Card 3 — Ditolak
-  statCards.value[2].badge     = s.rejected.alert_label
-  statCards.value[2].badgeType = s.rejected.alert_type === 'warning' ? 'badge-warn' : 'badge-ok'
-  statCards.value[2].badgeIcon = s.rejected.alert_type === 'warning' ? warnIcon : okIcon
-  statCards.value[2].note      = `${s.rejected.mine_needs_revision} surat milikmu perlu direvisi`
+  const isWarn1 = s.in_progress.alert_type === 'warning'
+  statCards.value[1].badge     = isWarn1
+    ? t('dashboard.noteInProgress', { days: s.in_progress.longest_processing_days })
+    : t('dashboard.badge.onTrack')
+  statCards.value[1].badgeType = isWarn1 ? 'badge-warn' : 'badge-ok'
+  statCards.value[1].badgeIcon = isWarn1 ? warnIcon : okIcon
+  statCards.value[1].note      = t('dashboard.noteInProgress', { days: s.in_progress.longest_processing_days })
 
-  // Card 4 — Selesai
-  statCards.value[3].badge     = s.completed.alert_label
-  statCards.value[3].badgeType = s.completed.alert_type === 'warning' ? 'badge-warn' : 'badge-ok'
-  statCards.value[3].badgeIcon = s.completed.alert_type === 'warning' ? warnIcon : okIcon
-  statCards.value[3].note      = `Total ${s.completed.total_year} sepanjang tahun`
+  const isWarn2 = s.rejected.alert_type === 'warning'
+  statCards.value[2].badge     = isWarn2
+    ? t('dashboard.badge.needsRevision', { n: s.rejected.mine_needs_revision })
+    : t('dashboard.badge.noRejected')
+  statCards.value[2].badgeType = isWarn2 ? 'badge-warn' : 'badge-ok'
+  statCards.value[2].badgeIcon = isWarn2 ? warnIcon : okIcon
+  statCards.value[2].note      = t('dashboard.noteRejected', { n: s.rejected.mine_needs_revision })
+
+  statCards.value[3].badge     = t('dashboard.badge.onTrack')
+  statCards.value[3].badgeType = 'badge-ok'
+  statCards.value[3].badgeIcon = okIcon
+  statCards.value[3].note      = t('dashboard.noteCompleted', { total: s.completed.total_year })
 
   showAlert.value  = s.need_approval.oldest_pending_days > 1
   alertCount.value = s.need_approval.total
 
-  // update donut chart dari data API
   statusDistribution.value = [
-    { label: 'Selesai',         count: s.completed.total,    color: '#10b981' },
-    { label: 'Perlu Diperiksa', count: s.need_approval.total, color: '#f59e0b' },
-    { label: 'In Progress',     count: s.in_progress.total,  color: '#3b82f6' },
-    { label: 'Ditolak',         count: s.rejected.total,     color: '#ef4444' },
+    { label: t('status.completed'),   count: s.completed.total,     color: '#10b981' },
+    { label: t('status.needsReview'), count: s.need_approval.total, color: '#f59e0b' },
+    { label: t('status.inProgress'),  count: s.in_progress.total,   color: '#3b82f6' },
+    { label: t('status.rejected'),    count: s.rejected.total,      color: '#ef4444' },
   ]
 }
 
-// Fetch ulang setiap kali tab filter berubah
-watch(activeStatTab, async (newTab) => {
+watch(activeStatTab, async newTab => {
   await fetchSummary(newTab)
   updateCardsFromSummary()
 })
 
-// Fetch ulang saat tab berubah
-watch(activeSuratTab, (newTab) => {
-	fetchRecentDocuments(tabTypeMap[newTab])
+watch(activeSuratTab, newTab => {
+  fetchRecentDocuments(tabTypeMap[newTab])
 })
 
-// Fetch pertama kali saat halaman dibuka
+// Re-translate labels/notes when sidebar language changes
+watch(locale, () => {
+  statCards.value[0].label  = t('status.needsReview')
+  statCards.value[0].action = t('dashboard.actions.review')
+  statCards.value[1].label  = t('status.inProgress')
+  statCards.value[1].action = t('dashboard.actions.view')
+  statCards.value[2].label  = t('status.rejected')
+  statCards.value[2].action = t('dashboard.actions.tinjau')
+  statCards.value[3].label  = t('dashboard.cardCompletedLabel')
+  statCards.value[3].action = t('dashboard.actions.view')
+
+  statusDistribution.value[0].label = t('status.completed')
+  statusDistribution.value[1].label = t('status.needsReview')
+  statusDistribution.value[2].label = t('status.inProgress')
+  statusDistribution.value[3].label = t('status.rejected')
+
+  if (summary.value) {
+    updateCardsFromSummary()
+  } else {
+    // Translate static badge labels even when API data hasn't loaded yet
+    statCards.value[0].badge = t('dashboard.badge.onTrack')
+    statCards.value[1].badge = t('dashboard.badge.onTrack')
+    statCards.value[2].badge = t('dashboard.badge.noRejected')
+    statCards.value[3].badge = t('dashboard.badge.onTrack')
+  }
+})
+
 onMounted(async () => {
   await fetchSummary(activeStatTab.value)
   updateCardsFromSummary()
@@ -534,11 +571,11 @@ onMounted(async () => {
 
 const filteredSurat = computed(() => recentDocuments.value ?? [])
 
-const statusClass = (status) => ({
-	'In Progress': 'status-progress',
-	'Selesai':     'status-selesai',
-	'Ditolak':     'status-ditolak',
-	'Cancelled':   'status-ditolak',
+const statusClass = status => ({
+  'In Progress': 'status-progress',
+  'Selesai':     'status-selesai',
+  'Ditolak':     'status-ditolak',
+  'Cancelled':   'status-ditolak',
 }[status] || '')
 
 // ════════════════════════════════════════
@@ -546,10 +583,10 @@ const statusClass = (status) => ({
 // ════════════════════════════════════════
 
 const statusDistribution = ref([
-  { label: 'Selesai',         count: 20, color: '#10b981' },
-  { label: 'Perlu Diperiksa', count: 12, color: '#f59e0b' },
-  { label: 'In Progress',     count: 8,  color: '#3b82f6' },
-  { label: 'Ditolak',         count: 5,  color: '#ef4444' },
+  { label: t('status.completed'),   count: 20, color: '#10b981' },
+  { label: t('status.needsReview'), count: 12, color: '#f59e0b' },
+  { label: t('status.inProgress'),  count: 8,  color: '#3b82f6' },
+  { label: t('status.rejected'),    count: 5,  color: '#ef4444' },
 ])
 
 const totalSurat    = computed(() => statusDistribution.value.reduce((a, b) => a + b.count, 0))
@@ -570,85 +607,76 @@ const donutSegments = computed(() => {
 // ════════════════════════════════════════
 
 const mappedDeadlines = computed(() =>
-    deadlines.value.map(d => {
-        const days = d.days_remaining
+  deadlines.value.map(d => {
+    const days = d.days_remaining
 
-        let urgency, urgencyClass, barColor, progress
+    let urgency, urgencyClass, barColor, progress
 
-        if (days < 0) {
-            urgency      = `+${Math.abs(days)} hari lewat`
-            urgencyClass = 'urgency-overdue'
-            barColor     = '#ef4444'
-            progress     = 100
-        } else if (days === 0) {
-            urgency      = 'Hari ini'
-            urgencyClass = 'urgency-today'
-            barColor     = '#f59e0b'
-            progress     = 90
-        } else if (days <= 14) {
-            urgency      = `${days} hari lagi`
-            urgencyClass = 'urgency-soon'
-            barColor     = '#f59e0b'
-            progress     = Math.max(20, 100 - (days / 14 * 100))
-        } else {
-            urgency      = `${days} hari lagi`
-            urgencyClass = 'urgency-ok'
-            barColor     = '#10b981'
-            progress     = Math.max(10, 100 - (days / 60 * 100))
-        }
+    if (days < 0) {
+      urgency      = t('dashboard.daysOverdue', { days: `+${Math.abs(days)}` })
+      urgencyClass = 'urgency-overdue'
+      barColor     = '#ef4444'
+      progress     = 100
+    } else if (days === 0) {
+      urgency      = t('dashboard.today')
+      urgencyClass = 'urgency-today'
+      barColor     = '#f59e0b'
+      progress     = 90
+    } else if (days <= 14) {
+      urgency      = t('dashboard.daysLeft', { days })
+      urgencyClass = 'urgency-soon'
+      barColor     = '#f59e0b'
+      progress     = Math.max(20, 100 - (days / 14 * 100))
+    } else {
+      urgency      = t('dashboard.daysLeft', { days })
+      urgencyClass = 'urgency-ok'
+      barColor     = '#10b981'
+      progress     = Math.max(10, 100 - (days / 60 * 100))
+    }
 
-        return {
-            id:           d.id,
-            name:         d.subject,
-            urgency,
-            urgencyClass,
-            progress,
-            barColor,
-        }
-    })
+    return { id: d.id, name: d.subject, urgency, urgencyClass, progress, barColor }
+  })
 )
-
 
 // ════════════════════════════════════════
 // SECTION 4D — Activity Feed
 // ════════════════════════════════════════
 
 const mappedActivities = computed(() => {
-	if (!activities.value) return []
+  if (!activities.value) return []
 
-	return activities.value.map(act => ({
-		id:      act.id,
-		icon:    act.is_approved ? iconCheck : iconX,
-		iconBg:    act.is_approved ? 'rgba(16,185,129,.15)' : 'rgba(239,68,68,.15)',
-		iconColor: act.is_approved ? '#10b981' : '#ef4444',
-		text:    act.is_approved
-			? `<strong>${act.subject}</strong> disetujui oleh <strong>${act.approver_name}</strong>`
-			: `<strong>${act.subject}</strong> ditolak, diminta revisi`,
-		time: formatRelativeTime(act.updated_at),
-	}))
+  return activities.value.map(act => ({
+    id:        act.id,
+    icon:      act.is_approved ? iconCheck : iconX,
+    iconBg:    act.is_approved ? 'rgba(16,185,129,.15)' : 'rgba(239,68,68,.15)',
+    iconColor: act.is_approved ? '#10b981' : '#ef4444',
+    text:      act.is_approved
+      ? `<strong>${act.subject}</strong> ${t('dashboard.approvedBy')} <strong>${act.approver_name}</strong>`
+      : `<strong>${act.subject}</strong> ${t('dashboard.rejectedRevision')}`,
+    time: formatRelativeTime(act.updated_at),
+  }))
 })
 
 const iconCheck = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="9 11 12 14 22 4"/></svg>`
-const iconMail  = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`
 const iconX     = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>`
 
-const formatRelativeTime = (isoString) => {
+const formatRelativeTime = isoString => {
   const diff = Math.floor((Date.now() - new Date(isoString).getTime()) / 1000)
 
-  if (diff <= 0)    return 'Baru saja'
-  if (diff < 60)    return `${diff} detik lalu`
-  if (diff < 3600)  return `${Math.floor(diff / 60)} menit lalu`
-  if (diff < 86400) return `${Math.floor(diff / 3600)} jam lalu`
-  return                   `${Math.floor(diff / 86400)} hari lalu`
+  if (diff <= 0)    return t('dashboard.justNow')
+  if (diff < 60)    return t('dashboard.secondsAgo', { n: diff })
+  if (diff < 3600)  return t('dashboard.minutesAgo', { n: Math.floor(diff / 60) })
+  if (diff < 86400) return t('dashboard.hoursAgo',   { n: Math.floor(diff / 3600) })
+  return                   t('dashboard.daysAgo',    { n: Math.floor(diff / 86400) })
 }
 
 // ════════════════════════════════════════
 // SEARCH
 // ════════════════════════════════════════
 
-let searchTimer   = null
+let searchTimer = null
 
-watch(searchQuery, (val) => {
+watch(searchQuery, val => {
   if (val && val.length > 100) {
     searchQuery.value = val.substring(0, 100)
     return
@@ -658,7 +686,7 @@ watch(searchQuery, (val) => {
 
   if (val.trim().length === 0) {
     searchResults.value = []
-    isSearching.value = false
+    isSearching.value   = false
     return
   }
 
@@ -680,7 +708,7 @@ const updateTime = () => {
   currentTime.value = `${hh}:${mm}:${ss}`
 }
 
-updateTime() // set langsung saat load
+updateTime()
 onMounted(() => {
   setInterval(updateTime, 1000)
 })
@@ -782,23 +810,6 @@ onMounted(() => {
 .header-subtitle { font-size: .82rem; color: var(--d-muted); margin-top: 4px; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
 .sep             { color: var(--d-border); }
 .header-right    { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-
-/* Notification icon button */
-.btn-icon {
-  position: relative; width: 40px; height: 40px;
-  border-radius: 10px; border: 1.5px solid var(--d-border);
-  background: var(--d-card); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--d-body); transition: all .15s;
-}
-.btn-icon:hover, .btn-icon.active { border-color: var(--d-blue); color: var(--d-blue); background: var(--d-blue-tint); }
-.notif-badge {
-  position: absolute; top: -5px; right: -5px;
-  background: #ef4444; color: #fff; font-size: 10px; font-weight: 700;
-  width: 16px; height: 16px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  border: 2px solid var(--d-card);
-}
 
 /* Primary CTA button */
 .btn-primary {
@@ -956,8 +967,8 @@ onMounted(() => {
 .surat-table td { padding: 13px 16px; vertical-align: middle; }
 
 .cell-nomor   { font-family: 'JetBrains Mono', monospace; font-size: .76rem; color: var(--d-blue); font-weight: 500; white-space: nowrap; }
-.cell-perihal { max-width: 200px; }
-.perihal-text { display: block; font-weight: 600; color: var(--d-heading); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cell-perihal { min-width: 180px; max-width: 280px; }
+.perihal-text { display: block; font-weight: 600; color: var(--d-heading); white-space: normal; word-break: break-word; line-height: 1.4; }
 .perihal-sub  { display: block; font-size: .75rem; color: var(--d-subtle); margin-top: 1px; }
 .cell-dari    { color: var(--d-body); white-space: nowrap; }
 .cell-tanggal { color: var(--d-muted); font-size: .8rem; white-space: nowrap; }
@@ -1039,22 +1050,15 @@ onMounted(() => {
    RESPONSIVE BREAKPOINTS
 ════════════════════════════════════════ */
 
-/* ── Large tablet landscape (≤ 1200px) ──
-   Stat cards: 4 → 2 columns */
 @media (max-width: 1200px) {
   .cards-grid  { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* ── Tablet portrait (≤ 1024px) ──
-   Main content: side-by-side → stacked
-   Right widgets: column → 2-col grid */
 @media (max-width: 1024px) {
   .main-content { grid-template-columns: 1fr; }
   .right-col    { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
 }
 
-/* ── Small tablet (≤ 768px) ──
-   Reduce padding, tighten spacing */
 @media (max-width: 768px) {
   .app-wrapper       { padding: 16px 18px; gap: 14px; }
   .dashboard-header  { padding: 16px 20px; }
@@ -1064,56 +1068,41 @@ onMounted(() => {
   .surat-table td    { padding: 11px 14px; }
 }
 
-/* ── Mobile (≤ 640px) ──
-   Full single-column layout, table → mobile cards */
 @media (max-width: 640px) {
-  /* Wrapper */
   .app-wrapper { padding: 12px; gap: 12px; }
 
-  /* Header: stack vertically */
   .dashboard-header { flex-direction: column; align-items: flex-start; padding: 14px 16px; gap: 12px; }
   .header-right     { width: 100%; justify-content: flex-end; }
   .header-title     { font-size: 1.1rem; }
   .header-subtitle  { font-size: .78rem; }
-  /* Hide button text, show icon only */
   .btn-label        { display: none; }
   .btn-primary      { padding: 10px 13px; }
 
-  /* Alert */
   .alert-banner { padding: 11px 14px; }
   .alert-text   { font-size: .8rem; }
 
-  /* Stat cards: 2 columns */
   .cards-grid   { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .card-number  { font-size: 2.2rem; }
-  .card-badge   { display: none; } /* hide badge on small cards */
+  .card-badge   { display: none; }
 
-  /* Filter toolbar: stack */
   .toolbar      { flex-direction: column; align-items: stretch; }
   .search-box   { width: 100%; }
   .tabs         { overflow-x: auto; padding-bottom: 2px; flex-wrap: nowrap; }
 
-  /* Main content: single column */
   .main-content { grid-template-columns: 1fr; }
 
-  /* Table: hide desktop table, show mobile cards */
   .table-wrapper     { display: none; }
   .mobile-surat-list { display: flex; }
 
-  /* Table header */
   .table-card-header { flex-direction: column; align-items: flex-start; padding: 14px 14px 12px; gap: 10px; }
   .tab-group         { width: 100%; justify-content: stretch; }
   .tab-btn           { flex: 1; text-align: center; padding: 6px 8px; font-size: .78rem; }
 
-  /* Widgets: back to single column */
   .right-col { grid-template-columns: 1fr; }
 
-  /* Donut: side by side still works, just smaller */
   .donut-wrap { width: 90px; height: 90px; }
 }
 
-/* ── Very small phones (≤ 380px) ──
-   Stat cards: 1 column */
 @media (max-width: 380px) {
   .cards-grid { grid-template-columns: 1fr; }
   .card-badge { display: none; }
