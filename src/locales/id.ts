@@ -113,7 +113,7 @@ const id = {
     loginTitle: 'Selamat Datang di Shifd',
     loginSubtitle: 'Silakan masuk ke akun Anda',
     email: 'Email',
-    emailPh: 'johndoe@email.com',
+    emailPh: "johndoe{'@'}email.com",
     password: 'Kata Sandi',
     loginBtn: 'Masuk',
     loggingIn: 'Sedang masuk...',

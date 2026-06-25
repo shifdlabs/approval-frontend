@@ -113,7 +113,7 @@ const en = {
     loginTitle: 'Welcome to Shifd',
     loginSubtitle: 'Please sign-in to your account',
     email: 'Email',
-    emailPh: 'johndoe@email.com',
+    emailPh: "johndoe{'@'}email.com",
     password: 'Password',
     loginBtn: 'Login',
     loggingIn: 'Logging in...',
